@@ -14,7 +14,7 @@ from PySide2 import QtWidgets, QtCore, QtGui
 #pip install websocket-client
 from websocket import create_connection
 
-Server = "ws://"+"192.168.1.6:30020"
+Server = "ws://"+"10.66.21.32:30020"
 
 Json_Data = \
     {
@@ -54,7 +54,7 @@ class MyWidget(QtWidgets.QWidget):
 
         @QtCore.Slot()
         def GetShots():
-            names = uo.UtilObserver('C:/GIT/ProjectOazis', '/**/*.umap')
+            names = uo.UtilObserver('C:\Perforce\WHH', '/**/*.umap')
             print(len(names))
             comboBox.clear()
             for i, name in enumerate(names):
@@ -98,7 +98,7 @@ class MyWidget(QtWidgets.QWidget):
         @QtCore.Slot()
         def UpdatePerforce():
             print("Perforce ")
-            pathbatch ="C:/GIT/ProjectOazis/Plugins/UnrealPythonScripting/Content/Python/UpdatePerforce.bat"
+            pathbatch ="SynPerforce.bat"
             arguments = ""
             os.system(pathbatch+" "+arguments)
 
