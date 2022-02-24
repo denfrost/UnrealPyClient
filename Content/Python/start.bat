@@ -1,0 +1,1 @@
+start C:\GIT\ProjectOazis\Plugins\UnrealPythonScripting\Content\Python\"start_client.bat-lnk".lnk

@@ -1,0 +1,1 @@
+"C:\Epic Games\UE_4.27\Engine\Binaries\Win64\UE4Editor.exe" "C:\GIT\ProjectOazis\Oazis.uproject" "/Game/SHOTS/EPWHH/%~1/%~1" -game -MovieSceneCaptureType="/Script/MovieSceneCapture.AutomatedLevelSequenceCapture" -LevelSequence="/Game/SHOTS/EPWHH/%~1/%~1_SEQ" -NoLoadingScreen -Windowed -MovieName="%~1"
