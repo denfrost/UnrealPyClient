@@ -35,4 +35,4 @@ def UtilObserver(sourcepath,file_mask):
 
     return name_assets
 
-print(len(UtilObserver('C:\Perforce\WHH', '/**/*.umap')))
+print(len(UtilObserver('C:/GIT/ProjectOazis', '/**/*.umap')))

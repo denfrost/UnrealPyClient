@@ -14,9 +14,7 @@ from PySide2 import QtWidgets, QtCore, QtGui
 #pip install websocket-client
 from websocket import create_connection
 
-Server = "ws://"+"10.66.21.32:30020"
-
-Json_Data = \
+Json_UpdatePerforce = \
     {
         "MessageName": "http",
         "Parameters": {
@@ -24,7 +22,127 @@ Json_Data = \
             "Verb": "PUT",
             "Body": {
                 "objectPath": "/Game/Remote/Test.Test:PersistentLevel.NewBlueprint_2",
-                "functionName": "SetShot"
+                "functionName": "UpdatePerforce",
+                "parameters": {
+                "bPar" : True,
+                "sShotName" : 'SH0005'
+                }
+            }
+        }
+    }
+
+
+Server = "ws://"+"192.168.1.11:30020"
+
+Json_RequestGetAllShots = \
+    {
+        "MessageName": "http",
+        "Parameters": {
+            "Url": "/remote/object/call",
+            "Verb": "PUT",
+            "Body": {
+                "objectPath": "/Game/Remote/Test.Test:PersistentLevel.NewBlueprint_2",
+                "functionName": "GetAllShots",
+            }
+        }
+    }
+
+Json_RequestSetShotRender = \
+    {
+        "MessageName": "http",
+        "Parameters": {
+            "Url": "/remote/object/call",
+            "Verb": "PUT",
+            "Body": {
+                "objectPath": "/Game/Remote/Test.Test:PersistentLevel.NewBlueprint_2",
+                "functionName": "SetShot",
+                "parameters": {
+                "bPar" : True,
+                "sShotName" : 'SH0005'
+                }
+            }
+        }
+    }
+
+Json_RequestStaticFunction = \
+    {
+        "MessageName": "http",
+        "Parameters": {
+            "Url": "/remote/object/call",
+            "Verb": "PUT",
+            "Body": {
+                "objectPath": "/Game/Remote/BPL_Remote.BPL_Remote",
+                "functionName": "HelloWorld",
+                "parameters": {
+                "bPar" : True,
+                "sShotName" : 'SH0005'
+                }
+            }
+        }
+    }
+
+Json_RequestDescribeTest =\
+    {
+    "MessageName": "http",
+    "Parameters": {
+        "Url": "/remote/object/describe",
+        "Verb": "PUT",
+        "Body": {
+            "ObjectPath": "/Game/Remote/Test.Test:PersistentLevel.NewBlueprint_2",
+        }
+    }
+    }
+
+Json_RequestDescribe =\
+    {
+    "MessageName": "http",
+    "Parameters": {
+        "Url": "/remote/object/describe",
+        "Verb": "PUT",
+        "Body": {
+            "ObjectPath": "/Game/Remote/Test.Test",
+        }
+    }
+    }
+
+Json_RequestDescribeUtil =\
+    {
+    "MessageName": "http",
+    "Parameters": {
+        "Url": "/remote/object/describe",
+        "Verb": "PUT",
+        "Body": {
+            "ObjectPath": "/Game/Remote/EditUtilityWP/EUW_Test.EUW_Test",
+        }
+    }
+    }
+
+
+Json_RequestStaticFunctionHelloWorld = \
+    {
+        "MessageName": "http",
+        "Parameters": {
+            "Url": "/remote/object/call",
+            "Verb": "PUT",
+            "Body": {
+                "objectPath": "/Game/Remote/BPL_Remote.BPL_Remote",
+                "functionName": "HelloWorld"
+            }
+        }
+    }
+
+Json_RequestObjectCallTest = \
+    {
+        "MessageName": "http",
+        "Parameters": {
+            "Url": "/remote/object/call",
+            "Verb": "PUT",
+            "Body": {
+                "objectPath": "/Game/Remote/Test.Test:PersistentLevel.NewBlueprint_2",
+                "functionName": "CallTest",
+                "parameters": {
+                    "sString": 'Call Test Succes'
+                }
             }
         }
     }
@@ -36,7 +154,6 @@ class MyWidget(QtWidgets.QWidget):
         def SendCommand():
             progressBar.setValue(0)
             progressBar.setValue(50)
-            ServerAnswerTextEdit.setText("")
             print("Send Command To Server :"+JsonTextEdit.toPlainText())
             HostServer = HostLineEdit.text()
             SendSocket(ClearAnswer, HostServer, JsonTextEdit.toPlainText(), ServerAnswered) #Send Json to Unreal
@@ -46,19 +163,66 @@ class MyWidget(QtWidgets.QWidget):
             StatusLabel.setText("Unreal Server Status Online : " + HostServer)
             print("Got Server Answer")
             tanswer =dt.now().strftime("%H:%M:%S")
+            ServerAnswerTextEdit.clear()
             ServerAnswerTextEdit.setText(tanswer+" : "+feedback) #JsonTextEdit.toPlainText()
+            tabwidget.setCurrentIndex(1)
+            FillShots(feedback)
+
 
         @QtCore.Slot()
         def StatusUpdate(status):
             StatusLabel.setText("Unreal Server Status "+status)
 
         @QtCore.Slot()
-        def GetShots():
-            names = uo.UtilObserver('C:\Perforce\WHH', '/**/*.umap')
+        def GetUtilObserverShots():
+            names = uo.UtilObserver('E:/GIT/ProjectOazis', '/**/*.umap')
             print(len(names))
             comboBox.clear()
             for i, name in enumerate(names):
                 comboBox.addItem(""+names[i])
+
+        @QtCore.Slot()
+        def GetShots():
+            names = "Get Shots from server!"
+            print(len(names))
+            comboBox.clear()
+            for i, name in enumerate(names):
+                comboBox.addItem("" + names[i])
+
+        def ParsedShots(feedback):
+            print('Json string : '+feedback)
+            res = feedback.replace("\\", '').replace('rnt', '').replace('rn', '').replace('b', '').replace('t"', '"') #clean json string
+            json_str = res[2:len(res) - 2]
+            print(json_str)
+            dict = json.loads(json_str)
+            print('Dict:')
+            type(dict)
+            for key, value in dict.items():
+                print(key, ":", value)
+            print(dict['ResponseBody'])
+            tanswer = dt.now().strftime("%H:%M:%S")
+            s1 ='' + json.dumps(dict['ResponseCode'])
+            ServerAnswerTextEdit.setText(tanswer + " : " +s1)
+            ServerAnswerTextEdit.append(json.dumps(dict['ResponseBody']))
+
+        def GetAllServerShots():
+            JsonTextEdit.setText(json.dumps(Json_RequestGetAllShots))
+            progressBar.setValue(0)
+            progressBar.setValue(50)
+            print("Send Command To Server :"+JsonTextEdit.toPlainText())
+            HostServer = HostLineEdit.text()
+            SendSocket(ClearAnswer, HostServer, JsonTextEdit.toPlainText(), ServerAnswered) #Send Json to Unreal
+            progressBar.setValue(100)
+
+        def FillShots(feedback):
+            res = feedback.split(",")
+            print(res[1])
+            comboBox.clear()
+            for i, name in enumerate(res):
+                comboBox.addItem(""+res[i])
+
+
+
 
         @QtCore.Slot()
         def MakeRender(): #arguments
@@ -98,9 +262,10 @@ class MyWidget(QtWidgets.QWidget):
         @QtCore.Slot()
         def UpdatePerforce():
             print("Perforce ")
-            pathbatch ="SynPerforce.bat"
-            arguments = ""
-            os.system(pathbatch+" "+arguments)
+            #pathbatch ="C:/GIT/ProjectOazis/Plugins/UnrealPythonScripting/Content/Python/UpdatePerforce.bat"
+            #arguments = ""
+            #os.system(pathbatch+" "+arguments)
+            SendSocket(ClearAnswer, HostServer, json.dumps(Json_UpdatePerforce), ServerAnswered)
 
         @QtCore.Slot()
         def MyQuit():
@@ -154,7 +319,7 @@ class MyWidget(QtWidgets.QWidget):
         self.connect(Command, QtCore.SIGNAL("clicked()"), SendCommand)
         GroupboxCommand.layout().addWidget(Command)
 
-        JsonTextEdit = QtWidgets.QTextEdit(json.dumps(Json_Data))
+        JsonTextEdit = QtWidgets.QTextEdit(json.dumps(Json_RequestGetAllShots))
         JsonTextEdit.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Medium))
         layout.addWidget(JsonTextEdit)
 
@@ -174,12 +339,12 @@ class MyWidget(QtWidgets.QWidget):
         GroupboxAuto.setLayout(vbox3)
 
 
-        getshot = QtWidgets.QPushButton("Get Server Shots")
+        getshot = QtWidgets.QPushButton("Check Server Shots")
         getshot.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
-        self.connect(getshot, QtCore.SIGNAL("clicked()"), GetShots)
+        self.connect(getshot, QtCore.SIGNAL("clicked()"), GetAllServerShots)
         GroupboxAuto.layout().addWidget(getshot)
 
-        render = QtWidgets.QPushButton("Make Render")
+        render = QtWidgets.QPushButton("Start Render Shot")
         render.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
         self.connect(render, QtCore.SIGNAL("clicked()"), MakeRender)
         GroupboxAuto.layout().addWidget(render)
@@ -197,7 +362,7 @@ class MyWidget(QtWidgets.QWidget):
         PerforceLabel.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Medium))
         GroupboxAuto2.layout().addWidget(PerforceLabel)
 
-        UpdatePerforceBtn = QtWidgets.QPushButton("Update Perforce")
+        UpdatePerforceBtn = QtWidgets.QPushButton("Start Update Perforce")
         UpdatePerforceBtn.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
         self.connect(UpdatePerforceBtn, QtCore.SIGNAL("clicked()"),UpdatePerforce)
         GroupboxAuto2.layout().addWidget(UpdatePerforceBtn)
@@ -206,12 +371,6 @@ class MyWidget(QtWidgets.QWidget):
         vbox5 = QtWidgets.QVBoxLayout()
         GroupboxMain.setLayout(vbox5)
         GroupboxMain.layout().addWidget(GroupboxAuto)
-
-        RenderJobLabel = QtWidgets.QLabel("Render Job")
-        RenderJobLabel.setGeometry(10, 50, 160, 20)
-        RenderJobLabel.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Medium))
-        GroupboxMain.layout().addWidget(RenderJobLabel)
-
 
         GroupboxMain.layout().addWidget(GroupboxAuto2)
         layout.addWidget(GroupboxMain)
@@ -258,6 +417,6 @@ widget = MyWidget()
 widget.show()
 print("Py App checking server...")
 sys.exit(app.exec_())  # for Windows external launch
-unreal.parent_external_window_to_slate(widget.winId())
+#unreal.parent_external_window_to_slate(widget.winId())
 
 
