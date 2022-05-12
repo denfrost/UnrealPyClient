@@ -227,7 +227,7 @@ class MyWidget(QtWidgets.QWidget):
         @QtCore.Slot()
         def MakeRender(): #arguments
             print("Make Render "+comboBox.currentText())
-            pathbatch ="C:/GIT/ProjectOazis/Plugins/UnrealPythonScripting/Content/Python/MakeShotRenderArg.bat"
+            pathbatch ="MakeShotRenderArg.bat"
             arguments = comboBox.currentText()
             os.system(pathbatch+" "+arguments)
 
