@@ -21,18 +21,14 @@ Json_UpdatePerforce = \
             "Url": "/remote/object/call",
             "Verb": "PUT",
             "Body": {
-                "objectPath": "/Game/Remote/Test.Test:PersistentLevel.NewBlueprint_2",
-                "functionName": "UpdatePerforce",
-                "parameters": {
-                "bPar" : True,
-                "sShotName" : 'SH0005'
-                }
+                "objectPath": "/Game/Remote/Test1.Test1:PersistentLevel.Remoter_2",
+                "functionName": "UpdatePerforce"
             }
         }
     }
 
 
-Server = "ws://"+"192.168.1.11:30020"
+Server = "ws://"+"10.66.7.80:30020"
 
 Json_RequestGetAllShots = \
     {
@@ -41,7 +37,7 @@ Json_RequestGetAllShots = \
             "Url": "/remote/object/call",
             "Verb": "PUT",
             "Body": {
-                "objectPath": "/Game/Remote/Test.Test:PersistentLevel.NewBlueprint_2",
+                "objectPath": "/Game/Remote/Test1.Test1:PersistentLevel.Remoter_2",
                 "functionName": "GetAllShots",
             }
         }
@@ -54,10 +50,12 @@ Json_RequestSetShotRender = \
             "Url": "/remote/object/call",
             "Verb": "PUT",
             "Body": {
-                "objectPath": "/Game/Remote/Test.Test:PersistentLevel.NewBlueprint_2",
+                "objectPath": "/Game/Remote/Test1.Test1:PersistentLevel.Remoter_2",
                 "functionName": "SetShot",
                 "parameters": {
                 "bPar" : True,
+                "sMapName" : 'SH0005',
+                "sSeqName" : 'SH0005',
                 "sShotName" : 'SH0005'
                 }
             }
@@ -157,7 +155,6 @@ class MyWidget(QtWidgets.QWidget):
             print("Send Command To Server :"+JsonTextEdit.toPlainText())
             HostServer = HostLineEdit.text()
             SendSocket(ClearAnswer, HostServer, JsonTextEdit.toPlainText(), ServerAnswered) #Send Json to Unreal
-            progressBar.setValue(100)
 
         def ServerAnswered(feedback):
             StatusLabel.setText("Unreal Server Status Online : " + HostServer)
@@ -166,8 +163,27 @@ class MyWidget(QtWidgets.QWidget):
             ServerAnswerTextEdit.clear()
             ServerAnswerTextEdit.setText(tanswer+" : "+feedback) #JsonTextEdit.toPlainText()
             tabwidget.setCurrentIndex(1)
-            FillShots(feedback)
+            progressBar.setValue(100)
 
+        def ServerAnsweredGetAllShots(feedback):
+            StatusLabel.setText("Unreal Server Status Online : " + HostServer)
+            print("Got Server Answer")
+            tanswer =dt.now().strftime("%H:%M:%S")
+            ServerAnswerTextEdit.clear()
+            ServerAnswerTextEdit.setText(tanswer+" : "+feedback) #JsonTextEdit.toPlainText()
+            tabwidget.setCurrentIndex(1)
+            FillShots(feedback)
+            progressBar.setValue(100)
+
+        def ServerAnsweredSetShotRender(feedback):
+            StatusLabel.setText("Unreal Server Status Online : " + HostServer)
+            print("Got Server Answer")
+            tanswer = dt.now().strftime("%H:%M:%S")
+            ServerAnswerTextEdit.clear()
+            ServerAnswerTextEdit.setText(tanswer + " : " + feedback)  # JsonTextEdit.toPlainText()
+            tabwidget.setCurrentIndex(1)
+            FillShots(feedback)
+            progressBar.setValue(100)
 
         @QtCore.Slot()
         def StatusUpdate(status):
@@ -211,8 +227,8 @@ class MyWidget(QtWidgets.QWidget):
             progressBar.setValue(50)
             print("Send Command To Server :"+JsonTextEdit.toPlainText())
             HostServer = HostLineEdit.text()
-            SendSocket(ClearAnswer, HostServer, JsonTextEdit.toPlainText(), ServerAnswered) #Send Json to Unreal
-            progressBar.setValue(100)
+            SendSocket(ClearAnswer, HostServer, JsonTextEdit.toPlainText(), ServerAnsweredGetAllShots) #Send Json to Unreal
+
 
         def FillShots(feedback):
             res = feedback.split(",")
@@ -228,8 +244,43 @@ class MyWidget(QtWidgets.QWidget):
         def MakeRender(): #arguments
             print("Make Render "+comboBox.currentText())
             pathbatch ="MakeShotRenderArg.bat"
-            arguments = comboBox.currentText()
-            os.system(pathbatch+" "+arguments)
+
+            opers = comboBox.currentText()
+            index = opers.find('_SEQ.')
+            argument_Umap = opers[:index]
+            print(index)
+            print(argument_Umap)
+
+            index = opers.find('"')
+            if index == -1 :
+                argument_Seq = comboBox.currentText()
+            else:
+                argument_Seq = opers[:index]
+            print(index)
+            print(argument_Seq)
+
+            index1 = argument_Seq.find('.')
+            argument_Shotname = argument_Seq[index1+1:]
+            print(argument_Shotname)
+            print(index1)
+            index2 = argument_Shotname.find('_SEQ')
+            print(index2)
+            argument_Shotname = argument_Shotname[:index2]
+            print(argument_Shotname)
+            Json_RequestSetShotRender["Parameters"]["Body"]["parameters"]["sMapName"] = argument_Umap
+            Json_RequestSetShotRender["Parameters"]["Body"]["parameters"]["sSeqName"] = argument_Seq
+            Json_RequestSetShotRender["Parameters"]["Body"]["parameters"]["sShotName"] = argument_Shotname
+
+            print(Json_RequestSetShotRender["Parameters"]["Body"]["parameters"])
+            #os.system(pathbatch+" "+argument_Umap+" "+argument_Seq+" "+argument_Shotname)
+
+            progressBar.setValue(0)
+            JsonTextEdit.setText(json.dumps(Json_RequestSetShotRender))
+            print("SetShotRender ")
+            progressBar.setValue(50)
+            HostServer = HostLineEdit.text()
+            SendSocket(ClearAnswer, HostServer, json.dumps(Json_RequestSetShotRender), ServerAnsweredSetShotRender)
+
 
         @QtCore.Slot()
         def ClearAnswer():
@@ -261,10 +312,11 @@ class MyWidget(QtWidgets.QWidget):
 
         @QtCore.Slot()
         def UpdatePerforce():
+            progressBar.setValue(0)
+            JsonTextEdit.setText(json.dumps(Json_UpdatePerforce))
             print("Perforce ")
-            #pathbatch ="C:/GIT/ProjectOazis/Plugins/UnrealPythonScripting/Content/Python/UpdatePerforce.bat"
-            #arguments = ""
-            #os.system(pathbatch+" "+arguments)
+            progressBar.setValue(50)
+            HostServer = HostLineEdit.text()
             SendSocket(ClearAnswer, HostServer, json.dumps(Json_UpdatePerforce), ServerAnswered)
 
         @QtCore.Slot()
