@@ -193,7 +193,6 @@ class MyWidget(QtWidgets.QWidget):
             ServerAnswerTextEdit.clear()
             ServerAnswerTextEdit.setText(tanswer + " : " + feedback)  # JsonTextEdit.toPlainText()
             tabwidget.setCurrentIndex(1)
-            FillShots(feedback)
             progressBar.setValue(100)
 
         @QtCore.Slot()
@@ -233,6 +232,7 @@ class MyWidget(QtWidgets.QWidget):
             ServerAnswerTextEdit.append(json.dumps(dict['ResponseBody']))
 
         def GetAllServerShots():
+            tabwidget.setCurrentIndex(0)
             JsonTextEdit.setText(json.dumps(Json_RequestGetAllShots))
             progressBar.setValue(0)
             progressBar.setValue(50)
@@ -292,6 +292,7 @@ class MyWidget(QtWidgets.QWidget):
 
             progressBar.setValue(0)
             JsonTextEdit.setText(json.dumps(Json_RequestSetShotRender))
+            tabwidget.setCurrentIndex(0)
             print("SetShotRender ")
             progressBar.setValue(50)
             HostServer = HostLineEdit.text()
@@ -330,6 +331,7 @@ class MyWidget(QtWidgets.QWidget):
         def UpdatePerforce():
             progressBar.setValue(0)
             JsonTextEdit.setText(json.dumps(Json_UpdatePerforce))
+            tabwidget.setCurrentIndex(0)
             print("Perforce ")
             progressBar.setValue(50)
             HostServer = HostLineEdit.text()
