@@ -13,6 +13,17 @@ from PySide2 import QtWidgets, QtCore, QtGui
 
 #pip install websocket-client
 from websocket import create_connection
+Json_RequestCheckMap =\
+    {
+    "MessageName": "http",
+    "Parameters": {
+        "Url": "/remote/object/describe",
+        "Verb": "PUT",
+        "Body": {
+            "ObjectPath": "/Game/Remote/Test1.Test1",
+        }
+    }
+    }
 
 Json_UpdatePerforce = \
     {
@@ -199,7 +210,7 @@ class MyWidget(QtWidgets.QWidget):
 
         @QtCore.Slot()
         def GetShots():
-            names = "Get Shots from server!"
+            names = "Make sequences list only test!"
             print(len(names))
             comboBox.clear()
             for i, name in enumerate(names):
@@ -235,7 +246,12 @@ class MyWidget(QtWidgets.QWidget):
             print(res[1])
             comboBox.clear()
             for i, name in enumerate(res):
-                comboBox.addItem(""+res[i])
+                if res[i].find('_SEQ.') > 0:
+                    index = res[i].find('"')
+                    if index == -1:
+                        comboBox.addItem("" + res[i])
+                    else:
+                        comboBox.addItem("" + res[i][:index])
 
 
 
@@ -371,7 +387,7 @@ class MyWidget(QtWidgets.QWidget):
         self.connect(Command, QtCore.SIGNAL("clicked()"), SendCommand)
         GroupboxCommand.layout().addWidget(Command)
 
-        JsonTextEdit = QtWidgets.QTextEdit(json.dumps(Json_RequestGetAllShots))
+        JsonTextEdit = QtWidgets.QTextEdit(json.dumps(Json_RequestCheckMap))
         JsonTextEdit.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Medium))
         layout.addWidget(JsonTextEdit)
 
