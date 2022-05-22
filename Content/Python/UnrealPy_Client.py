@@ -39,7 +39,7 @@ Json_UpdatePerforce = \
     }
 
 
-Server = "ws://"+"10.66.7.80:30020"
+Server = "ws://"+"10.66.7.80:30020" #10.66.7.80
 
 Json_RequestGetAllShots = \
     {
@@ -73,18 +73,19 @@ Json_RequestSetShotRender = \
         }
     }
 
-Json_RequestStaticFunction = \
+#Important!
+#Undependency Memory PayLoad 22.05.2022 dcan migrate all principal to this methods
+Json_RequestRemoteStaticFunction = \
     {
         "MessageName": "http",
         "Parameters": {
             "Url": "/remote/object/call",
             "Verb": "PUT",
             "Body": {
-                "objectPath": "/Game/Remote/BPL_Remote.BPL_Remote",
-                "functionName": "HelloWorld",
+                "objectPath": "/Engine/PythonTypes.Default__SamplePythonBlueprintLibrary",
+                "functionName": "python_test_bp_action_return",
                 "parameters": {
-                "bPar" : True,
-                "sShotName" : 'SH0005'
+                "result" : 'return string'
                 }
             }
         }
@@ -387,7 +388,7 @@ class MyWidget(QtWidgets.QWidget):
         self.connect(Command, QtCore.SIGNAL("clicked()"), SendCommand)
         GroupboxCommand.layout().addWidget(Command)
 
-        JsonTextEdit = QtWidgets.QTextEdit(json.dumps(Json_RequestCheckMap))
+        JsonTextEdit = QtWidgets.QTextEdit(json.dumps(Json_RequestRemoteStaticFunction))
         JsonTextEdit.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Medium))
         layout.addWidget(JsonTextEdit)
 

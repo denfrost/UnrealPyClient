@@ -25,6 +25,6 @@ class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
         ret=str, static=True, meta=dict(Category="Samples Python BlueprintFunctionLibrary")
     )
     def python_test_bp_action_return():
-        result = "Success"
+        result = "Success !!!"
         #unreal.log("Execute Bluerprint Action Return")
         return result
