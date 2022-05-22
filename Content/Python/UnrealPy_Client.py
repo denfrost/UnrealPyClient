@@ -179,7 +179,7 @@ class MyWidget(QtWidgets.QWidget):
 
         def ServerAnsweredGetAllShots(feedback):
             StatusLabel.setText("Unreal Server Status Online : " + HostServer)
-            print("Got Server Answer")
+            print("Got Server Answer : Getallshots")
             tanswer =dt.now().strftime("%H:%M:%S")
             ServerAnswerTextEdit.clear()
             ServerAnswerTextEdit.setText(tanswer+" : "+feedback) #JsonTextEdit.toPlainText()
@@ -189,13 +189,23 @@ class MyWidget(QtWidgets.QWidget):
 
         def ServerAnsweredSetShotRender(feedback):
             StatusLabel.setText("Unreal Server Status Online : " + HostServer)
-            print("Got Server Answer")
+            print("Got Server Answer : SetShotRender")
             tanswer = dt.now().strftime("%H:%M:%S")
             ServerAnswerTextEdit.clear()
             ServerAnswerTextEdit.setText(tanswer + " : " + feedback)  # JsonTextEdit.toPlainText()
             tabwidget.setCurrentIndex(1)
-            FillShots(feedback)
             progressBar.setValue(100)
+
+        def ServerAnsweredPerforce(feedback):
+            StatusLabel.setText("Unreal Server Status Online : " + HostServer)
+            print("Got Server Answer : Try Update server")
+            tanswer =dt.now().strftime("%H:%M:%S")
+            ServerAnswerTextEdit.clear()
+            ServerAnswerTextEdit.setText(tanswer+" : "+feedback) #JsonTextEdit.toPlainText()
+            tabwidget.setCurrentIndex(1)
+            PerforceLabel.setText("Perforce Updated : "+tanswer)
+            progressBar.setValue(100)
+
 
         @QtCore.Slot()
         def StatusUpdate(status):
@@ -234,6 +244,7 @@ class MyWidget(QtWidgets.QWidget):
             ServerAnswerTextEdit.append(json.dumps(dict['ResponseBody']))
 
         def GetAllServerShots():
+            tabwidget.setCurrentIndex(0)
             JsonTextEdit.setText(json.dumps(Json_RequestGetAllShots))
             progressBar.setValue(0)
             progressBar.setValue(50)
@@ -293,6 +304,7 @@ class MyWidget(QtWidgets.QWidget):
 
             progressBar.setValue(0)
             JsonTextEdit.setText(json.dumps(Json_RequestSetShotRender))
+            tabwidget.setCurrentIndex(0)
             print("SetShotRender ")
             progressBar.setValue(50)
             HostServer = HostLineEdit.text()
@@ -331,10 +343,11 @@ class MyWidget(QtWidgets.QWidget):
         def UpdatePerforce():
             progressBar.setValue(0)
             JsonTextEdit.setText(json.dumps(Json_UpdatePerforce))
+            tabwidget.setCurrentIndex(0)
             print("Perforce ")
             progressBar.setValue(50)
             HostServer = HostLineEdit.text()
-            SendSocket(ClearAnswer, HostServer, json.dumps(Json_UpdatePerforce), ServerAnswered)
+            SendSocket(ClearAnswer, HostServer, json.dumps(Json_UpdatePerforce), ServerAnsweredPerforce)
 
         @QtCore.Slot()
         def MyQuit():
@@ -354,7 +367,8 @@ class MyWidget(QtWidgets.QWidget):
         layout.addWidget(StatusLabel)
 
 
-        Groupbox = QtWidgets.QGroupBox("Server")
+        Groupbox = QtWidgets.QGroupBox("Server Status")
+        Groupbox.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Bold))
         vbox = QtWidgets.QHBoxLayout()
         Groupbox.setLayout(vbox)
         layout.addWidget(Groupbox)
@@ -379,6 +393,7 @@ class MyWidget(QtWidgets.QWidget):
         Groupbox.layout().addWidget(ServerToggleBtn)
 
         GroupboxCommand = QtWidgets.QGroupBox("Send Custom Commands")
+        GroupboxCommand.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Bold))
         vbox2 = QtWidgets.QVBoxLayout()
         GroupboxCommand.setLayout(vbox2)
         layout.addWidget(GroupboxCommand)
@@ -402,31 +417,37 @@ class MyWidget(QtWidgets.QWidget):
         GroupboxCommand.layout().addWidget(tabwidget)
 
 
-        GroupboxAuto = QtWidgets.QGroupBox("Unreal")
+        GroupboxAuto = QtWidgets.QGroupBox("Rendering Shots")
         GroupboxAuto.setChecked(True)
         vbox3 = QtWidgets.QHBoxLayout()
         GroupboxAuto.setLayout(vbox3)
 
 
-        getshot = QtWidgets.QPushButton("Check Server Shots")
+        getshot = QtWidgets.QPushButton("Get Server Sequences")
         getshot.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
         self.connect(getshot, QtCore.SIGNAL("clicked()"), GetAllServerShots)
         GroupboxAuto.layout().addWidget(getshot)
 
-        render = QtWidgets.QPushButton("Start Render Shot")
+        render = QtWidgets.QPushButton("Start Render Sequence")
         render.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
         self.connect(render, QtCore.SIGNAL("clicked()"), MakeRender)
         GroupboxAuto.layout().addWidget(render)
 
+        GroupboxAuto0 = QtWidgets.QGroupBox("Found Sequences")
+        GroupboxAuto0.setChecked(True)
+        vbox31 = QtWidgets.QHBoxLayout()
+        GroupboxAuto0.setLayout(vbox31)
+
         comboBox = QtWidgets.QComboBox(self)
+        comboBox.setFont(QtGui.QFont("Times", 10, QtGui.QFont.Medium))
         comboBox.addItem("EMPTY")
-        GroupboxAuto.layout().addWidget(comboBox)
+        GroupboxAuto0.layout().addWidget(comboBox)
 
         GroupboxAuto2 = QtWidgets.QGroupBox("Perforce")
         vbox4 = QtWidgets.QHBoxLayout()
         GroupboxAuto2.setLayout(vbox4)
 
-        PerforceLabel = QtWidgets.QLabel("Perforce")
+        PerforceLabel = QtWidgets.QLabel("Perforce Time updated :")
         PerforceLabel.setGeometry(10, 50, 160, 20)
         PerforceLabel.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Medium))
         GroupboxAuto2.layout().addWidget(PerforceLabel)
@@ -437,9 +458,11 @@ class MyWidget(QtWidgets.QWidget):
         GroupboxAuto2.layout().addWidget(UpdatePerforceBtn)
 
         GroupboxMain = QtWidgets.QGroupBox("SERVER: Automation Pipeline")
+        GroupboxMain.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Bold))
         vbox5 = QtWidgets.QVBoxLayout()
         GroupboxMain.setLayout(vbox5)
         GroupboxMain.layout().addWidget(GroupboxAuto)
+        GroupboxMain.layout().addWidget(GroupboxAuto0)
 
         GroupboxMain.layout().addWidget(GroupboxAuto2)
         layout.addWidget(GroupboxMain)
