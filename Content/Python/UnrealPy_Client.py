@@ -39,7 +39,7 @@ Json_UpdatePerforce = \
     }
 
 
-Server = "ws://"+"10.66.7.80:30020" #10.66.7.80
+Server = "ws://"+"localhost:30020" #10.66.7.80
 
 Json_RequestGetAllShots = \
     {
@@ -257,23 +257,31 @@ class MyWidget(QtWidgets.QWidget):
             res = feedback.split(",")
             print(res[1])
             comboBox.clear()
+            listing.clear()
             for i, name in enumerate(res):
                 if res[i].find('_SEQ.') > 0:
                     index = res[i].find('"')
                     if index == -1:
                         comboBox.addItem("" + res[i])
+                        listing.addItem("" + res[i])
                     else:
                         comboBox.addItem("" + res[i][:index])
+                        listing.addItem("" + res[i][:index])
+            listing.setMinimumHeight(listing.count()*30)
+            listing.setMaximumHeight(200)
 
+        def printItemText(self):
+            items = listing.selectedItems()
+            x = []
+            for i in range(len(items)):
+                x.append(str(listing.selectedItems()[i].text()))
+            print(x)
 
-
-
-        @QtCore.Slot()
-        def MakeRender(): #arguments
-            print("Make Render "+comboBox.currentText())
+        def MakeRenderTool(sequence):
+            print("Make Render "+sequence)
             pathbatch ="MakeShotRenderArg.bat"
 
-            opers = comboBox.currentText()
+            opers = sequence
             index = opers.find('_SEQ.')
             argument_Umap = opers[:index]
             print(index)
@@ -281,7 +289,7 @@ class MyWidget(QtWidgets.QWidget):
 
             index = opers.find('"')
             if index == -1 :
-                argument_Seq = comboBox.currentText()
+                argument_Seq = sequence
             else:
                 argument_Seq = opers[:index]
             print(index)
@@ -310,6 +318,16 @@ class MyWidget(QtWidgets.QWidget):
             HostServer = HostLineEdit.text()
             SendSocket(ClearAnswer, HostServer, json.dumps(Json_RequestSetShotRender), ServerAnsweredSetShotRender)
 
+
+        @QtCore.Slot()
+        def MakeRender(): #arguments
+            MakeRenderTool(comboBox.currentText())
+
+        @QtCore.Slot()
+        def BatchMakeRender(): #arguments
+            items = listing.selectedItems()
+            for i in range(len(items)):
+                MakeRenderTool(listing.selectedItems()[i].text())
 
         @QtCore.Slot()
         def ClearAnswer():
@@ -457,6 +475,28 @@ class MyWidget(QtWidgets.QWidget):
         self.connect(UpdatePerforceBtn, QtCore.SIGNAL("clicked()"),UpdatePerforce)
         GroupboxAuto2.layout().addWidget(UpdatePerforceBtn)
 
+
+        GroupboxAuto3 = QtWidgets.QGroupBox("Batch Mode Rendering [Warning: Will Heavy busy server!]")
+        GroupboxAuto3.setChecked(True)
+        vbox5 = QtWidgets.QVBoxLayout()
+        GroupboxAuto3.setLayout(vbox5)
+        listing = QtWidgets.QListWidget()
+        listing.setFont(QtGui.QFont("Times", 13, QtGui.QFont.Medium))
+        listing.setSelectionMode(
+            QtWidgets.QAbstractItemView.ExtendedSelection
+        )
+        item = QtWidgets.QListWidgetItem("empty")
+        listing.addItem(item)
+
+        listing.itemClicked.connect(printItemText)
+        GroupboxAuto3.layout().addWidget(listing)
+        BatchRenderBtn = QtWidgets.QPushButton("Start Batch Rendering")
+        BatchRenderBtn.setFont(QtGui.QFont("Times", 13, QtGui.QFont.Bold))
+        self.connect(BatchRenderBtn, QtCore.SIGNAL("clicked()"), BatchMakeRender)
+        GroupboxAuto3.layout().addWidget(BatchRenderBtn)
+
+
+
         GroupboxMain = QtWidgets.QGroupBox("SERVER: Automation Pipeline")
         GroupboxMain.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Bold))
         vbox5 = QtWidgets.QVBoxLayout()
@@ -465,6 +505,7 @@ class MyWidget(QtWidgets.QWidget):
         GroupboxMain.layout().addWidget(GroupboxAuto0)
 
         GroupboxMain.layout().addWidget(GroupboxAuto2)
+        GroupboxMain.layout().addWidget(GroupboxAuto3)
         layout.addWidget(GroupboxMain)
 
         progressBar = QtWidgets.QProgressBar(self)
