@@ -39,7 +39,7 @@ Json_UpdatePerforce = \
     }
 
 
-Server = "ws://"+"localhost:30020" #10.66.7.80
+Server = "ws://"+"10.66.7.80:30020" #10.66.7.80
 
 Json_RequestGetAllShots = \
     {
