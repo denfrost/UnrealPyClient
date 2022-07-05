@@ -1,4 +1,5 @@
 # 4.25 +
+# UE 5+
 
 import unreal
 
@@ -48,7 +49,7 @@ def refresh():
 # Get Toolbar
 
 def get_toolbar():
-    return unreal.ToolMenus.get().find_menu("LevelEditor.LevelEditorToolBar")
+    return unreal.ToolMenus.get().find_menu("LevelEditor.MainMenu")
 
 def get_staticmesh_toolbar():
     return unreal.ToolMenus.get().find_menu("AssetEditor.StaticMeshEditor.ToolBar")
