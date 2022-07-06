@@ -13,12 +13,18 @@ def extend_editor():
         label="Start test",
         command_string="import importlib; import unreal_startup; import unreal_worker; unreal_worker.start()",
     )
+    #Mod
+    me_showbutton = unreal_uiutils.create_menu_button(
+        name="ShowBtn",
+        label="Show All Funcs unreal",
+        command_string="import importlib; import unreal_startup; import unreal_worker; unreal_worker.show_funcs_unreal()",
+    )
 
     # Create standard menu entry
     me_reloadbutton = unreal_uiutils.create_menu_button(
         name="ReloadBtn",
         label="Reload",
-        command_string="import importlib; import unreal_startup; importlib.reload(unreal_startup); unreal_startup.reload()",
+        command_string="import importlib; import unreal_startup; importlib.reload(unreal_startup); unreal_startup.reload(); importlib.reload(unreal_worker);",
     )
     me_quitbutton = unreal_uiutils.create_menu_button(
         name="QuitUnrealBtn",
@@ -54,6 +60,7 @@ def extend_editor():
     new_mainmenu = unreal_uiutils.extend_mainmenu("Python", "Python")
     section = new_mainmenu.add_section("python.menu", "Python Tools")
     new_mainmenu.add_menu_entry("python.menu", me_startbutton)
+    new_mainmenu.add_menu_entry("python.menu", me_showbutton)
     new_mainmenu.add_menu_entry("python.menu", me_reloadbutton)
     new_mainmenu.add_menu_entry("python.menu", me_quitbutton)
     new_entry = unreal.ToolMenuEntryExtensions.init_menu_entry(
