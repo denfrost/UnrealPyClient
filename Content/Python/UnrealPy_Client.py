@@ -48,8 +48,11 @@ Json_RequestGetAllShots = \
             "Url": "/remote/object/call",
             "Verb": "PUT",
             "Body": {
-                "objectPath": "/Game/Remote/Test1.Test1:PersistentLevel.Remoter_2",
-                "functionName": "GetAllShots",
+                "objectPath": "/Engine/PythonTypes.Default__SamplePythonBlueprintLibrary",
+                "functionName": "unreal_python_get_all_shots",
+                "parameters": {
+                "result" : 'return string'
+                }
             }
         }
     }
@@ -61,8 +64,8 @@ Json_RequestSetShotRender = \
             "Url": "/remote/object/call",
             "Verb": "PUT",
             "Body": {
-                "objectPath": "/Game/Remote/Test1.Test1:PersistentLevel.Remoter_2",
-                "functionName": "SetShot",
+                "objectPath": "/Engine/PythonTypes.Default__SamplePythonBlueprintLibrary",
+                "functionName": "unreal_python_set_shot",
                 "parameters": {
                 "bPar" : True,
                 "sMapName" : 'SH0005',

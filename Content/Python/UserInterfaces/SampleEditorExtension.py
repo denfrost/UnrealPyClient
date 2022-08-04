@@ -24,7 +24,7 @@ def extend_editor():
     me_reloadbutton = unreal_uiutils.create_menu_button(
         name="ReloadBtn",
         label="Reload",
-        command_string="import importlib; import unreal_startup; importlib.reload(unreal_startup); unreal_startup.reload(); importlib.reload(unreal_worker);",
+        command_string="import importlib; import unreal_startup; importlib.reload(unreal_startup); unreal_startup.reload();",
     )
     me_quitbutton = unreal_uiutils.create_menu_button(
         name="QuitUnrealBtn",

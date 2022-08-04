@@ -1,7 +1,5 @@
 import unreal
-import unreal_uiutils
 from unreal_global import *
-from unreal_utils import AssetRegistryPostLoad
 unreal.log("""@
 
 ####################
@@ -11,9 +9,6 @@ Init Worker Script
 ####################
 
 """)
-
-import BlueprintLibrary
-import UserInterfaces
 
 def spawn_actor(assetpath):
     if unreal.EditorAssetLibrary.does_asset_exist(assetpath):
