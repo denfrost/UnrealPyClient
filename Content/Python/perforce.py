@@ -4,8 +4,8 @@ from P4 import P4Exception
 def work_in_depo(p4):
     perforceinfo(p4, True)
     depo2 = "//depot/WHP_UE5"
-    #perforce_update(p4, "//depot/Test_Poj_01", "denis.balikhin_pc-14-025_8545")
-    perforce_update(p4, "//depot/Test01", "denbaster_DESKTOP-IERDB91_350")
+    perforce_update(p4, "//depot/Test_Poj_01", "denis.balikhin_pc-14-025_8545")
+    #perforce_update(p4, "//depot/Test01", "denbaster_DESKTOP-IERDB91_350")
 
 def perforce_main(user, passw, perforce):
     #p4 = P4.P4(client="denbaster_DESKTOP-IERDB91_350", port="1666")
@@ -55,5 +55,5 @@ def perforceinfo(p4,outinfo_bool):
             print(str(key) + "=" + info[0][key])
     return info
 
-perforce_main('denbaster', 'm2ue5m2ue5', '3.25.99.243:1666')
-#perforce_main('denis.balikhin', 'm2ue4m2ue4')
+#perforce_main('denbaster', 'm2ue5m2ue5', '3.25.99.243:1666')
+perforce_main('denis.balikhin', 'm2ue4m2ue4', 'ssl:perforcesrv:1666')
