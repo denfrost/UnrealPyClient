@@ -1,1 +1,1 @@
-"C:\Unreal\Epic Games\UE_4.27\Engine\Binaries\Win64\UE4Editor.exe" "C:\Users\denis.balikhin\depot\Test_Poj_01\Test_Poj_01.uproject" "%~1" -game -MovieSceneCaptureType="/Script/MovieSceneCapture.AutomatedLevelSequenceCapture" -LevelSequence="%~2" -NoLoadingScreen -Windowed -MovieName="%~3"
+"C:\Epic Games\UE_5.0\Engine\Binaries\Win64\UnrealEditor.exe" "E:\UE4JOB\M2Animation\WHH50\WHH50.uproject" "%~1" -game -MovieSceneCaptureType="/Script/MovieSceneCapture.AutomatedLevelSequenceCapture" -LevelSequence="%~2" -NoLoadingScreen -Windowed -MovieName="%~3"

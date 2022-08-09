@@ -52,13 +52,14 @@ class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
         meta=dict(Category="Samples Python BlueprintFunctionLibrary"),
     )
     def unreal_python_set_shot(bPar, sMapName, sSeqName, sShotName):
+        print("Start Batch file")
+        prog_dir = unreal.Paths.project_plugins_dir() + 'UnrealPyClient/Content/Python/'
+        print(unreal.Paths.engine_user_dir() + "MakeShotRenderArg.bat "+sMapName+' '+sSeqName+' '+sShotName)
         unreal.log(
             "Execute Render Shot Bluerprint Action With Inputs {} {} {} {}".format(
                 bPar, sMapName, sSeqName, sShotName
             )
         )
-        print("Start Batch file")
-        print(unreal.Paths.engine_user_dir() + "MakeShotRenderArg.bat "+sMapName+' '+sSeqName+' '+sShotName)
         os.system(unreal.Paths.convert_relative_path_to_full(
             unreal.Paths.engine_user_dir()) + "MakeShotRenderArg.bat "+sMapName+' '+sSeqName+' '+sShotName)
 
@@ -71,6 +72,6 @@ class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
     @unreal.ufunction(ret=str)
     def unreal_client_startbat(self):
         clientbat = os.getcwd()+"start_client.bat"
-        os.system(unreal.Paths.convert_relative_path_to_full(clientbat))
+        os.system(clientbat)
         print('Start UnrealPy_Client! : ' + clientbat)
         return 'Start UnrealPy_Client! : ' + clientbat

@@ -287,7 +287,7 @@ class MyWidget(QtWidgets.QWidget):
         def CheckServer():
             try:
                 progressBar.setValue(0)
-                create_connection(HostLineEdit.text(), 10)
+                create_connection(HostLineEdit.text(), 5)
                 ChangeStatus(True)
             except:
                 ChangeStatus(False)

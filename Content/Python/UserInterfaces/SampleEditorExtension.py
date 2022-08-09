@@ -10,7 +10,7 @@ def extend_editor():
     #UnrealPyClient
     me_startunrealclient = unreal_uiutils.create_menu_button(
         name="StartClientBtn",
-        label="Start UnrealPyClient",
+        label="Open Unreal Remote Tool",
         command_string="import importlib; import unreal_startup; import unreal_worker; unreal_worker.Start_UnrealPy_Client()",
     )
     #Mod
@@ -22,14 +22,14 @@ def extend_editor():
     #Mod
     me_showbutton = unreal_uiutils.create_menu_button(
         name="ShowBtn",
-        label="Show All Funcs unreal",
+        label="Show API Python Functions",
         command_string="import importlib; import unreal_startup; import unreal_worker; unreal_worker.show_funcs_unreal()",
     )
 
     # Create standard menu entry
     me_reloadbutton = unreal_uiutils.create_menu_button(
         name="ReloadBtn",
-        label="Reload",
+        label="Reload code",
         command_string="import importlib; import unreal_startup; importlib.reload(unreal_startup); unreal_startup.reload();",
     )
     me_quitbutton = unreal_uiutils.create_menu_button(
@@ -63,13 +63,13 @@ def extend_editor():
     pythonsubmenu.add_menu_entry("python.file.menu", me_quitbutton)
 
     # Create Standalone Menu and register menu entry created above
-    new_mainmenu = unreal_uiutils.extend_mainmenu("Python", "Python")
+    new_mainmenu = unreal_uiutils.extend_mainmenu("M2remote", "M2remote")
     section = new_mainmenu.add_section("python.menu", "Python Tools")
     new_mainmenu.add_menu_entry("python.menu", me_startunrealclient)
-    new_mainmenu.add_menu_entry("python.menu", me_startbutton)
+    # new_mainmenu.add_menu_entry("python.menu", me_startbutton)
     new_mainmenu.add_menu_entry("python.menu", me_showbutton)
     new_mainmenu.add_menu_entry("python.menu", me_reloadbutton)
-    new_mainmenu.add_menu_entry("python.menu", me_quitbutton)
+    # new_mainmenu.add_menu_entry("python.menu", me_quitbutton)
     new_entry = unreal.ToolMenuEntryExtensions.init_menu_entry(
         new_mainmenu.menu_name,
         "submenu",
