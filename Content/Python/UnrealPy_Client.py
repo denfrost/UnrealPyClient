@@ -33,8 +33,11 @@ Json_UpdatePerforce = \
             "Url": "/remote/object/call",
             "Verb": "PUT",
             "Body": {
-                "objectPath": "/Game/Remote/Test1.Test1:PersistentLevel.Remoter_2",
-                "functionName": "UpdatePerforce"
+                "objectPath": "/Engine/PythonTypes.Default__SamplePythonBlueprintLibrary",
+                "functionName": "unreal_update_perforce",
+                "parameters": {
+                "result" : 'return string'
+                }
             }
         }
     }
