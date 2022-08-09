@@ -21,11 +21,12 @@ def perforce_main():
     if p4.connected():
         print('Succes and ready for command : '+str(session))
         p4.run_login() #pass
-
-    perforceinfo(p4, False)
+    else:
+        print('Perforce Not Connected')
+    #perforceinfo(p4, False)
     depo2 = "//depot/WHP_UE5"
     #perforce_update(p4, "//depot/Test_Poj_01")
-    perforce_update(p4, depo2)
+    #perforce_update(p4, depo2)
 
 def perforce_update(p4,depot):
     try:
