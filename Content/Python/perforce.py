@@ -1,6 +1,12 @@
 import P4 as P4
 from P4 import P4Exception
 
+def work_in_depo(p4):
+    # perforceinfo(p4, False)
+    depo2 = "//depot/WHP_UE5"
+    perforce_update(p4, "//depot/Test_Poj_01")
+    # perforce_update(p4, depo2)
+
 def perforce_main():
     #p4 = P4.P4(client="denis.balikhin_pc-14-025_8545", port="1666")
     p4 = P4.P4()
@@ -21,12 +27,9 @@ def perforce_main():
     if p4.connected():
         print('Succes and ready for command : '+str(session))
         p4.run_login() #pass
+        work_in_depo(p4) #main working place
     else:
         print('Perforce Not Connected')
-    #perforceinfo(p4, False)
-    depo2 = "//depot/WHP_UE5"
-    #perforce_update(p4, "//depot/Test_Poj_01")
-    #perforce_update(p4, depo2)
 
 def perforce_update(p4,depot):
     try:
