@@ -1,1 +1,1 @@
-"C:\Epic Games\UE_5.0\Engine\Binaries\Win64\UnrealEditor.exe" "E:\UE4JOB\M2Animation\WHH50\WHH50.uproject" "%~1" -game -MovieSceneCaptureType="/Script/MovieSceneCapture.AutomatedLevelSequenceCapture" -LevelSequence="%~2" -NoLoadingScreen -Windowed -MovieName="%~3"
+"%~4" "%~5" "%~1" -game -MovieSceneCaptureType="/Script/MovieSceneCapture.AutomatedLevelSequenceCapture" -LevelSequence="%~2" -NoLoadingScreen -Windowed -MovieName="%~3"

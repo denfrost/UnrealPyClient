@@ -53,15 +53,22 @@ class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
     )
     def unreal_python_set_shot(bPar, sMapName, sSeqName, sShotName):
         print("Start Batch file")
-        prog_dir = unreal.Paths.project_plugins_dir() + 'UnrealPyClient/Content/Python/'
-        print(unreal.Paths.engine_user_dir() + "MakeShotRenderArg.bat "+sMapName+' '+sSeqName+' '+sShotName)
+        unreal_editor = unreal.Paths.root_dir() + 'Engine/Binaries/Win64/UnrealEditor.exe'
+        project_dir = unreal.Paths.project_dir()
+        program_dir = unreal.Paths.project_plugins_dir() + 'UnrealPyClient/Content/Python/'
+        print("Unreal_Editor: "+unreal_editor)
+        print("Unreal_Project: " + project_dir)
+        project_dir = unreal.Paths.project_dir()[:-1]
+        project_file = project_dir.split("/")[-1]
+        project_file_path = unreal.Paths.project_dir() + project_file + '.uproject'
+        print('File project: ' + project_file_path)
+        print(program_dir + "MakeShotRenderArg.bat "+sMapName+' '+sSeqName+' '+sShotName+' "'+unreal_editor+'" "'+project_file_path+'"')
         unreal.log(
             "Execute Render Shot Bluerprint Action With Inputs {} {} {} {}".format(
                 bPar, sMapName, sSeqName, sShotName
             )
         )
-        os.system(unreal.Paths.convert_relative_path_to_full(
-            unreal.Paths.engine_user_dir()) + "MakeShotRenderArg.bat "+sMapName+' '+sSeqName+' '+sShotName)
+        os.system(program_dir + "MakeShotRenderArg.bat "+sMapName+' '+sSeqName+' '+sShotName+' "'+unreal_editor+'" "'+project_file_path+'"')
 
     @unreal.ufunction(ret=str)
     def unreal_project_plugin_dir(self):

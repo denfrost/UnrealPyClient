@@ -63,3 +63,24 @@ def Start_UnrealPy_Client():
     clientbat = prog_dir + "start_client.bat"
     os.system(clientbat+' '+prog_dir)
     print('Start UnrealPy_Client! : '+clientbat)
+
+def ShowWorkingDirs():
+    print('main dir program')
+    prog_dir = unreal.Paths.project_plugins_dir() + 'UnrealPyClient'
+    print('Plugin UnrealPyClient Directory: ' + prog_dir)
+    engine_dir = unreal.Paths.engine_dir()
+    root_dir = unreal.Paths.root_dir()
+    unreal_dir = unreal.Paths.root_dir() + 'Engine/Binaries/Win64'
+    project_dir = unreal.Paths.project_dir()[:-1]
+    project_file = project_dir.split("/")[-1]
+    project_file_path = unreal.Paths.project_dir() + project_file+'.uproject'
+    print('File project: '+project_file_path)
+    video_capture_dir = unreal.Paths.video_capture_dir()
+    project_persistent_download_dir = unreal.Paths.project_persistent_download_dir()
+    print('extend dirs...')
+    print('Unreal Directory: ' + unreal_dir)
+    print('Root Directory: ' + root_dir)
+    print('Binaries Directory: ' + engine_dir)
+    print('Project Directory: ' + project_dir)
+    print('Video Capture Directory: ' + video_capture_dir)
+    print('Project Download Directory: ' + project_persistent_download_dir)

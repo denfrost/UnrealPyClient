@@ -13,6 +13,12 @@ def extend_editor():
         label="Open Unreal Remote Tool",
         command_string="import importlib; import unreal_startup; import unreal_worker; unreal_worker.Start_UnrealPy_Client()",
     )
+    #UnrealPyClient
+    me_showworkingdirs = unreal_uiutils.create_menu_button(
+        name="ShowWorkingDirsBtn",
+        label="Show Working Directories",
+        command_string="import importlib; import unreal_startup; import unreal_worker; unreal_worker.ShowWorkingDirs()",
+    )
     #Mod
     me_startbutton = unreal_uiutils.create_menu_button(
         name="StartBtn",
@@ -66,7 +72,7 @@ def extend_editor():
     new_mainmenu = unreal_uiutils.extend_mainmenu("M2remote", "M2remote")
     section = new_mainmenu.add_section("python.menu", "Python Tools")
     new_mainmenu.add_menu_entry("python.menu", me_startunrealclient)
-    # new_mainmenu.add_menu_entry("python.menu", me_startbutton)
+    new_mainmenu.add_menu_entry("python.menu", me_showworkingdirs)
     new_mainmenu.add_menu_entry("python.menu", me_showbutton)
     new_mainmenu.add_menu_entry("python.menu", me_reloadbutton)
     # new_mainmenu.add_menu_entry("python.menu", me_quitbutton)

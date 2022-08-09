@@ -31,11 +31,13 @@ assetregistry_pretickhandle = unreal.register_slate_post_tick_callback(assetregi
 
 import BlueprintLibrary
 import UserInterfaces
+import unreal_worker
 
 def reload():
     import importlib
     importlib.reload(BlueprintLibrary)
     importlib.reload(UserInterfaces)
+    importlib.reload(unreal_worker)
 
 def spawn_actor(assetpath):
     if unreal.EditorAssetLibrary.does_asset_exist(assetpath):
