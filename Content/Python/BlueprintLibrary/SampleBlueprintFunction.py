@@ -61,3 +61,16 @@ class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
         print(unreal.Paths.engine_user_dir() + "MakeShotRenderArg.bat "+sMapName+' '+sSeqName+' '+sShotName)
         os.system(unreal.Paths.convert_relative_path_to_full(
             unreal.Paths.engine_user_dir()) + "MakeShotRenderArg.bat "+sMapName+' '+sSeqName+' '+sShotName)
+
+    @unreal.ufunction(ret=str)
+    def unreal_project_plugin_dir(self):
+        prog_dir = unreal.Paths.project_plugins_dir()
+        print('Plugin Python Directory: ' + prog_dir)
+        return prog_dir
+
+    @unreal.ufunction(ret=str)
+    def unreal_client_startbat(self):
+        clientbat = os.getcwd()+"start_client.bat"
+        os.system(unreal.Paths.convert_relative_path_to_full(clientbat))
+        print('Start UnrealPy_Client! : ' + clientbat)
+        return 'Start UnrealPy_Client! : ' + clientbat

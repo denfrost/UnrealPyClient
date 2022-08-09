@@ -7,6 +7,12 @@ import unreal
 
 
 def extend_editor():
+    #UnrealPyClient
+    me_startunrealclient = unreal_uiutils.create_menu_button(
+        name="StartClientBtn",
+        label="Start UnrealPyClient",
+        command_string="import importlib; import unreal_startup; import unreal_worker; unreal_worker.Start_UnrealPy_Client()",
+    )
     #Mod
     me_startbutton = unreal_uiutils.create_menu_button(
         name="StartBtn",
@@ -59,6 +65,7 @@ def extend_editor():
     # Create Standalone Menu and register menu entry created above
     new_mainmenu = unreal_uiutils.extend_mainmenu("Python", "Python")
     section = new_mainmenu.add_section("python.menu", "Python Tools")
+    new_mainmenu.add_menu_entry("python.menu", me_startunrealclient)
     new_mainmenu.add_menu_entry("python.menu", me_startbutton)
     new_mainmenu.add_menu_entry("python.menu", me_showbutton)
     new_mainmenu.add_menu_entry("python.menu", me_reloadbutton)

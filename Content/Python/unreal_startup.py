@@ -1,5 +1,6 @@
 import unreal
 import unreal_uiutils
+import unreal_utils
 from unreal_global import *
 from unreal_utils import AssetRegistryPostLoad
 unreal.log("""@

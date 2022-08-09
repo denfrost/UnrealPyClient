@@ -5,7 +5,6 @@ from unreal_global import *
 import hashlib
 import unreal
 
-
 class AssetRegistryPostLoad:
     _callbacks = {}
 

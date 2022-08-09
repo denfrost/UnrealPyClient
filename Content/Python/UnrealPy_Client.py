@@ -7,12 +7,13 @@ from datetime import datetime as dt
 #My Library
 import UtilObserver as uo
 
-
 #pip install PySide2
 from PySide2 import QtWidgets, QtCore, QtGui
 
 #pip install websocket-client
 from websocket import create_connection
+
+#describe calls checking umap, uasset.
 Json_RequestCheckMap =\
     {
     "MessageName": "http",
@@ -94,18 +95,6 @@ Json_RequestRemoteStaticFunction = \
         }
     }
 
-Json_RequestDescribeTest =\
-    {
-    "MessageName": "http",
-    "Parameters": {
-        "Url": "/remote/object/describe",
-        "Verb": "PUT",
-        "Body": {
-            "ObjectPath": "/Game/Remote/Test.Test:PersistentLevel.NewBlueprint_2",
-        }
-    }
-    }
-
 Json_RequestDescribe =\
     {
     "MessageName": "http",
@@ -116,48 +105,6 @@ Json_RequestDescribe =\
             "ObjectPath": "/Game/Remote/Test.Test",
         }
     }
-    }
-
-Json_RequestDescribeUtil =\
-    {
-    "MessageName": "http",
-    "Parameters": {
-        "Url": "/remote/object/describe",
-        "Verb": "PUT",
-        "Body": {
-            "ObjectPath": "/Game/Remote/EditUtilityWP/EUW_Test.EUW_Test",
-        }
-    }
-    }
-
-
-Json_RequestStaticFunctionHelloWorld = \
-    {
-        "MessageName": "http",
-        "Parameters": {
-            "Url": "/remote/object/call",
-            "Verb": "PUT",
-            "Body": {
-                "objectPath": "/Game/Remote/BPL_Remote.BPL_Remote",
-                "functionName": "HelloWorld"
-            }
-        }
-    }
-
-Json_RequestObjectCallTest = \
-    {
-        "MessageName": "http",
-        "Parameters": {
-            "Url": "/remote/object/call",
-            "Verb": "PUT",
-            "Body": {
-                "objectPath": "/Game/Remote/Test.Test:PersistentLevel.NewBlueprint_2",
-                "functionName": "CallTest",
-                "parameters": {
-                    "sString": 'Call Test Succes'
-                }
-            }
-        }
     }
 
 class MyWidget(QtWidgets.QWidget):
@@ -340,7 +287,7 @@ class MyWidget(QtWidgets.QWidget):
         def CheckServer():
             try:
                 progressBar.setValue(0)
-                create_connection(HostLineEdit.text())
+                create_connection(HostLineEdit.text(), 10)
                 ChangeStatus(True)
             except:
                 ChangeStatus(False)
@@ -537,13 +484,30 @@ def SendSocket(ClearAnswer, HostServer,Json_request, ServerAnswered):
     ServerAnswered(server_str)
     ws.close()
 
+def unreal_working_dirs():
+    print('main dir program')
+    prog_dir = unreal.Paths.project_plugins_dir() + 'UnrealPyClient'
+    print('Plugin UnrealPyClient Directory: ' + prog_dir)
+    root_dir = unreal.Paths.root_dir()
+    project_dir = unreal.Paths.project_dir()
+    video_capture_dir = unreal.Paths.video_capture_dir()
+    project_persistent_download_dir = unreal.Paths.project_persistent_download_dir()
+    print('extend dirs...')
+    print('Root Directory: ' + root_dir)
+    print('Project Directory: ' + project_dir)
+    print('Video Capture Directory: ' + video_capture_dir)
+    print('Project Download Directory: ' + project_persistent_download_dir)
+
+
 if __name__ == "__main__":
     print("Start Py App")
 if "unreal" not in dir():
     print("Warning: Unreal modules Not Loaded!")
+    print('Main Dir program: '+os.getcwd())
     Loaded = True
 else:
-    unreal.log("Unreal modules ready!");
+    unreal.log("Unreal modules Loaded & Ready!")
+    unreal_working_dirs()
 app = None
 if not QtWidgets.QApplication.instance():
     app = QtWidgets.QApplication(sys.argv)
@@ -552,7 +516,7 @@ else:
 widget = MyWidget()
 widget.show()
 print("Py App checking server...")
-sys.exit(app.exec_())  # for Windows external launch
-#unreal.parent_external_window_to_slate(widget.winId())
-
+if app:
+    sys.exit(app.exec_())  # for Windows external launch
+unreal.parent_external_window_to_slate(widget.winId())
 

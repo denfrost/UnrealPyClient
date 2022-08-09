@@ -1,5 +1,6 @@
 import unreal
 from unreal_global import *
+import os
 unreal.log("""@
 
 ####################
@@ -55,3 +56,10 @@ def start():
 
     unreal.log_warning("Finished")
     return
+
+def Start_UnrealPy_Client():
+    prog_dir = unreal.Paths.project_plugins_dir() + 'UnrealPyClient/Content/Python/'
+    print('Plugin UnrealPyClient Directory: ' + prog_dir)
+    clientbat = prog_dir + "start_client.bat"
+    os.system(clientbat+' '+prog_dir)
+    print('Start UnrealPy_Client! : '+clientbat)
