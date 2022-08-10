@@ -1,6 +1,6 @@
 from unreal_global import *
 import os
-import BlueprintLibrary.SampleBlueprintFunction as bp_Lib
+import BlueprintLibrary.SampleBlueprintFunction as bp_lib
 unreal.log("""@
 
 ####################
@@ -61,8 +61,9 @@ def Start_UnrealPy_Client():
     prog_dir = unreal.Paths.project_plugins_dir() + 'UnrealPyClient/Content/Python/'
     print('Plugin UnrealPyClient Directory: ' + prog_dir)
     clientbat = prog_dir + "start_client.bat"
-    os.system(clientbat+' '+prog_dir)
-    print('Start UnrealPy_Client! : '+clientbat)
+    unreal_client_path = prog_dir + 'UnrealPy_Client.py'
+    os.system(clientbat+' '+unreal_client_path)
+    print('Start UnrealPy_Client! : '+clientbat+' '+unreal_client_path)
 
 def ShowWorkingDirs():
     print('main dir program')
@@ -86,6 +87,7 @@ def ShowWorkingDirs():
     print('Project Download Directory: ' + project_persistent_download_dir)
 
 def UpdatePerforce():
-    bp_Lib.SamplePythonBlueprintLibrary.unreal_update_perforce(self=None)
+    bp_lib.SamplePythonBlueprintLibrary.unreal_update_perforce()
 
-
+def Set_Profile_Perforce():
+    unreal.EditorDialog.show_message('Error loading %s' % level_anim, 'Does not exist', unreal.AppMsgType.OK)

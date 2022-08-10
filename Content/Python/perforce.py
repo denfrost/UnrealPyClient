@@ -9,7 +9,7 @@ def work_in_depo(p4):
     perforce_update(p4, settings.get_Settings_field('Depot'), settings.get_Settings_field('Workspace'))
 
 def perforce_main(p4):
-    perforce_login(p4)
+    perforce_login(p4, True)
     work_in_depo(p4)
 
 def perforce_login(p4, show_profile=False):

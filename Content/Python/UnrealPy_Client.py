@@ -1,17 +1,21 @@
 import unreal
-
 import sys
 import json
 import os
 from datetime import datetime as dt
 #My Library
 import UtilObserver as uo
+import settings
 
 #pip install PySide2
-from PySide2 import QtWidgets, QtCore, QtGui
+from PySide2 import *
+from PySide2.QtWidgets import QApplication, QDialog, QMainWindow, QPushButton, QInputDialog
+from PySide2.QtWidgets import *
 
 #pip install websocket-client
 from websocket import create_connection
+
+#perforce vars setting
 
 #describe calls checking umap, uasset.
 Json_RequestCheckMap =\
@@ -109,6 +113,58 @@ Json_RequestDescribe =\
         }
     }
     }
+
+class input_dialog(QWidget):
+    def __init__(self, parent=None):
+        super(input_dialog, self).__init__(parent)
+
+        layout = QFormLayout()
+        self.lbl = QLabel("Profile Name")
+        Name = settings.get_Settings_field('Name')
+        self.le = QLineEdit(Name)
+        layout.addRow(self.lbl, self.le)
+
+        self.lbl1 = QLabel("User")
+        User = settings.get_Settings_field('User')
+        self.le1 = QLineEdit(User)
+        layout.addRow(self.lbl1, self.le1)
+
+        self.lbl2 = QLabel("Password")
+        Pwd = settings.get_Settings_field('Pwd')
+        self.le2 = QLineEdit(Pwd)
+        layout.addRow(self.lbl2, self.le2)
+
+        self.lbl3 = QLabel("Host")
+        Host = settings.get_Settings_field('Host')
+        self.le3 = QLineEdit(Host)
+        layout.addRow(self.lbl3, self.le3)
+
+        self.lbl4 = QLabel("Depot")
+        Depot = settings.get_Settings_field('Depot')
+        self.le4 = QLineEdit(Depot)
+        layout.addRow(self.lbl4, self.le4)
+
+        self.lbl5 = QLabel("Workspace")
+        Workspace = settings.get_Settings_field('Workspace')
+        self.le5 = QLineEdit(Workspace)
+        layout.addRow(self.lbl5, self.le5)
+
+        self.btn6 = QPushButton("Save")
+        self.btn6.clicked.connect(self.saveProfile)
+        self.btn7 = QPushButton("Cancel")
+        self.btn7.clicked.connect(self.dlg_quit)
+        layout.addRow(self.btn6, self.btn7)
+
+        self.setLayout(layout)
+        self.setWindowTitle('Settings Perforce')
+        self.resize(350, 200)
+
+    def saveProfile(self):
+        list = {'Name': self.le.text(), 'User': self.le1.text(), "Pwd": self.le2.text(), 'Host': self.le3.text(), 'Depot': self.le4.text(), 'Workspace': self.le5.text()}
+        settings.rewrite_exist_profile(list)
+
+    def dlg_quit(self):
+        self.close()
 
 class MyWidget(QtWidgets.QWidget):
     def __init__(self, parent=None):
@@ -322,6 +378,23 @@ class MyWidget(QtWidgets.QWidget):
             SendSocket(ClearAnswer, HostServer, json.dumps(Json_UpdatePerforce), ServerAnsweredPerforce)
 
         @QtCore.Slot()
+        def SetPerforceProfile():
+            ex = input_dialog()
+            ex.show()
+            ex.exec_()
+
+        @QtCore.Slot()
+        def ShowDialogs():
+            items = ("C", "C++", "Java", "Python")
+            item, ok = QInputDialog.getItem(self, "select input dialog", "list of languages", items, 0, False)
+
+            dlg = QDialog(self)
+            dlg.resize(400, 400)
+            dlg.setWindowTitle("Settings Perforce")
+            dlg.exec_()
+
+
+        @QtCore.Slot()
         def MyQuit():
             app.quit()
 
@@ -429,7 +502,13 @@ class MyWidget(QtWidgets.QWidget):
         PerforceLabel.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Medium))
         GroupboxAuto2.layout().addWidget(PerforceLabel)
 
-        UpdatePerforceBtn = QtWidgets.QPushButton("Start Update Perforce")
+        SetPerforceBtn = QtWidgets.QPushButton("Settings")
+        SetPerforceBtn.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
+        self.connect(SetPerforceBtn, QtCore.SIGNAL("clicked()"),SetPerforceProfile)
+        GroupboxAuto2.layout().addWidget(SetPerforceBtn)
+
+
+        UpdatePerforceBtn = QtWidgets.QPushButton("Update Perforce")
         UpdatePerforceBtn.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
         self.connect(UpdatePerforceBtn, QtCore.SIGNAL("clicked()"),UpdatePerforce)
         GroupboxAuto2.layout().addWidget(UpdatePerforceBtn)

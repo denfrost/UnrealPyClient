@@ -13,14 +13,12 @@ def get_Settings_field(field):
         settings_file = json.load(f)
         return settings_file[field]
 
-def check_exist_profile(Name, user, pwd, host, depot, workspace):
-    open_or_create_Settings(Name, user, pwd, host, depot, workspace)
-    print("look " + get_Settings_field())
-    if get_Settings_field() != '':
-        print(get_Settings_field())
+def check_exist_profile():
+    return (get_Settings_field('Name') != '')
 
-def open_or_create_Settings(Name, user, pwd, host, depot, workspace):
-    settings_file_preset = {'Name': Name, 'User': user, "Pwd": pwd, 'Host': host, 'Depot': depot, 'Workspace': workspace}
+
+def open_or_create_Settings(list={}):
+    settings_file_preset = {'Name': list[0], 'User': list[1], "Pwd": list[2], 'Host': list[3], 'Depot': list[4], 'Workspace': list[5]}
     if os.path.isfile(Json_settings):
         print("Settings exist "+Json_settings)
     else:
@@ -32,3 +30,9 @@ def get_Settings_profile():
     with open(Json_settings, 'r') as f:
         settings_file = json.load(f)
         return settings_file
+
+def rewrite_exist_profile(list={}):
+    settings_file_preset = {'Name': list[0], 'User': list[1], "Pwd": list[2], 'Host': list[3], 'Depot': list[4],
+                            'Workspace': list[5]}
+    with open(Json_settings, 'w') as f:
+        json.dump(settings_file_preset, f)

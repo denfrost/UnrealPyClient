@@ -1,3 +1,3 @@
 echo start websoclet client
-py "%~1UnrealPy_Client.py"
+py %~1
 rem pause
