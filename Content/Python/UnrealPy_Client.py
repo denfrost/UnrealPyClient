@@ -1,5 +1,5 @@
-#import unreal
-import datetime
+import unreal
+
 import sys
 import json
 import os
@@ -43,7 +43,7 @@ Json_UpdatePerforce = \
     }
 
 
-Server = "ws://"+"localhost:30020" #10.66.7.80
+Server = "ws://"+"localhost:30020"
 
 Json_RequestGetAllShots = \
     {
@@ -270,14 +270,15 @@ class MyWidget(QtWidgets.QWidget):
             progressBar.setValue(50)
             HostServer = HostLineEdit.text()
             SendSocket(ClearAnswer, HostServer, json.dumps(Json_RequestSetShotRender), ServerAnsweredSetShotRender)
-
-
         @QtCore.Slot()
-        def MakeRender(): #arguments
+        def RenderImages():
+            print('Start Render Images')
+        @QtCore.Slot()
+        def RenderMovie(): #arguments
             MakeRenderTool(comboBox.currentText())
 
         @QtCore.Slot()
-        def BatchMakeRender(): #arguments
+        def BatchRenderMovie(): #arguments
             items = listing.selectedItems()
             for i in range(len(items)):
                 MakeRenderTool(listing.selectedItems()[i].text())
@@ -312,10 +313,10 @@ class MyWidget(QtWidgets.QWidget):
 
         @QtCore.Slot()
         def UpdatePerforce():
+            print("Perforce ")
             progressBar.setValue(0)
             JsonTextEdit.setText(json.dumps(Json_UpdatePerforce))
             tabwidget.setCurrentIndex(0)
-            print("Perforce ")
             progressBar.setValue(50)
             HostServer = HostLineEdit.text()
             SendSocket(ClearAnswer, HostServer, json.dumps(Json_UpdatePerforce), ServerAnsweredPerforce)
@@ -399,10 +400,15 @@ class MyWidget(QtWidgets.QWidget):
         self.connect(getshot, QtCore.SIGNAL("clicked()"), GetAllServerShots)
         GroupboxAuto.layout().addWidget(getshot)
 
-        render = QtWidgets.QPushButton("Start Render Sequence")
+        render = QtWidgets.QPushButton("Render Movie Sequence")
         render.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
-        self.connect(render, QtCore.SIGNAL("clicked()"), MakeRender)
+        self.connect(render, QtCore.SIGNAL("clicked()"), RenderMovie)
         GroupboxAuto.layout().addWidget(render)
+
+        render_images = QtWidgets.QPushButton("Render Images Sequence")
+        render_images.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
+        self.connect(render_images, QtCore.SIGNAL("clicked()"), RenderImages)
+        GroupboxAuto.layout().addWidget(render_images)
 
         GroupboxAuto0 = QtWidgets.QGroupBox("Found Sequences")
         GroupboxAuto0.setChecked(True)
@@ -445,7 +451,7 @@ class MyWidget(QtWidgets.QWidget):
         GroupboxAuto3.layout().addWidget(listing)
         BatchRenderBtn = QtWidgets.QPushButton("Start Batch Rendering")
         BatchRenderBtn.setFont(QtGui.QFont("Times", 13, QtGui.QFont.Bold))
-        self.connect(BatchRenderBtn, QtCore.SIGNAL("clicked()"), BatchMakeRender)
+        self.connect(BatchRenderBtn, QtCore.SIGNAL("clicked()"), BatchRenderMovie)
         GroupboxAuto3.layout().addWidget(BatchRenderBtn)
 
 

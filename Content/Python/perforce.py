@@ -1,32 +1,32 @@
-import settings as cfg
+import settings as settings
 import P4 as P4
 from P4 import P4Exception
 
 #perforce_main('denis.balikhin', 'm2ue4m2ue4', 'ssl:perforcesrv:1666')
 perforce_host = ''
 
-def work_in_depo():
-    perforce_update(cfg.get_Settings_field('Depot'), cfg.get_Settings_field('Workspace'))
+def work_in_depo(p4):
+    perforce_update(p4, settings.get_Settings_field('Depot'), settings.get_Settings_field('Workspace'))
 
-def perforce_main():
-    perforce_login()
-    work_in_depo()
+def perforce_main(p4):
+    perforce_login(p4)
+    work_in_depo(p4)
 
-def perforce_login(show_profile=False):
-    print('Profile settings: ' + cfg.get_Settings_field('Name'))
+def perforce_login(p4, show_profile=False):
+    print('Profile settings: ' + settings.get_Settings_field('Name'))
     if show_profile:
-        for key in cfg.get_Settings_profile():
-            print(key+'='+cfg.get_Settings_field(key))
+        for key in settings.get_Settings_profile():
+            print(key +'=' + settings.get_Settings_field(key))
 
-    print('Start Py Perforce : '+cfg.get_Settings_field('Host'))
+    print('Start Py Perforce : ' + settings.get_Settings_field('Host'))
     if p4.user:
-        print('Found API Perforce user: '+cfg.get_Settings_field('User'))
+        print('Found API Perforce user: ' + settings.get_Settings_field('User'))
     else:
-        print('Accces API driver not found '+cfg.get_Settings_field('Host'))
+        print('Accces API driver not found ' + settings.get_Settings_field('Host'))
 
     try:
-        p4.user = cfg.get_Settings_field('User')
-        p4.password = cfg.get_Settings_field('Pwd')
+        p4.user = settings.get_Settings_field('User')
+        p4.password = settings.get_Settings_field('Pwd')
 
         session = p4.connect()
     except P4Exception:
@@ -38,7 +38,7 @@ def perforce_login(show_profile=False):
     else:
         print('Perforce Not Connected')
 
-def perforce_update(depot, workspace):
+def perforce_update(p4, depot, workspace):
     try:
         print('Try Update depot:')
         client = p4.fetch_client()
@@ -54,6 +54,7 @@ def perforce_update(depot, workspace):
         p4.disconnect()
 
 def get_perforce_info(show_info=False):
+    p4 = P4.P4(port=settings.get_Settings_field('Host'))
     info = p4.run("info")  # Run "p4 info" (returns a dict)
     if show_info:
         print('Print Info:')
@@ -61,7 +62,10 @@ def get_perforce_info(show_info=False):
             print(str(key) + "=" + info[0][key])
     return info
 
-perforce_host = cfg.get_Settings_field('Host')
-p4 = P4.P4(port=perforce_host)
-perforce_main()
+def update():
+    perforce_host = settings.get_Settings_field('Host')
+    p4 = P4.P4(port=perforce_host)
+    perforce_main(p4)
+
+update()
 

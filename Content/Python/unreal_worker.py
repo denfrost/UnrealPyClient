@@ -1,6 +1,6 @@
-import unreal
 from unreal_global import *
 import os
+import BlueprintLibrary.SampleBlueprintFunction as bp_Lib
 unreal.log("""@
 
 ####################
@@ -84,3 +84,8 @@ def ShowWorkingDirs():
     print('Project Directory: ' + project_dir)
     print('Video Capture Directory: ' + video_capture_dir)
     print('Project Download Directory: ' + project_persistent_download_dir)
+
+def UpdatePerforce():
+    bp_Lib.SamplePythonBlueprintLibrary.unreal_update_perforce(self=None)
+
+
