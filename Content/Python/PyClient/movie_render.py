@@ -7,8 +7,8 @@ import shutil
 
 import unreal
 
-import utils
-import ftp_transfer
+from . import utils
+from . import ftp_transfer
 #from . import shotgun
 
 import importlib
@@ -149,6 +149,7 @@ def render_jobs(image_dirs,transfer=False):
     image_directories = image_dirs
     
     # cleanup render folder before start rendering
+    '''
     for d in image_dirs:
         for filename in os.listdir(d):
             file_path = os.path.join(d, filename)
@@ -159,7 +160,7 @@ def render_jobs(image_dirs,transfer=False):
                     shutil.rmtree(file_path)
             except Exception as e:
                 print('Failed to delete %s. Reason: %s' % (file_path, e))
-    
+    '''
     NewExecutor = subsystem.render_queue_with_executor(unreal.MoviePipelinePIEExecutor)
     
     if transfer:

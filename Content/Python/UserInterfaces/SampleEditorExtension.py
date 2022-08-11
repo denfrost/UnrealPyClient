@@ -7,6 +7,12 @@ import unreal
 
 
 def extend_editor():
+    #UnrealMovieRender
+    me_renderimagessequence = unreal_uiutils.create_menu_button(
+        name="RenderImagesBtn",
+        label="Render Images Sequence",
+        command_string="import importlib; import unreal_startup; import unreal_worker; unreal_worker.Render_Images_Sequence()",
+    )
     #UnrealPyClient
     me_startunrealclient = unreal_uiutils.create_menu_button(
         name="StartClientBtn",
@@ -77,6 +83,7 @@ def extend_editor():
     # Create Standalone Menu and register menu entry created above
     new_mainmenu = unreal_uiutils.extend_mainmenu("M2remote", "M2remote")
     section = new_mainmenu.add_section("python.menu", "Python Tools")
+    new_mainmenu.add_menu_entry("python.menu", me_renderimagessequence)
     new_mainmenu.add_menu_entry("python.menu", me_startunrealclient)
     new_mainmenu.add_menu_entry("python.menu", me_updateperforce)
     new_mainmenu.add_menu_entry("python.menu", me_showworkingdirs)
