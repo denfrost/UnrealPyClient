@@ -43,7 +43,7 @@ class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
         for asset in assets:
             print(asset)
             count = 0
-            if '_Anim_SEQ' in str(asset.object_path):
+            if '_SEQ' in str(asset.package_name): #_ANIM_SEQ
                 output = output + ',' +str(asset.object_path)
         print('Size output: '+str(len(output)))
         return output
@@ -110,8 +110,8 @@ class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
         job_name = sSeqName.split('.')[-1]
         job_anim_dir = sSeqName.split('.')[0]
         job_anim_dir = job_anim_dir.split(job_name)[0]
-        job_map_dir = job_anim_dir.split('ANIM/')[0]
-        job_map = str(job_name).split('_Anim_SEQ')[0]
+        job_map_dir = job_anim_dir
+        job_map = str(job_name).split('_SEQ')[0]
         job_map_path = job_map_dir+job_map+'.'+job_map
         user_folder = os.path.expanduser('~')
         output_folder = user_folder+'/UnrealRenderImages'+job_anim_dir

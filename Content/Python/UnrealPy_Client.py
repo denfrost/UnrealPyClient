@@ -295,18 +295,10 @@ class MyWidget(QtWidgets.QWidget):
             listing.clear()
             print('Start Sorting:')
             for i, name in enumerate(res):
-                print('Feedback ['+str(i)+']: '+res[i])
-                if res[i].find('_Anim_SEQ') > 0:
-                    #index = res[i].find('"')
-                    #if index == -1:
+                #print('Feedback ['+str(i)+']: '+res[i])
+                if res[i].find('_SEQ') > 0: #_ANIM_SEQ
                     comboBox.addItem("" + res[i])
                     listing.addItem("" + res[i])
-                    '''
-                    else:
-                        comboBox.addItem("" + res[i][:index])
-                        listing.addItem("" + res[i][:index])
-                    '''
-            #listing.setMinimumHeight(listing.count()*30)
             listing.setMaximumHeight(200)
 
         def printItemText(self):
