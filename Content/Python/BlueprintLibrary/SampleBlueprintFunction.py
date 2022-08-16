@@ -42,8 +42,10 @@ class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
         assets = asset_reg.get_assets_by_class('LevelSequence', search_sub_classes=False)
         for asset in assets:
             print(asset)
+            count = 0
             if '_Anim_SEQ' in str(asset.object_path):
                 output = output + ',' +str(asset.object_path)
+        print('Size output: '+str(len(output)))
         return output
 
     @unreal.ufunction(
