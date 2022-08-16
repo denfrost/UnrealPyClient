@@ -59,15 +59,16 @@ def start():
     return
 
 def Start_UnrealPy_Client():
-    prog_dir = unreal.Paths.project_plugins_dir() + 'UnrealPyClient/Content/Python/'
-    print('Plugin UnrealPyClient Directory: ' + prog_dir)
-    clientbat = prog_dir + "start_client.bat"
-    unreal_client_path = prog_dir + 'UnrealPy_Client.py'
+    script_dir = os.path.abspath(__file__).split('unreal_worker.py')[0]
+    print('Plugin UnrealPyClient Directory: ' + script_dir)
+    clientbat = script_dir + "start_client.bat"
+    unreal_client_path = script_dir + 'UnrealPy_Client.py'
     os.system(clientbat+' '+unreal_client_path)
     print('Start UnrealPy_Client! : '+clientbat+' '+unreal_client_path)
 
 def ShowWorkingDirs():
-    print('main dir program')
+    script_dir = os.path.abspath(__file__).split('unreal_worker.py')[0]
+    print('main dir program : '+script_dir)
     prog_dir = unreal.Paths.project_plugins_dir() + 'UnrealPyClient'
     print('Plugin UnrealPyClient Directory: ' + prog_dir)
     engine_dir = unreal.Paths.engine_dir()
