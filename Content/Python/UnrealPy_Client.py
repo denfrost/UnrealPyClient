@@ -95,6 +95,7 @@ Json_RequestRenderImages = \
                 "functionName": "unreal_python_render_images",
                 "parameters": {
                 "sSeqName" : 'SH0005',
+                "iQualityPreset" : 3,
                 }
             }
         }
@@ -352,20 +353,21 @@ class MyWidget(QtWidgets.QWidget):
             HostServer = HostLineEdit.text()
             SendSocket(ClearAnswer, HostServer, json.dumps(Json_RequestSetShotRender), ServerAnsweredSetShotRender)
 
-        def MakeImagesTool(sequence):
-            print('Send Render for ImagesTool Render : '+sequence)
+        def MakeImagesTool(sequence,iQualityPreset=3):
+            print('Send Render for ImagesTool Render : '+sequence + ' Quality - '+str(iQualityPreset))
             Json_RequestRenderImages["Parameters"]["Body"]["parameters"]["sSeqName"] = sequence
+            Json_RequestRenderImages["Parameters"]["Body"]["parameters"]["iQuality"] = iQualityPreset
             progressBar.setValue(0)
             JsonTextEdit.setText(json.dumps(Json_RequestRenderImages))
             tabwidget.setCurrentIndex(0)
             print("Sending....")
             progressBar.setValue(50)
             HostServer = HostLineEdit.text()
-            SendSocket(ClearAnswer, HostServer, json.dumps(Json_RequestRenderImages), ServerAnsweredImagesRender())
+            SendSocket(ClearAnswer, HostServer, json.dumps(Json_RequestRenderImages), ServerAnsweredImagesRender)
 
         @QtCore.Slot()
         def RenderImages():
-            MakeImagesTool(comboBox.currentText())
+            MakeImagesTool(comboBox.currentText(), comboBoxQ.currentIndex())
         @QtCore.Slot()
         def RenderMovie(): #arguments
             MakeRenderTool(comboBox.currentText())
@@ -501,6 +503,7 @@ class MyWidget(QtWidgets.QWidget):
 
         GroupboxAuto = QtWidgets.QGroupBox("Rendering Shots")
         GroupboxAuto.setChecked(True)
+        vbox4 = QtWidgets.QVBoxLayout()
         vbox3 = QtWidgets.QHBoxLayout()
         GroupboxAuto.setLayout(vbox3)
 
@@ -519,6 +522,16 @@ class MyWidget(QtWidgets.QWidget):
         render_images.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
         self.connect(render_images, QtCore.SIGNAL("clicked()"), RenderImages)
         GroupboxAuto.layout().addWidget(render_images)
+
+        preset = QtWidgets.QLabel("Quality")
+        GroupboxAuto.layout().addWidget(preset)
+        comboBoxQ = QtWidgets.QComboBox(self)
+        comboBoxQ.setFont(QtGui.QFont("Times", 10, QtGui.QFont.Medium))
+        comboBoxQ.addItem("Preset01")
+        comboBoxQ.addItem("Preset02VeryLow")
+        comboBoxQ.addItem("Preset02LoW")
+        comboBoxQ.addItem("Preset03VeryHigh")
+        GroupboxAuto.layout().addWidget(comboBoxQ)
 
         GroupboxAuto0 = QtWidgets.QGroupBox("Found Sequences")
         GroupboxAuto0.setChecked(True)

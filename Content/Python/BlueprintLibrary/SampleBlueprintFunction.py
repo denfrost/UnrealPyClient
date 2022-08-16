@@ -1,7 +1,8 @@
-import unreal
+#import unreal
 import os
 
 from unreal_global import *
+from unreal_global import PyClientMovie as PyClientMovie
 
 @unreal.uclass()
 class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
@@ -92,18 +93,33 @@ class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
         return perforcebat
 
     @unreal.ufunction(
-        params=[str],
+        params=[str, int],
         static=True,
         meta=dict(Category="Samples Python BlueprintFunctionLibrary"),
     )
-    def unreal_python_render_images(sSeqName):
-        unreal.log_warning("Job Render. Make Render Images Job : "+sSeqName)
-        import Content.Python.PyClient as PyClient
+    def unreal_python_render_images(sSeqName, iQuality=3):
+        Presets = ['/Game/Cinematics/MoviePipeline/Presets/Render_Settings_001.Render_Settings_001',
+                   '/Game/Cinematics/MoviePipeline/Presets/Render_Settings_002_veryLow.Render_Settings_002_veryLow',
+                   '/Game/Cinematics/MoviePipeline/Presets/Render_Settings_002_Low.Render_Settings_002_Low',
+                   '/Game/Cinematics/MoviePipeline/Presets/Render_Settings_003_VeryHigh.Render_Settings_003_VeryHigh']
+        unreal.log_warning("Job Render. Make Render Images Job : "+sSeqName+' Quality : '+Presets[iQuality])
         global CurrentJob
-        CurrentJob = PyClient.movie_render.make_render_job('NewMap_Anim_SEQ', '/Game/NewMap_Anim_SEQ.NewMap_Anim_SEQ',
+        job_sequence_path = sSeqName
+        job_name = sSeqName.split('.')[-1]
+        job_anim_dir = sSeqName.split('.')[0]
+        job_anim_dir = job_anim_dir.split(job_name)[0]
+        job_map_dir = job_anim_dir.split('ANIM/')[0]
+        job_map = str(job_name).split('_Anim_SEQ')[0]
+        job_map_path = job_map_dir+job_map+'.'+job_map
+        user_folder = os.path.expanduser('~')
+        output_folder = user_folder+'/UnrealRenderImages'+job_anim_dir
+        print(f'Job : Name: {job_name} SeqPath: {job_sequence_path} Map: {job_anim_dir}{job_map} OutputFolder : {output_folder} Preset : {Presets[iQuality]}')
+        CurrentJob = PyClientMovie.make_render_job(job_name, job_sequence_path, job_map_path, output_folder, Presets[iQuality])
+        '''
+        CurrentJob = PyClientMovie.make_render_job('NewMap_Anim_SEQ', '/Game/NewMap_Anim_SEQ.NewMap_Anim_SEQ',
                                                            '/Game/NewMap_Anim.NewMap_Anim',
                                                            'C:/Users/UnrealWorkstation/LIVE/NewMap_Anim/COMMON/RENDER/NewMap_Anim',
                                                            '/Game/Cinematics/MoviePipeline/Presets/Render_Settings_003_VeryHigh.Render_Settings_003_VeryHigh')
+        '''
         unreal.log_warning("Job Render. Images Job ready: " + CurrentJob.job_name)
-        PyClient.movie_render.render_jobs('C:/Users/UnrealWorkstation/LIVE/NewMap_Anim/COMMON/RENDER/NewMap_Anim',
-                                          False)
+        PyClientMovie.render_jobs(output_folder,False)

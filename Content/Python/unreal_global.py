@@ -1,5 +1,9 @@
 import unreal
 
+from PyClient import *
+import PyClient.movie_render as PyClientMovie
+
+
 AssetRegistry = unreal.AssetRegistryHelpers.get_asset_registry()
 
 UtilLibrary = unreal.EditorUtilityLibrary
