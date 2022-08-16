@@ -1,4 +1,4 @@
-import unreal
+#import unreal
 import sys
 import json
 import os
@@ -79,6 +79,22 @@ Json_RequestSetShotRender = \
                 "sMapName" : 'SH0005',
                 "sSeqName" : 'SH0005',
                 "sShotName" : 'SH0005'
+                }
+            }
+        }
+    }
+
+Json_RequestRenderImages = \
+    {
+        "MessageName": "http",
+        "Parameters": {
+            "Url": "/remote/object/call",
+            "Verb": "PUT",
+            "Body": {
+                "objectPath": "/Engine/PythonTypes.Default__SamplePythonBlueprintLibrary",
+                "functionName": "unreal_python_render_images",
+                "parameters": {
+                "sSeqName" : 'SH0005',
                 }
             }
         }
@@ -199,6 +215,15 @@ class MyWidget(QtWidgets.QWidget):
         def ServerAnsweredSetShotRender(feedback):
             StatusLabel.setText("Unreal Server Status Online : " + HostServer)
             print("Got Server Answer : SetShotRender")
+            tanswer = dt.now().strftime("%H:%M:%S")
+            ServerAnswerTextEdit.clear()
+            ServerAnswerTextEdit.setText(tanswer + " : " + feedback)  # JsonTextEdit.toPlainText()
+            tabwidget.setCurrentIndex(1)
+            progressBar.setValue(100)
+
+        def ServerAnsweredImagesRender(feedback):
+            StatusLabel.setText("Unreal Server Status Online : " + HostServer)
+            print("Got Server Answer : ImagesRenderTool")
             tanswer = dt.now().strftime("%H:%M:%S")
             ServerAnswerTextEdit.clear()
             ServerAnswerTextEdit.setText(tanswer + " : " + feedback)  # JsonTextEdit.toPlainText()
@@ -326,9 +351,21 @@ class MyWidget(QtWidgets.QWidget):
             progressBar.setValue(50)
             HostServer = HostLineEdit.text()
             SendSocket(ClearAnswer, HostServer, json.dumps(Json_RequestSetShotRender), ServerAnsweredSetShotRender)
+
+        def MakeImagesTool(sequence):
+            print('Send Render for ImagesTool Render : '+sequence)
+            Json_RequestRenderImages["Parameters"]["Body"]["parameters"]["sSeqName"] = sequence
+            progressBar.setValue(0)
+            JsonTextEdit.setText(json.dumps(Json_RequestRenderImages))
+            tabwidget.setCurrentIndex(0)
+            print("Sending....")
+            progressBar.setValue(50)
+            HostServer = HostLineEdit.text()
+            SendSocket(ClearAnswer, HostServer, json.dumps(Json_RequestRenderImages), ServerAnsweredImagesRender())
+
         @QtCore.Slot()
         def RenderImages():
-            print('Start Render Images')
+            MakeImagesTool(comboBox.currentText())
         @QtCore.Slot()
         def RenderMovie(): #arguments
             MakeRenderTool(comboBox.currentText())
@@ -606,5 +643,7 @@ widget.show()
 print("Py App checking server...")
 if app:
     sys.exit(app.exec_())  # for Windows external launch
-unreal.parent_external_window_to_slate(widget.winId())
+if "unreal" in dir():
+    import unreal
+    unreal.parent_external_window_to_slate(widget.winId())
 

@@ -92,7 +92,7 @@ def UpdatePerforce():
 
 def Render_Images_Sequence():
     print('Start Images Rendering')
-    PyClient.movie_render.cleanup_queue()
+    #PyClient.movie_render.cleanup_queue() #Cleanup queue
     """
         SH1870
         /Game/SHOTS/WHP01/SH1870/SH1870_SEQ.SH1870_SEQ
@@ -101,8 +101,38 @@ def Render_Images_Sequence():
         C:/Users/denis.balikhin/LIVE/WHM/WHP01/COMMON/RENDER/WHM_WHP01_SH1870
         /Game/Cinematics/MoviePipeline/Presets/Render_Settings_003_VeryHigh.Render_Settings_003_VeryHigh
     """
-    PyClient.movie_render.make_render_job('NewMap_Anim_SEQ', '/Game/NewMap_Anim_SEQ.NewMap_Anim_SEQ', '/Game/NewMap_Anim.NewMap_Anim', 'C:/Users/UnrealWorkstation/LIVE/NewMap_Anim/COMMON/RENDER/NewMap_Anim',
+    global CurrentJob
+    CurrentJob = PyClient.movie_render.make_render_job('NewMap_Anim_SEQ', '/Game/NewMap_Anim_SEQ.NewMap_Anim_SEQ', '/Game/NewMap_Anim.NewMap_Anim', 'C:/Users/UnrealWorkstation/LIVE/NewMap_Anim/COMMON/RENDER/NewMap_Anim',
                                           '/Game/Cinematics/MoviePipeline/Presets/Render_Settings_003_VeryHigh.Render_Settings_003_VeryHigh')
+    print_MoviePipelineQueue()
     PyClient.movie_render.render_jobs('C:/Users/UnrealWorkstation/LIVE/NewMap_Anim/COMMON/RENDER/NewMap_Anim', False)
+    #delete_MoviePipelineJob('NewMap_Anim_SEQ')
     #PyClient.movie_render.make_render_job('Test', sequencer, world, output_folder, preset_addr)
     #PyClient.movie_render.render_jobs(image_dirs, transfer=False):
+
+
+def print_MoviePipelineQueue():
+    subsystem = unreal.get_editor_subsystem(unreal.MoviePipelineQueueSubsystem)
+    pipelineQueue = subsystem.get_queue()
+
+    existed_jobs = pipelineQueue.get_jobs()
+    print('Current JOB name : ' + str(CurrentJob.job_name))
+
+    print('Queue jobs count= ' + str(len(existed_jobs)))
+
+    for job in existed_jobs:
+        print('Job Seq = '+str(job.sequence))
+        print('Job Map = '+str(job.map))
+        print('Job Name = '+str(job.job_name))
+
+def My_Render_Images(sequence=''):
+    if sequence=='': return
+    unreal.log_warning("Job Render. Make Render Images Job")
+    global CurrentJob
+    CurrentJob = PyClient.movie_render.make_render_job('NewMap_Anim_SEQ', '/Game/NewMap_Anim_SEQ.NewMap_Anim_SEQ',
+                                                       '/Game/NewMap_Anim.NewMap_Anim',
+                                                       'C:/Users/UnrealWorkstation/LIVE/NewMap_Anim/COMMON/RENDER/NewMap_Anim',
+                                                       '/Game/Cinematics/MoviePipeline/Presets/Render_Settings_003_VeryHigh.Render_Settings_003_VeryHigh')
+    unreal.log_warning("Job Render. Images Job ready: "+CurrentJob.job_name)
+    PyClient.movie_render.render_jobs('C:/Users/UnrealWorkstation/LIVE/NewMap_Anim/COMMON/RENDER/NewMap_Anim', False)
+

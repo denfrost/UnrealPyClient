@@ -3,7 +3,6 @@ import os
 
 from unreal_global import *
 
-
 @unreal.uclass()
 class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
     @unreal.ufunction(
@@ -91,3 +90,20 @@ class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
         print('Update Perforce! : ' + perforcebat+' '+perforcePy)
         os.system(perforcebat+' '+perforcePy)
         return perforcebat
+
+    @unreal.ufunction(
+        params=[str],
+        static=True,
+        meta=dict(Category="Samples Python BlueprintFunctionLibrary"),
+    )
+    def unreal_python_render_images(sSeqName):
+        unreal.log_warning("Job Render. Make Render Images Job : "+sSeqName)
+        import Content.Python.PyClient as PyClient
+        global CurrentJob
+        CurrentJob = PyClient.movie_render.make_render_job('NewMap_Anim_SEQ', '/Game/NewMap_Anim_SEQ.NewMap_Anim_SEQ',
+                                                           '/Game/NewMap_Anim.NewMap_Anim',
+                                                           'C:/Users/UnrealWorkstation/LIVE/NewMap_Anim/COMMON/RENDER/NewMap_Anim',
+                                                           '/Game/Cinematics/MoviePipeline/Presets/Render_Settings_003_VeryHigh.Render_Settings_003_VeryHigh')
+        unreal.log_warning("Job Render. Images Job ready: " + CurrentJob.job_name)
+        PyClient.movie_render.render_jobs('C:/Users/UnrealWorkstation/LIVE/NewMap_Anim/COMMON/RENDER/NewMap_Anim',
+                                          False)

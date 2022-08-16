@@ -128,8 +128,9 @@ def make_render_job(name,sequencer, world,output_folder,preset_addr):
     outputSetting = job.get_configuration().find_setting_by_class(unreal.MoviePipelineOutputSetting)
     #outputSetting.output_resolution = unreal.IntPoint(1920,1080)
     outputSetting.output_directory = unreal.DirectoryPath(output_folder)
+    return job
 
-    
+
 def render_jobs(image_dirs,transfer=False):
     '''
     Render jobs already in render queue
@@ -164,8 +165,29 @@ def render_jobs(image_dirs,transfer=False):
     NewExecutor = subsystem.render_queue_with_executor(unreal.MoviePipelinePIEExecutor)
     
     if transfer:
-        NewExecutor.on_executor_finished_delegate.add_callable_unique(file_transfer_callback) 
-    
-   
-        
-        
+        NewExecutor.on_executor_finished_delegate.add_callable_unique(file_transfer_callback)
+
+    NewExecutor.on_executor_finished_delegate.add_callable_unique(delete_MoviePipelineJob)
+
+def delete_MoviePipelineJob(inJob, success):
+    print('Delete Queue succes' + str(success))
+    print('Delete Queue inJob'+str(inJob))
+    subsystem = unreal.get_editor_subsystem(unreal.MoviePipelineQueueSubsystem)
+    pipelineQueue = subsystem.get_queue()
+
+    existed_jobs = pipelineQueue.get_jobs()
+
+    print('Delete Queue jobs count= ' + str(len(pipelineQueue.get_jobs())))
+
+    print('Delete jobs image directory : '+image_directories)
+    print('Delete jobs job directory : ' + str(inJob))
+    unreal.log_warning('Job Render. success :' + str(success))
+    for job in existed_jobs:
+        outputSetting = job.get_configuration().find_setting_by_class(unreal.MoviePipelineOutputSetting)
+        print(outputSetting.output_directory.path)
+        if outputSetting.output_directory.path == image_directories:
+            pipelineQueue.delete_job(job)
+            print('Deleted Finished Job succes : '+job.job_name)
+            unreal.log_warning('Job Render. Deleted Finished Job succes :'+job.job_name)
+        else:
+            unreal.log_warning('Job Render.  Not found Finished Job something going wrong!')
