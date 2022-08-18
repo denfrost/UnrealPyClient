@@ -9,7 +9,7 @@ import unreal
 
 from . import utils
 from . import ftp_transfer
-#from . import shotgun
+from . import shotgun
 
 import importlib
 importlib.reload(utils)
