@@ -95,11 +95,11 @@ class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
         return perforcebat
 
     @unreal.ufunction(
-        params=[str, int],
+        params=[str, int, bool],
         static=True,
         meta=dict(Category="Samples Python BlueprintFunctionLibrary"),
     )
-    def unreal_python_render_images(sSeqName, iQuality=3):
+    def unreal_python_render_images(sSeqName, iQuality=3, bFtp_transfer=True):
         Presets = ['/Game/Cinematics/MoviePipeline/Presets/Render_Settings_001.Render_Settings_001',
                    '/Game/Cinematics/MoviePipeline/Presets/Render_Settings_002_veryLow.Render_Settings_002_veryLow',
                    '/Game/Cinematics/MoviePipeline/Presets/Render_Settings_002_Low.Render_Settings_002_Low',
@@ -123,5 +123,5 @@ class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
                                                            'C:/Users/UnrealWorkstation/LIVE/NewMap_Anim/COMMON/RENDER/NewMap_Anim',
                                                            '/Game/Cinematics/MoviePipeline/Presets/Render_Settings_003_VeryHigh.Render_Settings_003_VeryHigh')
         '''
-        unreal.log_warning("Job Render. Images Job ready: " + CurrentJob.job_name)
-        PyClientMovie.render_jobs(output_folder,False)
+        unreal.log_warning("Job Render. Images Job ready: " + CurrentJob.job_name + ' Transfer to Shotgun :'+str(bFtp_transfer))
+        PyClientMovie.render_jobs(output_folder, bFtp_transfer)

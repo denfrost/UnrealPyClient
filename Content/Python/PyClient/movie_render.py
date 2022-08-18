@@ -33,17 +33,24 @@ def file_transfer_callback(inJob, success):
     
     medias = []
     shotgun_media = []
+
+    unreal.log_warning('Job Render. image_directories : '+str(image_directories))
+
     for dir in image_directories:
     
         image_seq = dir + '\\' + dir.split('_')[-1] + '_SEQ.%04d.exr'
+        unreal.log_warning('Job Render. image_seq : ' + str(image_directories))
         tl = dir.split('\\')[:-2]
-        output_folder = '/'.join(tl) + '/MEDIA'
+        #output_folder = '/'.join(tl) + '/MEDIA'
+        output_folder = image_directories + '/MEDIA'
         folder = Path(output_folder)
         if not folder.exists ():
             os.makedirs(folder)
         
         # make media for shotgun
         output_mov = output_folder + '/' + 'UER_' + dir.split('\\')[-1] + '.mp4'
+
+        unreal.log_warning('Job Render. output_mov : '+str(output_mov))
 
         #conversion_cmd = f'ffmpeg -y -start_number 101 -i {image_seq} -c:v libx264 -crf 18 -vb 20M -vf fps=25 -pix_fmt yuv420p {output_mov}'
         
@@ -53,6 +60,7 @@ def file_transfer_callback(inJob, success):
         CREATE_NO_WINDOW = 0x08000000
         subprocess.call( conversion_cmd,creationflags=CREATE_NO_WINDOW)
 
+        unreal.log_warning('Job Render. conversion_cmd : ' + str(conversion_cmd))
 
         of = Path(output_mov)
         if of.exists():
@@ -61,11 +69,16 @@ def file_transfer_callback(inJob, success):
             
             # publish it to shotgun
             time.sleep(3)
-            
+
+            unreal.log_warning('Get version shotgun before TRY..')
             try:
+                unreal.log_warning('Job Render. Get version shotgun')
                 version = shotgun.publish_shot(dir.split('\\')[-1],l_drive_media[0])
+                print('MSH :'+str(version))
             except:
                 print('error in submit to shotgun')
+        else:
+            unreal.log_warning('Job Render. Get version shotgun of not exist..')
 
         # transfer rendered frames to Render folder in L
         # duplicate for version first

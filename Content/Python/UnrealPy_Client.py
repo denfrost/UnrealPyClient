@@ -349,10 +349,11 @@ class MyWidget(QtWidgets.QWidget):
             HostServer = HostLineEdit.text()
             SendSocket(ClearAnswer, HostServer, json.dumps(Json_RequestSetShotRender), ServerAnsweredSetShotRender)
 
-        def MakeImagesTool(sequence,iQualityPreset=3):
+        def MakeImagesTool(sequence, iQualityPreset=3, bFtp_transfer=True):
             print('Send Render for ImagesTool Render : '+sequence + ' Quality - '+str(iQualityPreset))
             Json_RequestRenderImages["Parameters"]["Body"]["parameters"]["sSeqName"] = sequence
             Json_RequestRenderImages["Parameters"]["Body"]["parameters"]["iQuality"] = iQualityPreset
+            Json_RequestRenderImages["Parameters"]["Body"]["parameters"]["bFtp_transfer"] = bFtp_transfer
             progressBar.setValue(0)
             JsonTextEdit.setText(json.dumps(Json_RequestRenderImages))
             tabwidget.setCurrentIndex(0)
