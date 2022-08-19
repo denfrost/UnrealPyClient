@@ -36,69 +36,71 @@ def file_transfer_callback(inJob, success):
 
     unreal.log_warning('Job Render. image_directories : '+str(image_directories))
 
-    for dir in image_directories:
-        unreal.log_warning('Job Render. dir :'+dir)
-        #C:\Users\denis.balikhin / UnrealRenderImages / Game / SHOTS / WHP01 / SH0080 /
-        unreal.log_warning(image_directories.rsplit('/')[-2])
-        #image_seq = dir + '\\' + dir.split('_')[-1] + '_SEQ.%04d.exr'
-        image_seq = image_directories + image_directories.rsplit('/')[-2] + '_SEQ.%04d.exr'
-        unreal.log_warning('Job Render. image_seq : ' + str(image_seq))
-        tl = dir.split('\\')[:-2]
-        #output_folder = '/'.join(tl) + '/MEDIA'
-        output_folder = image_directories + '/MEDIA'
-        folder = Path(output_folder)
-        if not folder.exists ():
-            os.makedirs(folder)
+    #for dir in image_directories:
+
+    #C:\Users\denis.balikhin / UnrealRenderImages / Game / SHOTS / WHP01 / SH0080 /
+    name_shot = image_directories.rsplit('/')[-2]
+    unreal.log_warning(name_shot)
+    #image_seq = dir + '\\' + dir.split('_')[-1] + '_SEQ.%04d.exr'
+    image_seq = image_directories + name_shot + '_SEQ.%04d.exr'
+    unreal.log_warning('Job Render. image_seq : ' + str(image_seq))
+    #tl = dir.split('\\')[:-2]
+    #output_folder = '/'.join(tl) + '/MEDIA'
+    output_folder = image_directories + '/MEDIA'
+    folder = Path(output_folder)
+    if not folder.exists ():
+        os.makedirs(folder)
         
-        # make media for shotgun
-        output_mov = output_folder + '/' + 'UER_' + dir.split('\\')[-1] + '.mp4'
+    # make media for shotgun
+    output_mov = output_folder + '/' + 'UER_' + name_shot + '.mp4'
 
-        unreal.log_warning('Job Render. output_mov : '+str(output_mov))
+    unreal.log_warning('Job Render. output_mov : '+str(output_mov))
 
-        #conversion_cmd = f'ffmpeg -y -start_number 101 -i {image_seq} -c:v libx264 -crf 18 -vb 20M -vf fps=25 -pix_fmt yuv420p {output_mov}'
+    #conversion_cmd = f'ffmpeg -y -start_number 101 -i {image_seq} -c:v libx264 -crf 18 -vb 20M -vf fps=25 -pix_fmt yuv420p {output_mov}'
         
-        conversion_cmd = f'ffmpeg -y -color_range tv -colorspace bt709 -color_primaries bt709 -color_trc bt709 -start_number 101 -i {image_seq} -c:v libx264  -vf "lutrgb=r=gammaval(0.416666667):g=gammaval(0.416666667):b=gammaval(0.416666667)" -pix_fmt yuv420p -color_range tv -colorspace bt709 -color_primaries bt709 -color_trc bt709 -crf 18 -vb 20M {output_mov}'
+    conversion_cmd = f'ffmpeg -y -color_range tv -colorspace bt709 -color_primaries bt709 -color_trc bt709 -start_number 101 -i {image_seq} -c:v libx264  -vf "lutrgb=r=gammaval(0.416666667):g=gammaval(0.416666667):b=gammaval(0.416666667)" -pix_fmt yuv420p -color_range tv -colorspace bt709 -color_primaries bt709 -color_trc bt709 -crf 18 -vb 20M {output_mov}'
         
-        print (conversion_cmd)
-        CREATE_NO_WINDOW = 0x08000000
-        subprocess.call( conversion_cmd,creationflags=CREATE_NO_WINDOW)
+    print (conversion_cmd)
+    CREATE_NO_WINDOW = 0x08000000
+    subprocess.call( conversion_cmd,creationflags=CREATE_NO_WINDOW)
 
-        unreal.log_warning('Job Render. conversion_cmd : ' + str(conversion_cmd))
+    unreal.log_warning('Job Render. conversion_cmd : ' + str(conversion_cmd))
 
-        of = Path(output_mov)
-        if of.exists():
-            # send media file to L drive
-            l_drive_media = ftp_transfer.transfer_data([output_mov])
-            
-            # publish it to shotgun
-            time.sleep(3)
+    of = Path(output_mov)
+    if of.exists():
+        # send media file to L drive
+        l_drive_media = ftp_transfer.transfer_data([output_mov])
 
-            unreal.log_warning('Get version shotgun before TRY..')
-            try:
-                unreal.log_warning('Job Render. Get version shotgun')
-                version = shotgun.publish_shot(dir.split('\\')[-1],l_drive_media[0])
-                print('MSH :'+str(version))
-            except:
-                print('error in submit to shotgun')
+        # publish it to shotgun
+        time.sleep(3)
+
+        unreal.log_warning('Get version shotgun before TRY..')
+        try:
+            unreal.log_warning('Job Render. Get version shotgun')
+            version = shotgun.publish_shot(name_shot, l_drive_media[0])
+            print('MSH :'+str(version))
+        except:
+            print('error in submit to shotgun')
+            version = '001'
         else:
             unreal.log_warning('Job Render. Get version shotgun of not exist..')
 
-        # transfer rendered frames to Render folder in L
-        # duplicate for version first
+    # transfer rendered frames to Render folder in L
+    # duplicate for version first
         
-        files_list = []
-        files = glob.glob(dir + '/*')
+    files_list = []
+    files = glob.glob(output_folder + '/*')
         
-        if len(files):
-            folder = f'{dir}/V{version}'
-            os.makedirs(folder)
+    if len(files):
+        folder = f'{output_folder}/V{version}'
+        os.makedirs(folder)
 
-            for f in files:
-                copied_file = shutil.copy2(f, folder)
-                files_list.append(copied_file)
+        for f in files:
+            copied_file = shutil.copy2(f, folder)
+            files_list.append(copied_file)
 
                 # add hero file
-            files_list.extend(files)
+        files_list.extend(files)
 
         l_drive_files = ftp_transfer.transfer_data(files_list)
         

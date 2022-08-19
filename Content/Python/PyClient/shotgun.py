@@ -164,14 +164,23 @@ def publish_shot(shot_name,movie_path):
     '''
     publish shot movie to shotgun 
     '''
-    
+    unreal.log_warning('Job Render. Publish Meme. Shot_name : '+shot_name+' movie_path : '+movie_path)
     #shot_name = 'WHM_EPWHH_SH0010'
 
+    unreal.log_warning('Job Render. Publish Meme. Finding... in sg'+str(sg))
+    make_project_list()
+
     project = sg.find_one('Project',[['name','is','Warhammer project']], ["content"] )
+    unreal.log_warning('Job Render. Publish Meme. project : '+project)
     shot = sg.find_one("Shot", [["code", "is", shot_name]], ["content"])
+    unreal.log_warning('Job Render. Publish Meme. shot : ' + shot)
     task = sg.find_one("Task", [["entity", "is", shot], ["content", "is", "lighting"]])
+    unreal.log_warning('Job Render. Publish Meme. project : ' + task)
     versions = sg.find("Version", [["entity", "is", shot], ["sg_task", "is", task]], ["code"])
-    
+    unreal.log_warning('Job Render. Publish Meme. project : ' + versions)
+
+    unreal.log_warning('Job Render. Publish Meme. project : ' + project + ' task : ' + task+' versions : '+versions)
+
     if not versions: # the first version
         
         str_ver = '001'

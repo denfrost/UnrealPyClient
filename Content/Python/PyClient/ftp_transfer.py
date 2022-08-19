@@ -4,7 +4,7 @@ import ftplib
 import base64
 #from base64 import b64decode as memeIt
 
-#from . import config
+from . import config
 
 
 ROOT = '/ifs/data/picturethis/Projects/'
@@ -149,6 +149,7 @@ def transfer_data(data):
         path = path.replace('\\', '/')
         
         server_path = config.source_drive + path.split('/LIVE/')[-1]
+        print('server_path :'+server_path)
         destination.append(server_path)
         
         dir_path = make_directories(server_path,ftp_hndl)
