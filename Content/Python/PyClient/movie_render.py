@@ -37,9 +37,12 @@ def file_transfer_callback(inJob, success):
     unreal.log_warning('Job Render. image_directories : '+str(image_directories))
 
     for dir in image_directories:
-    
-        image_seq = dir + '\\' + dir.split('_')[-1] + '_SEQ.%04d.exr'
-        unreal.log_warning('Job Render. image_seq : ' + str(image_directories))
+        unreal.log_warning('Job Render. dir :'+dir)
+        #C:\Users\denis.balikhin / UnrealRenderImages / Game / SHOTS / WHP01 / SH0080 /
+        unreal.log_warning(image_directories.rsplit('/')[-2])
+        #image_seq = dir + '\\' + dir.split('_')[-1] + '_SEQ.%04d.exr'
+        image_seq = image_directories + image_directories.rsplit('/')[-2] + '_SEQ.%04d.exr'
+        unreal.log_warning('Job Render. image_seq : ' + str(image_seq))
         tl = dir.split('\\')[:-2]
         #output_folder = '/'.join(tl) + '/MEDIA'
         output_folder = image_directories + '/MEDIA'
