@@ -106,6 +106,7 @@ class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
                    '/Game/Cinematics/MoviePipeline/Presets/Render_Settings_003_VeryHigh.Render_Settings_003_VeryHigh']
         unreal.log_warning("Job Render. Make Render Images Job : "+sSeqName+' Quality : '+Presets[iQuality]+' Transfer Publish : '+str(bFtp_transfer))
         global CurrentJob
+        job_work_folder = '/LIVE' #'/UnrealRenderImages'
         job_sequence_path = sSeqName
         job_name = sSeqName.split('.')[-1]
         job_anim_dir = sSeqName.split('.')[0]
@@ -114,7 +115,7 @@ class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
         job_map = str(job_name).split('_SEQ')[0]
         job_map_path = job_map_dir+job_map+'.'+job_map
         user_folder = os.path.expanduser('~')
-        output_folder = user_folder+'/UnrealRenderImages'+job_anim_dir
+        output_folder = user_folder+job_work_folder+job_anim_dir
         print(f'Job : Name: {job_name} SeqPath: {job_sequence_path} Map: {job_anim_dir}{job_map} OutputFolder : {output_folder} Preset : {Presets[iQuality]}')
         CurrentJob = PyClientMovie.make_render_job(job_name, job_sequence_path, job_map_path, output_folder, Presets[iQuality])
         '''

@@ -35,6 +35,7 @@ def file_transfer_callback(inJob, success):
     # ['C:\\Users\\mostafa.ari\\LIVE\\WHM\\EPWHH\\COMMON\\RENDER\\WHM_EPWHH_SH0170', 
     # 'C:\\Users\\mostafa.ari\\LIVE\\WHM\\EPWHH\\COMMON\\RENDER\\WHM_EPWHH_SH0180']
 
+    # new
     # C:\\UserFolder\\LIVE\\CurrentProject\\EPWHH\'\COMMON\\RENDER\'\ShotnameFolder  *.exr
     # C:\\UserFolder\\LIVE\\CurrentProject\\EPWHH\'\COMMON\\MEDIA\'\ShotnameFolder  *.mp4
 
