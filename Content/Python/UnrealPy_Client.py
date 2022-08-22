@@ -518,6 +518,7 @@ class MyWidget(QtWidgets.QWidget):
 
         render = QtWidgets.QPushButton("Render Movie Sequence")
         render.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
+        render.setEnabled(False)
         self.connect(render, QtCore.SIGNAL("clicked()"), RenderMovie)
         GroupboxAuto.layout().addWidget(render)
 
@@ -603,6 +604,7 @@ class MyWidget(QtWidgets.QWidget):
         GroupboxAuto3.layout().addWidget(listing)
         BatchRenderBtn = QtWidgets.QPushButton("Start Batch Rendering")
         BatchRenderBtn.setFont(QtGui.QFont("Times", 13, QtGui.QFont.Bold))
+        BatchRenderBtn.setEnabled(False)
         self.connect(BatchRenderBtn, QtCore.SIGNAL("clicked()"), BatchRenderMovie)
         GroupboxAuto3.layout().addWidget(BatchRenderBtn)
 
