@@ -9,7 +9,14 @@ import unreal
 
 from . import utils
 from . import ftp_transfer
-from . import shotgun
+
+print("Try load: Meme and  handle ImportError:")
+try:
+    from . import shotgun
+except ImportError as ie:
+    print("Try load: It cannot import module and submodule", ie)
+
+
 
 import importlib
 importlib.reload(utils)
