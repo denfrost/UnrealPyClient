@@ -1,6 +1,7 @@
 #import unreal
 import os
 
+from unreal_global import settings as settings
 from unreal_global import *
 from unreal_global import PyClientMovie as PyClientMovie
 
@@ -112,10 +113,21 @@ class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
         job_anim_dir = sSeqName.split('.')[0]
         job_anim_dir = job_anim_dir.split(job_name)[0]
         job_map_dir = job_anim_dir
+        # ['C:\\Users\\mostafa.ari\\LIVE\\WHM\\EPWHH\\COMMON\\RENDER\\WHM_EPWHH_SH0170',
+        #/Game/SHOTS/EPWHH/SH0000/
+
+        print(f'Job AnimDir: {job_anim_dir}')
+
         job_map = str(job_name).split('_SEQ')[0]
         job_map_path = job_map_dir+job_map+'.'+job_map
         user_folder = os.path.expanduser('~')
-        output_folder = user_folder+job_work_folder+job_anim_dir
+
+        CurrentProject = settings.get_Current_project()
+        Episode = job_anim_dir.split('SHOTS/')[-1].split('/')[0]
+        print(f'Job server AnimDir: {CurrentProject}/{Episode}/COMMON/RENDER/{CurrentProject}_{Episode}_{job_map}')
+        server_anim_dir = f'/{CurrentProject}/{Episode}/COMMON/RENDER/{CurrentProject}_{Episode}_{job_map}'
+
+        output_folder = user_folder+job_work_folder+server_anim_dir
         print(f'Job : Name: {job_name} SeqPath: {job_sequence_path} Map: {job_anim_dir}{job_map} OutputFolder : {output_folder} Preset : {Presets[iQuality]}')
         CurrentJob = PyClientMovie.make_render_job(job_name, job_sequence_path, job_map_path, output_folder, Presets[iQuality])
         '''

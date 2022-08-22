@@ -3,6 +3,7 @@ import unreal
 from PyClient import *
 import PyClient.movie_render as PyClientMovie
 
+import settings
 
 AssetRegistry = unreal.AssetRegistryHelpers.get_asset_registry()
 

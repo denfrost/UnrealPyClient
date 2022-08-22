@@ -41,7 +41,6 @@ def file_transfer_callback(inJob, success):
 
     print('Start Transferring Files ...')
 
-    
     medias = []
     shotgun_media = []
 
@@ -49,21 +48,24 @@ def file_transfer_callback(inJob, success):
 
     #for dir in image_directories:
 
-    #C:\Users\denis.balikhin / UnrealRenderImages / Game / SHOTS / WHP01 / SH0080 /
-    name_shot = image_directories.rsplit('/')[-2]
-    unreal.log_warning(name_shot)
+    #C:\Users\UnrealWorkstation / LIVE / WHM / EPWHH / COMMON / RENDER / WHM_EPWHH_SH0000
+    full_name_shot = image_directories.split('/')[-1]
+    name_shot = image_directories.split('_')[-1]
+    unreal.log_warning('Full name shot : '+full_name_shot)
     #image_seq = dir + '\\' + dir.split('_')[-1] + '_SEQ.%04d.exr'
-    image_seq = image_directories + name_shot + '_SEQ.%04d.exr'
+
+    image_seq = image_directories +'/'+ name_shot + '_SEQ.%04d.exr'
     unreal.log_warning('Job Render. image_seq : ' + str(image_seq))
     #tl = dir.split('\\')[:-2]
     #output_folder = '/'.join(tl) + '/MEDIA'
-    output_folder = image_directories + '/MEDIA'
+    movie_dir = image_directories.split('RENDER/')[0]
+    output_folder = movie_dir + '/MEDIA'
     folder = Path(output_folder)
     if not folder.exists ():
         os.makedirs(folder)
         
     # make media for shotgun
-    output_mov = output_folder + '/' + 'UER_' + name_shot + '.mp4'
+    output_mov = output_folder + '/' + 'UER_' + full_name_shot + '.mp4'
 
     unreal.log_warning('Job Render. output_mov : '+str(output_mov))
 
@@ -76,7 +78,7 @@ def file_transfer_callback(inJob, success):
     subprocess.call( conversion_cmd,creationflags=CREATE_NO_WINDOW)
 
     unreal.log_warning('Job Render. conversion_cmd : ' + str(conversion_cmd))
-
+    return
     of = Path(output_mov)
     if of.exists():
         # send media file to L drive
