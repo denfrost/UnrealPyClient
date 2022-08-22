@@ -539,7 +539,7 @@ class MyWidget(QtWidgets.QWidget):
         comboBoxQ.addItem("Preset02VeryLow")
         comboBoxQ.addItem("Preset02LoW")
         comboBoxQ.addItem("Preset03VeryHigh")
-        comboBoxQ.currentIndex=3
+        comboBoxQ.setCurrentIndex(3)
         GroupboxAuto5.layout().addWidget(comboBoxQ)
 
         CheckTransferToggleBtn = QtWidgets.QCheckBox("Transfer")
