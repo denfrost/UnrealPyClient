@@ -350,7 +350,7 @@ class MyWidget(QtWidgets.QWidget):
             SendSocket(ClearAnswer, HostServer, json.dumps(Json_RequestSetShotRender), ServerAnsweredSetShotRender)
 
         def MakeImagesTool(sequence, iQualityPreset=3, bFtp_transfer=True):
-            print('Send Render for ImagesTool Render : '+sequence + ' Quality - '+str(iQualityPreset))
+            print('Send Render for ImagesTool Render : '+sequence + ' Quality - '+str(iQualityPreset)+' Ftp transfer - '+str(bFtp_transfer))
             Json_RequestRenderImages["Parameters"]["Body"]["parameters"]["sSeqName"] = sequence
             Json_RequestRenderImages["Parameters"]["Body"]["parameters"]["iQuality"] = iQualityPreset
             Json_RequestRenderImages["Parameters"]["Body"]["parameters"]["bFtp_transfer"] = bFtp_transfer
@@ -364,7 +364,7 @@ class MyWidget(QtWidgets.QWidget):
 
         @QtCore.Slot()
         def RenderImages():
-            MakeImagesTool(comboBox.currentText(), comboBoxQ.currentIndex())
+            MakeImagesTool(comboBox.currentText(), comboBoxQ.currentIndex(), CheckTransferToggleBtn.isChecked())
         @QtCore.Slot()
         def RenderMovie(): #arguments
             MakeRenderTool(comboBox.currentText())
@@ -402,6 +402,14 @@ class MyWidget(QtWidgets.QWidget):
         def onClickedToggle():
             Check.setEnabled(ServerToggleBtn.isChecked())
             HostLineEdit.setEnabled(ServerToggleBtn.isChecked())
+
+        @QtCore.Slot()
+        def onClickedToggleTransfer():
+            print('Set Ftp transfer : '+str(CheckTransferToggleBtn.isChecked()))
+
+        @QtCore.Slot()
+        def onOpenFolder():
+            print('Open image folder')
 
         @QtCore.Slot()
         def UpdatePerforce():
@@ -500,10 +508,8 @@ class MyWidget(QtWidgets.QWidget):
 
         GroupboxAuto = QtWidgets.QGroupBox("Rendering Shots")
         GroupboxAuto.setChecked(True)
-        vbox4 = QtWidgets.QVBoxLayout()
         vbox3 = QtWidgets.QHBoxLayout()
         GroupboxAuto.setLayout(vbox3)
-
 
         getshot = QtWidgets.QPushButton("Get Server Sequences")
         getshot.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
@@ -520,15 +526,31 @@ class MyWidget(QtWidgets.QWidget):
         self.connect(render_images, QtCore.SIGNAL("clicked()"), RenderImages)
         GroupboxAuto.layout().addWidget(render_images)
 
+        GroupboxAuto5 = QtWidgets.QGroupBox("Rendering Settings")
+        GroupboxAuto5.setChecked(True)
+        vbox4 = QtWidgets.QHBoxLayout()
+        GroupboxAuto5.setLayout(vbox4)
+
         preset = QtWidgets.QLabel("Quality")
-        GroupboxAuto.layout().addWidget(preset)
+        GroupboxAuto5.layout().addWidget(preset)
         comboBoxQ = QtWidgets.QComboBox(self)
         comboBoxQ.setFont(QtGui.QFont("Times", 10, QtGui.QFont.Medium))
         comboBoxQ.addItem("Preset01")
         comboBoxQ.addItem("Preset02VeryLow")
         comboBoxQ.addItem("Preset02LoW")
         comboBoxQ.addItem("Preset03VeryHigh")
-        GroupboxAuto.layout().addWidget(comboBoxQ)
+        comboBoxQ.currentIndex=3
+        GroupboxAuto5.layout().addWidget(comboBoxQ)
+
+        CheckTransferToggleBtn = QtWidgets.QCheckBox("Transfer")
+        CheckTransferToggleBtn.setChecked(True)
+        self.connect(CheckTransferToggleBtn, QtCore.SIGNAL("clicked()"), onClickedToggleTransfer)
+        GroupboxAuto5.layout().addWidget(CheckTransferToggleBtn)
+
+        OpenFolderBtn = QtWidgets.QPushButton("Open Folder..")
+        OpenFolderBtn.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
+        self.connect(OpenFolderBtn, QtCore.SIGNAL("clicked()"), onOpenFolder)
+        GroupboxAuto5.layout().addWidget(OpenFolderBtn)
 
         GroupboxAuto0 = QtWidgets.QGroupBox("Found Sequences")
         GroupboxAuto0.setChecked(True)
@@ -587,6 +609,7 @@ class MyWidget(QtWidgets.QWidget):
         vbox5 = QtWidgets.QVBoxLayout()
         GroupboxMain.setLayout(vbox5)
         GroupboxMain.layout().addWidget(GroupboxAuto)
+        GroupboxMain.layout().addWidget(GroupboxAuto5)
         GroupboxMain.layout().addWidget(GroupboxAuto0)
 
         GroupboxMain.layout().addWidget(GroupboxAuto2)

@@ -104,7 +104,7 @@ class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
                    '/Game/Cinematics/MoviePipeline/Presets/Render_Settings_002_veryLow.Render_Settings_002_veryLow',
                    '/Game/Cinematics/MoviePipeline/Presets/Render_Settings_002_Low.Render_Settings_002_Low',
                    '/Game/Cinematics/MoviePipeline/Presets/Render_Settings_003_VeryHigh.Render_Settings_003_VeryHigh']
-        unreal.log_warning("Job Render. Make Render Images Job : "+sSeqName+' Quality : '+Presets[iQuality])
+        unreal.log_warning("Job Render. Make Render Images Job : "+sSeqName+' Quality : '+Presets[iQuality]+' Transfer Publish : '+str(bFtp_transfer))
         global CurrentJob
         job_sequence_path = sSeqName
         job_name = sSeqName.split('.')[-1]
