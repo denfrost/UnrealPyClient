@@ -15,7 +15,7 @@ from PySide2.QtWidgets import *
 #pip install websocket-client
 from websocket import create_connection
 
-#perforce vars setting
+from unreal_global import PyClientMovie as PyClientMovie
 
 #describe calls checking umap, uasset.
 Json_RequestCheckMap =\
@@ -409,7 +409,15 @@ class MyWidget(QtWidgets.QWidget):
 
         @QtCore.Slot()
         def onOpenFolder():
-            print('Open image folder')
+            import subprocess
+            print('Open image folder ')
+            #PyClientMovie.OpenFolderImages()
+            print('Images directories : ')
+            dir ='C:\\Users'
+            if PyClientMovie.image_directories:
+                subprocess.Popen(f'explorer "{PyClientMovie.image_directories}"')
+            else:
+                subprocess.Popen(f'explorer "{dir}"')
 
         @QtCore.Slot()
         def UpdatePerforce():

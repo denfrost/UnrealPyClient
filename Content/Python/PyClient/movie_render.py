@@ -218,3 +218,9 @@ def delete_MoviePipelineJob(inJob, success):
             unreal.log_warning('Job Render. Deleted Finished Job succes :'+job.job_name)
         else:
             unreal.log_warning('Job Render.  Not found Finished Job something going wrong!')
+
+def OpenFolderImages():
+    print('Images directories : '+image_directories)
+    subprocess.Popen(f'explorer "{image_directories}"')
+
+
