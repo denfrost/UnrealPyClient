@@ -476,7 +476,7 @@ class MyWidget(QtWidgets.QWidget):
         self.connect(Check, QtCore.SIGNAL("clicked()"), CheckServer)
         Groupbox.layout().addWidget(Check)
 
-        HostLineEdit = QtWidgets.QLineEdit('localhost')
+        HostLineEdit = QtWidgets.QLineEdit(Server)
         HostLineEdit.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Medium))
         HostServer = "ws://" + HostLineEdit.text()+":30020"
         HostLineEdit = QtWidgets.QLineEdit(Server)
