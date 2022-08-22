@@ -47,7 +47,7 @@ Json_UpdatePerforce = \
     }
 
 
-Server = "ws://"+"localhost:30020"
+Server = "ws://"+"10.66.7.80:30020"
 
 Json_RequestGetAllShots = \
     {
@@ -562,6 +562,7 @@ class MyWidget(QtWidgets.QWidget):
 
         OpenFolderBtn = QtWidgets.QPushButton("Open Folder..")
         OpenFolderBtn.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
+        OpenFolderBtn.setEnabled(False)
         self.connect(OpenFolderBtn, QtCore.SIGNAL("clicked()"), onOpenFolder)
         GroupboxAuto5.layout().addWidget(OpenFolderBtn)
 
