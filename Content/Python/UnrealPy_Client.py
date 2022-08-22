@@ -5,7 +5,7 @@ import os
 from datetime import datetime as dt
 #My Library
 import UtilObserver as uo
-import settings
+import settings as settings
 
 #pip install PySide2
 from PySide2 import *
@@ -531,6 +531,9 @@ class MyWidget(QtWidgets.QWidget):
         vbox4 = QtWidgets.QHBoxLayout()
         GroupboxAuto5.setLayout(vbox4)
 
+        current_project = QtWidgets.QLabel("Current Project : "+settings.get_Current_project()+'                    ')
+        GroupboxAuto5.layout().addWidget(current_project)
+
         preset = QtWidgets.QLabel("Quality")
         GroupboxAuto5.layout().addWidget(preset)
         comboBoxQ = QtWidgets.QComboBox(self)
@@ -541,6 +544,7 @@ class MyWidget(QtWidgets.QWidget):
         comboBoxQ.addItem("Preset03VeryHigh")
         comboBoxQ.setCurrentIndex(3)
         GroupboxAuto5.layout().addWidget(comboBoxQ)
+
 
         CheckTransferToggleBtn = QtWidgets.QCheckBox("Transfer")
         CheckTransferToggleBtn.setChecked(True)
@@ -659,6 +663,7 @@ def unreal_working_dirs():
 
 if __name__ == "__main__":
     print("Start Py App")
+    print('Current Project : '+settings.get_Current_project())
 if "unreal" not in dir():
     print("Warning: Unreal modules Not Loaded!")
     print('Main Dir program: '+os.getcwd())

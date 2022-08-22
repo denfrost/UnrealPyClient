@@ -36,3 +36,10 @@ def rewrite_exist_profile(list={}):
                             'Workspace': list[5]}
     with open(Json_settings, 'w') as f:
         json.dump(settings_file_preset, f)
+
+def get_Current_project():
+    # User profile folder and some
+    Json_project = USER_FOLDER + '\M2_Settings.json'
+    with open(Json_project, 'r') as f:
+        settings_file = json.load(f)
+        return settings_file['DefaultProject']
