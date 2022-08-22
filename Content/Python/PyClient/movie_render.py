@@ -78,7 +78,6 @@ def file_transfer_callback(inJob, success):
     subprocess.call( conversion_cmd,creationflags=CREATE_NO_WINDOW)
 
     unreal.log_warning('Job Render. conversion_cmd : ' + str(conversion_cmd))
-    return
     of = Path(output_mov)
     if of.exists():
         # send media file to L drive
@@ -102,11 +101,13 @@ def file_transfer_callback(inJob, success):
     # duplicate for version first
         
     files_list = []
-    files = glob.glob(output_folder + '/*')
+    unreal.log_warning('Frames dir : '+output_folder)
+    files = glob.glob(image_directories + '/*')
         
     if len(files):
-        folder = f'{output_folder}/V{version}'
-        os.makedirs(folder)
+        folder = f'{image_directories}/V{version}'
+        if not os.path.exists(folder):
+            os.makedirs(folder)
 
         for f in files:
             copied_file = shutil.copy2(f, folder)
@@ -179,20 +180,15 @@ def render_jobs(image_dirs,transfer=False):
     global image_directories
 
     image_directories = image_dirs
-    
-    # cleanup render folder before start rendering
-    '''
-    for d in image_dirs:
-        for filename in os.listdir(d):
-            file_path = os.path.join(d, filename)
-            try:
-                if os.path.isfile(file_path) or os.path.islink(file_path):
-                    os.unlink(file_path)
-                elif os.path.isdir(file_path):
-                    shutil.rmtree(file_path)
-            except Exception as e:
-                print('Failed to delete %s. Reason: %s' % (file_path, e))
-    '''
+    unreal.log_warning('Try Cleanup Render folder: '+str(image_directories))
+    if os.path.exists(image_directories):
+        try:
+            shutil.rmtree(image_directories)
+        except Exception as e:
+            print('Failed to delete %s. Reason: %s' % (image_directories, e))
+        else:
+            unreal.log_warning('Cleanup Render folder finished : ' + str(image_directories))
+
     NewExecutor = subsystem.render_queue_with_executor(unreal.MoviePipelinePIEExecutor)
     
     if transfer:
