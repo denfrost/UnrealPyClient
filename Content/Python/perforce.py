@@ -63,6 +63,7 @@ def get_perforce_info(show_info=False):
     return info
 
 def update():
+    print(P4.P4.identify())
     perforce_host = settings.get_Settings_field('Host')
     p4 = P4.P4(port=perforce_host)
     perforce_main(p4)
