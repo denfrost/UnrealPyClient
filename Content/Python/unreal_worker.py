@@ -1,18 +1,17 @@
-from unreal_global import *
 import os
-import BlueprintLibrary.SampleBlueprintFunction as bp_lib
-import PyClient.movie_render
-unreal.log("""@
+
+print("""@
 
 ####################
 
-Init Worker Script
+Reload Unreal Worker Script
 
 ####################
 
 """)
 
 def spawn_actor(assetpath):
+    import unreal
     if unreal.EditorAssetLibrary.does_asset_exist(assetpath):
         assetobject = unreal.EditorAssetLibrary.load_asset(assetpath)
         spawn_actor = unreal.EditorLevelLibrary.spawn_actor_from_object(assetobject, unreal.Vector(0, 0, 0))
@@ -20,10 +19,12 @@ def spawn_actor(assetpath):
         return spawn_actor
 
 def show_funcs_unreal():
+    import unreal
     for x in sorted(dir(unreal)):
         print(x)
 
 def start():
+    import unreal
     print('Start Test')
     unreal.log_warning("Start Actor")
     #Actor = spawn_actor('/Game/Test/Denis/Blueprints/BP_Actor.BP_Actor')
@@ -67,6 +68,7 @@ def Start_UnrealPy_Client():
     print('Start UnrealPy_Client! : '+clientbat+' '+unreal_client_path)
 
 def ShowWorkingDirs():
+    import unreal
     script_dir = os.path.abspath(__file__).split('unreal_worker.py')[0]
     print('main dir program : '+script_dir)
     prog_dir = unreal.Paths.project_plugins_dir() + 'UnrealPyClient'
@@ -89,6 +91,8 @@ def ShowWorkingDirs():
     print('Project Download Directory: ' + project_persistent_download_dir)
 
 def UpdatePerforce():
+    import unreal
+    import BlueprintLibrary.SampleBlueprintFunction as bp_lib
     unreal.EditorLoadingAndSavingUtils().new_blank_map(save_existing_map=False)
     bp_lib.SamplePythonBlueprintLibrary.unreal_update_perforce()
 
@@ -114,6 +118,7 @@ def Render_Images_Sequence():
 
 
 def print_MoviePipelineQueue():
+    import unreal
     subsystem = unreal.get_editor_subsystem(unreal.MoviePipelineQueueSubsystem)
     pipelineQueue = subsystem.get_queue()
 
@@ -128,7 +133,11 @@ def print_MoviePipelineQueue():
         print('Job Name = '+str(job.job_name))
 
 def My_Render_Images(sequence=''):
-    if sequence=='': return
+    import unreal
+    import PyClient.movie_render
+    if sequence == '':
+        print('Sequence null')
+        return
     unreal.log_warning("Job Render. Make Render Images Job")
     global CurrentJob
     CurrentJob = PyClient.movie_render.make_render_job('NewMap_Anim_SEQ', '/Game/NewMap_Anim_SEQ.NewMap_Anim_SEQ',
@@ -138,3 +147,6 @@ def My_Render_Images(sequence=''):
     unreal.log_warning("Job Render. Images Job ready: "+CurrentJob.job_name)
     PyClient.movie_render.render_jobs('C:/Users/UnrealWorkstation/LIVE/NewMap_Anim/COMMON/RENDER/NewMap_Anim', False)
 
+def openFolderImages():
+    import PyClient.movie_render
+    print(PyClient.movie_render.image_directories)

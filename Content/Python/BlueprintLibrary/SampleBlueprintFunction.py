@@ -1,4 +1,4 @@
-#import unreal
+import unreal
 import os
 
 from unreal_global import settings as settings

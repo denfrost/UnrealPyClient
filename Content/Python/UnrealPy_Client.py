@@ -15,7 +15,7 @@ from PySide2.QtWidgets import *
 #pip install websocket-client
 from websocket import create_connection
 
-from unreal_global import PyClientMovie as PyClientMovie
+Server = "ws://"+"localhost:30020"
 
 #describe calls checking umap, uasset.
 Json_RequestCheckMap =\
@@ -46,8 +46,6 @@ Json_UpdatePerforce = \
         }
     }
 
-
-Server = "ws://"+"10.66.7.80:30020"
 
 Json_RequestGetAllShots = \
     {
@@ -296,9 +294,10 @@ class MyWidget(QtWidgets.QWidget):
             print('Start Sorting:')
             for i, name in enumerate(res):
                 #print('Feedback ['+str(i)+']: '+res[i])
-                if res[i].find('_SEQ') > 0: #_ANIM_SEQ
-                    comboBox.addItem("" + res[i])
-                    listing.addItem("" + res[i])
+                if res[i].find('_SEQ') > 0:
+                    if 'Anim_SEQ' not in res[i]: #_Anim_SEQ ignore
+                        comboBox.addItem("" + res[i])
+                        listing.addItem("" + res[i])
             listing.setMaximumHeight(200)
 
         def printItemText(self):
@@ -381,6 +380,7 @@ class MyWidget(QtWidgets.QWidget):
 
         @QtCore.Slot()
         def CheckServer():
+            print("Connect to Unreal websocket : " + HostLineEdit.text())
             try:
                 progressBar.setValue(0)
                 create_connection(HostLineEdit.text(), 5)
@@ -390,13 +390,14 @@ class MyWidget(QtWidgets.QWidget):
 
         @QtCore.Slot()
         def ChangeStatus(check):
+            tm=dt.now().strftime("%H:%M:%S")
             if check:
-                StatusLabel.setText("Unreal Server Status Online : " + HostLineEdit.text())
+                StatusLabel.setText("Unreal Server Status Online : " + HostLineEdit.text() + ' ' + tm)
                 StatusLabel.setStyleSheet("QLabel { color : green; }")
                 progressBar.setValue(100)
             else:
                 StatusLabel.setStyleSheet("QLabel { background-color : yellow; color : red; }")
-                StatusLabel.setText("Unreal Server Status Offline: Pls start RemoteWebControl")
+                StatusLabel.setText("Unreal Server Status Offline : " + HostLineEdit.text() + ' ' + tm)
 
         @QtCore.Slot()
         def onClickedToggle():
@@ -682,6 +683,8 @@ if "unreal" not in dir():
 else:
     unreal.log("Unreal modules Loaded & Ready!")
     unreal_working_dirs()
+
+print("Connect to Unreal websocket : "+Server)
 app = None
 if not QtWidgets.QApplication.instance():
     app = QtWidgets.QApplication(sys.argv)
