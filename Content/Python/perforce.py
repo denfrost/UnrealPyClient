@@ -46,8 +46,8 @@ def perforce_update(p4, depot, workspace):
         p4.client = workspace
         print('Workspace: '+p4.client)
         #p4 sync //depot/UE_Perforce01/...#head
-        print('Try Sync Force : '+"{}/...#head".format(depot))
-        sync = p4.run_sync("-f", "{}/...#head".format(depot))
+        print('Try Sync Force : '+"{}...#head".format(depot))
+        sync = p4.run_sync("-f", "{}...#head".format(depot))
         print('SYNC : '+str(sync))
     except P4Exception:
         for e in p4.errors:  # Display errors
