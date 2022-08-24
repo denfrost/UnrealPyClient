@@ -88,6 +88,7 @@ class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
 
     @unreal.ufunction(ret=str, static=True)
     def unreal_update_perforce():
+        unreal.EditorLoadingAndSavingUtils().new_blank_map(save_existing_map=False)
         script_dir = os.path.abspath(__file__).split('BlueprintLibrary\SampleBlueprintFunction.py')[0]
         perforcebat = script_dir + "UpdatePerforce.bat"
         perforcePy = script_dir + "perforce.py"
