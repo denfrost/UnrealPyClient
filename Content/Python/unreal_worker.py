@@ -89,6 +89,7 @@ def ShowWorkingDirs():
     print('Project Download Directory: ' + project_persistent_download_dir)
 
 def UpdatePerforce():
+    unreal.EditorLoadingAndSavingUtils().new_blank_map(save_existing_map=False)
     bp_lib.SamplePythonBlueprintLibrary.unreal_update_perforce()
 
 def Render_Images_Sequence():
