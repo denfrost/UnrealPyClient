@@ -435,7 +435,9 @@ class MyWidget(QtWidgets.QWidget):
                     comboBox.setCurrentIndex(index)
             else:
                 comboBox.setCurrentIndex(0)
-
+        @QtCore.Slot()
+        def onEnterFilterLine():
+            onClickedFilter()
 
         @QtCore.Slot()
         def UpdatePerforce():
@@ -596,6 +598,8 @@ class MyWidget(QtWidgets.QWidget):
         FilterToggleBtn.setFixedWidth(80)
         FilterLineEdit.setFixedWidth(80)
         self.connect(FilterToggleBtn, QtCore.SIGNAL("clicked()"), onClickedFilter)
+        self.connect(FilterLineEdit, QtCore.SIGNAL("returnPressed()"), onEnterFilterLine)
+
         GroupboxAuto0.layout().addWidget(FilterToggleBtn)
         GroupboxAuto0.layout().addWidget(FilterLineEdit)
 
