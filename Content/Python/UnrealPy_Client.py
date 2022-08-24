@@ -277,6 +277,7 @@ class MyWidget(QtWidgets.QWidget):
             ServerAnswerTextEdit.append(json.dumps(dict['ResponseBody']))
 
         def GetAllServerShots():
+            FilterToggleBtn.setChecked(False)
             tabwidget.setCurrentIndex(0)
             JsonTextEdit.setText(json.dumps(Json_RequestGetAllShots))
             progressBar.setValue(0)
@@ -423,6 +424,18 @@ class MyWidget(QtWidgets.QWidget):
                 subprocess.Popen(f'explorer "{PyClientMovie.image_directories}"')
             else:
                 subprocess.Popen(f'explorer "{dir}"')
+
+        @QtCore.Slot()
+        def onClickedFilter():
+            if FilterToggleBtn.isChecked():
+                print('filter = '+FilterLineEdit.text())
+                index = comboBox.findText(FilterLineEdit.text(), QtCore.Qt.MatchRegularExpression)
+                print(index)
+                if index > -1:
+                    comboBox.setCurrentIndex(index)
+            else:
+                comboBox.setCurrentIndex(0)
+
 
         @QtCore.Slot()
         def UpdatePerforce():
@@ -576,9 +589,20 @@ class MyWidget(QtWidgets.QWidget):
         vbox31 = QtWidgets.QHBoxLayout()
         GroupboxAuto0.setLayout(vbox31)
 
+        FilterToggleBtn = QtWidgets.QCheckBox("Filter")
+        FilterLineEdit = QtWidgets.QLineEdit('Name')
+        FilterLineEdit.setFont(QtGui.QFont("Times", 10, QtGui.QFont.Medium))
+        FilterToggleBtn.setChecked(False)
+        FilterToggleBtn.setFixedWidth(80)
+        FilterLineEdit.setFixedWidth(80)
+        self.connect(FilterToggleBtn, QtCore.SIGNAL("clicked()"), onClickedFilter)
+        GroupboxAuto0.layout().addWidget(FilterToggleBtn)
+        GroupboxAuto0.layout().addWidget(FilterLineEdit)
+
         comboBox = QtWidgets.QComboBox(self)
         comboBox.setFont(QtGui.QFont("Times", 10, QtGui.QFont.Medium))
         comboBox.addItem("EMPTY")
+
         GroupboxAuto0.layout().addWidget(comboBox)
 
         GroupboxAuto2 = QtWidgets.QGroupBox("Perforce")
