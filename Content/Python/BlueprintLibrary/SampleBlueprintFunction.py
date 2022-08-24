@@ -46,6 +46,7 @@ class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
             count = 0
             if '_SEQ' in str(asset.package_name): #_ANIM_SEQ
                 output = output + ',' +str(asset.object_path)
+        output = output + ',' #delimiter data
         print('Size output: '+str(len(output)))
         return output
 
