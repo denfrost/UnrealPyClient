@@ -295,7 +295,7 @@ class MyWidget(QtWidgets.QWidget):
             for i, name in enumerate(res):
                 #print('Feedback ['+str(i)+']: '+res[i])
                 if res[i].find('_SEQ') > 0:
-                    if 'Anim_SEQ' not in res[i]: #_Anim_SEQ ignore
+                    if 'ANIM_SEQ' not in res[i]: #_Anim_SEQ ignore
                         comboBox.addItem("" + res[i])
                         listing.addItem("" + res[i])
             listing.setMaximumHeight(200)
