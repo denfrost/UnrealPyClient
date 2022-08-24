@@ -104,10 +104,10 @@ def Render_Images_Sequence():
         /Game/Cinematics/MoviePipeline/Presets/Render_Settings_003_VeryHigh.Render_Settings_003_VeryHigh
     """
     global CurrentJob
-    CurrentJob = PyClient.movie_render.make_render_job('NewMap_Anim_SEQ', '/Game/NewMap_Anim_SEQ.NewMap_Anim_SEQ', '/Game/NewMap_Anim.NewMap_Anim', 'C:/Users/UnrealWorkstation/LIVE/NewMap_Anim/COMMON/RENDER/NewMap_Anim',
-                                          '/Game/Cinematics/MoviePipeline/Presets/Render_Settings_003_VeryHigh.Render_Settings_003_VeryHigh')
+    #CurrentJob = PyClient.movie_render.make_render_job('NewMap_Anim_SEQ', '/Game/NewMap_Anim_SEQ.NewMap_Anim_SEQ', '/Game/NewMap_Anim.NewMap_Anim', 'C:/Users/UnrealWorkstation/LIVE/NewMap_Anim/COMMON/RENDER/NewMap_Anim',
+    #                                     '/Game/Cinematics/MoviePipeline/Presets/Render_Settings_003_VeryHigh.Render_Settings_003_VeryHigh')
     print_MoviePipelineQueue()
-    PyClient.movie_render.render_jobs('C:/Users/UnrealWorkstation/LIVE/NewMap_Anim/COMMON/RENDER/NewMap_Anim', False)
+    #PyClient.movie_render.render_jobs('C:/Users/UnrealWorkstation/LIVE/NewMap_Anim/COMMON/RENDER/NewMap_Anim', False)
     #delete_MoviePipelineJob('NewMap_Anim_SEQ')
     #PyClient.movie_render.make_render_job('Test', sequencer, world, output_folder, preset_addr)
     #PyClient.movie_render.render_jobs(image_dirs, transfer=False):
