@@ -80,13 +80,14 @@ def perforce_update(p4, depot, workspace):
         print('SYNC : '+str(sync))
         used_tn = dt.now() - start_tn
         tn = dt.now().strftime("%H:%M:%S")
+        settings.addlog('Perforce Updating finished : ' + depot + ' finished time ' + tn + ' Used_time: ' + str(used_tn), 0)
     except P4Exception:
         for e in p4.errors:  # Display errors
             print(e)
-            settings.addlog('Error perforce: ' + e, 2)
+            settings.addlog('Perforce Error fired: ' + e, 2)
     finally:
         print('SYNC Used_time: '+str(used_tn))
-        settings.addlog('Perforce Updated : '+depot+' finished time '+tn+' Used_time: '+str(used_tn), 0)
+        settings.addlog('Perforce Updated no errors! Used_time: '+str(used_tn), 0)
         p4.disconnect()
 
 def get_perforce_info(show_info=False):
