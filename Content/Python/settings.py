@@ -6,13 +6,13 @@ import json
 
 import logging
 
-logging.basicConfig(filename="M2remote.log",
-                    format='%(asctime)s %(message)s',
-                    filemode='w', level=logging.INFO)
-
 # User profile folder and some
 USER_FOLDER = os.environ['USERPROFILE']
 Json_settings = USER_FOLDER + '/M2_RemoteCfg.json'
+
+logging.basicConfig(filename=USER_FOLDER + "/M2remote.log",
+                    format='%(asctime)s %(message)s',
+                    filemode='w', level=logging.INFO)
 
 def get_Settings_field(field):
     with open(Json_settings, 'r') as f:
