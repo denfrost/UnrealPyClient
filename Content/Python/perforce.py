@@ -1,6 +1,7 @@
 import settings as settings
 import P4 as P4
 from P4 import P4Exception
+from datetime import datetime as dt
 
 #perforce_main('denis.balikhin', 'm2ue4m2ue4', 'ssl:perforcesrv:1666')
 perforce_host = ''
@@ -38,9 +39,15 @@ def perforce_login(p4, show_profile=False):
     else:
         print('Perforce Not Connected')
 
+class P4ProgressHandler(P4.Progress):
+    def update(self, units):
+        tn = dt.now().strftime("%H:%M:%S.%f")
+        print("Progress PERFORCE Syncing [%s : %s]" % (tn, units))
+
 def perforce_update(p4, depot, workspace):
     try:
-        print('Try Update depot:')
+        p4.progress = P4ProgressHandler()
+        print('Try Update depot: '+depot)
         client = p4.fetch_client()
         print(client['View'])
         p4.client = workspace
