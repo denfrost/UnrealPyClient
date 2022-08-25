@@ -75,7 +75,8 @@ def perforce_update(p4, depot, workspace):
         print('Workspace: '+p4.client)
         #p4 sync //depot/UE_Perforce01/...#head
         print('Try Sync Force : '+"{}...#head".format(depot))
-        sync = p4.run_sync("-f", "{}...#head".format(depot))
+        # sync = p4.run_sync("-f", "{}...#head".format(depot))
+        sync = p4.run("sync", "{}...#head".format(depot))
         print('SYNC : '+str(sync))
         used_tn = dt.now() - start_tn
         tn = dt.now().strftime("%H:%M:%S")
