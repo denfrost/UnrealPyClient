@@ -20,6 +20,7 @@ def perforce_login(p4, show_profile=False):
             print(key +'=' + settings.get_Settings_field(key))
 
     print('Start Py Perforce : ' + settings.get_Settings_field('Host'))
+    settings.addlog('Start Perforce: ' + settings.get_Settings_field('Host'))
     if p4.user:
         print('Found API Perforce user: ' + settings.get_Settings_field('User'))
     else:
@@ -33,8 +34,10 @@ def perforce_login(p4, show_profile=False):
     except P4Exception:
         for e in session.errors:  # Display errors
             print(e)
+            settings.addlog('Error connect perforce: ' + e, 2)
     if session.connected():
         print('Succes and ready for command : '+str(session))
+        settings.addlog('Try Update depot: ' + str(session))
         session.run_login() #pass
     else:
         print('Perforce Not Connected')
@@ -47,6 +50,7 @@ class P4ProgressHandler(P4.Progress):
 def perforce_update(p4, depot, workspace):
     try:
         p4.progress = P4ProgressHandler()
+        settings.addlog('Try Update depot: '+depot, 0)
         print('Try Update depot: '+depot)
         client = p4.fetch_client()
         print(client['View'])
@@ -56,9 +60,12 @@ def perforce_update(p4, depot, workspace):
         print('Try Sync Force : '+"{}...#head".format(depot))
         sync = p4.run_sync("-f", "{}...#head".format(depot))
         print('SYNC : '+str(sync))
+        tn = dt.now().strftime("%H:%M:%S")
+        settings.addlog('Perforce Updated : '+depot+' finished time '+tn, 0)
     except P4Exception:
         for e in p4.errors:  # Display errors
             print(e)
+            settings.addlog('Error perforce: ' + e, 2)
     finally:
         p4.disconnect()
 

@@ -4,6 +4,11 @@ import os
 # Simple Save Settings by Json
 import json
 
+import logging
+logging.basicConfig(filename="M2remote.log",
+					format='%(asctime)s %(message)s',
+					filemode='w')
+
 # User profile folder and some
 USER_FOLDER = os.environ['USERPROFILE']
 Json_settings = USER_FOLDER + '/M2_RemoteCfg.json'
@@ -43,3 +48,12 @@ def get_Current_project():
     with open(Json_project, 'r') as f:
         settings_file = json.load(f)
         return settings_file['DefaultProject']
+
+def addlog(info,num=0):
+    logger = logging.getLogger()
+    if num == 0:
+        logger.info(info)
+    if num == 1:
+        logger.warning(info)
+    if num == 2:
+        logger.error(info)
