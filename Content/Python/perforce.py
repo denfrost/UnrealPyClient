@@ -43,9 +43,25 @@ def perforce_login(p4, show_profile=False):
         print('Perforce Not Connected')
 
 class P4ProgressHandler(P4.Progress):
+    curr_syncfile = ''
+    curr_syncunits = -1
+    #def init(self, type):
+        #print( "Progress.init with '%s'" % type)
     def update(self, units):
         tn = dt.now().strftime("%H:%M:%S.%f")
         print("Progress PERFORCE Syncing [%s : %s]" % (tn, units))
+        self.curr_syncunits = units
+    #def setTotal(self, total):
+        #P4.Progress.setTotal(self, total)
+        #print("Progress.setTotal with '%s' " % total)
+    def setDescription(self, description, units):
+        print("Progress PERFORCE Syncing ['%s' # %s]" % (description, self.curr_syncunits))
+        self.curr_syncfile = description
+    def done(self, fail):
+        if fail > 0:
+            print("Failed Sync : %s " % self.curr_syncfile)
+            settings.addlog('Error perforce: ' + self.curr_syncfile, 2)
+
 
 def perforce_update(p4, depot, workspace):
     try:

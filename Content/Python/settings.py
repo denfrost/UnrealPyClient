@@ -5,9 +5,10 @@ import os
 import json
 
 import logging
+
 logging.basicConfig(filename="M2remote.log",
-					format='%(asctime)s %(message)s',
-					filemode='w')
+                    format='%(asctime)s %(message)s',
+                    filemode='w', level=logging.INFO)
 
 # User profile folder and some
 USER_FOLDER = os.environ['USERPROFILE']
