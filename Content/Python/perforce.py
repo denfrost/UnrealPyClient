@@ -65,6 +65,7 @@ class P4ProgressHandler(P4.Progress):
 
 def perforce_update(p4, depot, workspace):
     try:
+        start_tn = dt.now()
         p4.progress = P4ProgressHandler()
         settings.addlog('Try Update depot: '+depot, 0)
         print('Try Update depot: '+depot)
@@ -76,13 +77,15 @@ def perforce_update(p4, depot, workspace):
         print('Try Sync Force : '+"{}...#head".format(depot))
         sync = p4.run_sync("-f", "{}...#head".format(depot))
         print('SYNC : '+str(sync))
+        used_tn = dt.now() - start_tn
         tn = dt.now().strftime("%H:%M:%S")
-        settings.addlog('Perforce Updated : '+depot+' finished time '+tn, 0)
     except P4Exception:
         for e in p4.errors:  # Display errors
             print(e)
             settings.addlog('Error perforce: ' + e, 2)
     finally:
+        print('SYNC Used_time: '+str(used_tn))
+        settings.addlog('Perforce Updated : '+depot+' finished time '+tn+' Used_time: '+str(used_tn), 0)
         p4.disconnect()
 
 def get_perforce_info(show_info=False):
