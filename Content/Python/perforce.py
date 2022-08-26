@@ -74,20 +74,27 @@ def perforce_update(p4, depot, workspace):
         p4.client = workspace
         print('Workspace: '+p4.client)
         #p4 sync //depot/UE_Perforce01/...#head
-        print('Try Sync Force : '+"{}...#head".format(depot))
+        print('Try Sync get last changes: '+"{}...#head".format(depot))
+        settings.addlog('Try Sync get last changes: '+"{}...#head".format(depot), 0)
         # sync = p4.run_sync("-f", "{}...#head".format(depot))
         sync = p4.run("sync", "{}...#head".format(depot))
         print('SYNC : '+str(sync))
         used_tn = dt.now() - start_tn
         tn = dt.now().strftime("%H:%M:%S")
-        settings.addlog('Perforce Updating finished : ' + depot + ' finished time ' + tn + ' Used_time: ' + str(used_tn), 0)
+        print('Perforce Syncing finished : ' + depot + ' finished time ' + tn + ' Used_time: ' + str(used_tn))
+        settings.addlog('Perforce Syncing finished : ' + depot + ' finished time ' + tn + ' Used_time: ' + str(used_tn), 0)
     except P4Exception:
         for e in p4.errors:  # Display errors
-            print(e)
-            settings.addlog('Perforce Error fired: ' + e, 2)
+            print('Perforce Error Sync fired: ' + e)
+            settings.addlog('Perforce Error Sync fired: ' + e, 2)
+    else:
+        used_tn = dt.now() - start_tn
+        print('Perforce Updated no exception! Used_time: ' + str(used_tn))
+        settings.addlog('Perforce Updated no exception! Used_time: '+str(used_tn), 0)
     finally:
-        print('SYNC Used_time: '+str(used_tn))
-        settings.addlog('Perforce Updated no errors! Used_time: '+str(used_tn), 0)
+        used_tn = dt.now() - start_tn
+        print('Perforce Finally Updated. Used_time: '+str(used_tn))
+        settings.addlog('Perforce Finally Updated. Used_time: '+str(used_tn), 0)
         p4.disconnect()
 
 def get_perforce_info(show_info=False):
