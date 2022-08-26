@@ -77,7 +77,7 @@ def perforce_update(p4, depot, workspace):
         print('Try Sync get last changes: '+"{}...#head".format(depot))
         settings.addlog('Try Sync get last changes: '+"{}...#head".format(depot), 0)
         # sync = p4.run_sync("-f", "{}...#head".format(depot))
-        sync = p4.run("sync", "{}...#head".format(depot))
+        sync = p4.run("sync", "-f", "{}...#head".format(depot))
         print('SYNC : '+str(sync))
         used_tn = dt.now() - start_tn
         tn = dt.now().strftime("%H:%M:%S")
