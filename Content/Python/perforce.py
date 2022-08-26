@@ -77,7 +77,7 @@ def perforce_update(p4, depot, workspace):
         print('Try Sync get last changes: '+"{}...#head".format(depot))
         settings.addlog('Try Sync get last changes: '+"{}...#head".format(depot), 0)
         # sync = p4.run_sync("-f", "{}...#head".format(depot))
-        sync = p4.run("sync", "-f", "{}...#head".format(depot))
+        sync = p4.run("sync", "{}...#head".format(depot))
         print('SYNC : '+str(sync))
         used_tn = dt.now() - start_tn
         tn = dt.now().strftime("%H:%M:%S")
@@ -87,6 +87,12 @@ def perforce_update(p4, depot, workspace):
         for e in p4.errors:  # Display errors
             print('Perforce Error Sync fired: ' + e)
             settings.addlog('Perforce Error Sync fired: ' + e, 2)
+            syncfile = e.split(' ')[-1]
+            print('Try Force Sync File: ' + "{}#head".format(syncfile))
+            settings.addlog('Try Force Sync File: ' + "{}#head".format(syncfile), 0)
+            sync = p4.run("sync", "-f", "{}...#head".format(depot))
+            print('SYNC Force: '+sync)
+            settings.addlog('SYNC Force: '+sync, 0)
     else:
         used_tn = dt.now() - start_tn
         print('Perforce Updated no exception! Used_time: ' + str(used_tn))
