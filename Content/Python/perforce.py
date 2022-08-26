@@ -90,9 +90,9 @@ def perforce_update(p4, depot, workspace):
             syncfile = e.split(' ')[-1]
             print('Try Force Sync File: ' + "{}#head".format(syncfile))
             settings.addlog('Try Force Sync File: ' + "{}#head".format(syncfile), 0)
-            sync = p4.run("sync", "-f", "{}...#head".format(depot))
-            print('SYNC Force: '+sync)
-            settings.addlog('SYNC Force: '+sync, 0)
+            sync = p4.run("sync", "-f", "{}#head".format(syncfile))
+            print('SYNC Force: '+str(sync))
+            settings.addlog('SYNC Force: '+str(sync), 0)
     else:
         used_tn = dt.now() - start_tn
         print('Perforce Updated no exception! Used_time: ' + str(used_tn))
@@ -102,6 +102,7 @@ def perforce_update(p4, depot, workspace):
         print('Perforce Finally Updated. Used_time: '+str(used_tn))
         settings.addlog('Perforce Finally Updated. Used_time: '+str(used_tn), 0)
         p4.disconnect()
+        print('Perforce disconnected')
 
 def get_perforce_info(show_info=False):
     p4 = P4.P4(port=settings.get_Settings_field('Host'))
