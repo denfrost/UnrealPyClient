@@ -333,6 +333,11 @@ class MyWidget(QtWidgets.QWidget):
             listing.setMaximumHeight(200)
 
         def FillQueueJobs(feedback):
+            if feedback == '':
+                print('FillQueueJobs :'+feedback[2])
+            else:
+                print('FillQueueJobs :'+feedback[3])
+                print('FillQueueJobs :'+feedback)
             res = feedback.split(",")
             res.sort()
             print(res[1])
@@ -583,7 +588,7 @@ class MyWidget(QtWidgets.QWidget):
         tabwidget.addTab(ServerAnswerTextEdit, "Answer Server")
         GroupboxCommand.layout().addWidget(tabwidget)
 
-        GroupboxQueue = QtWidgets.QGroupBox("Movie Rendering Queue")
+        GroupboxQueue = QtWidgets.QGroupBox("Manager Movie Rendering Queue")
         GroupboxQueue.setChecked(True)
         vbox50 = QtWidgets.QHBoxLayout()
         GroupboxQueue.setLayout(vbox50)

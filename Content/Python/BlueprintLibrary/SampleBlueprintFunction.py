@@ -142,11 +142,15 @@ class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
         PyClientMovie.render_jobs(output_folder, bFtp_transfer)
 
 
-        @unreal.ufunction(
-            ret=str, static=True, meta=dict(Category="Samples Python BlueprintFunctionLibrary")
-        )
-        def unreal_python_get_queue_jobs():
-            CurrentJobs = PyClientMovie.get_render_queue_jobs()
-            for job in CurrentJobs:
-                print(job.job_name)
-            return CurrentJobs
+    @unreal.ufunction(
+        ret=str, static=True, meta=dict(Category="Samples Python BlueprintFunctionLibrary")
+    )
+    def unreal_python_get_queue_jobs():
+        output = ''
+        CurrentJobs = PyClientMovie.get_render_queue_jobs()
+        for job in CurrentJobs:
+            print('JobName: '+job.job_name)
+            print('JobProgress: '+str(job.get_status_progress()))
+            print('JobStatus: ' + str(job.get_status_message()))
+            output = output +',' + job.job_name + '-' + str(job.get_status_progress())+'-'+job.get_status_message()+','
+        return output

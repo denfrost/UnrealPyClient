@@ -247,5 +247,8 @@ def errored_MoviePipelineJob(Exec, inJob, is_fatal, errortext):
     unreal.log_warning('Job Render. Aborted!')
     delete_MoviePipelineJob(inJob, is_fatal)
 
-
+def is_rendering_queue():
+    render_queue_system = unreal.get_editor_subsystem(unreal.MoviePipelineQueueSubsystem)
+    print('Queue is rendering : '+str(render_queue_system.is_rendering()))
+    return render_queue_system.is_rendering()
 

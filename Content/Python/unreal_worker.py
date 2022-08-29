@@ -154,6 +154,7 @@ def openFolderImages():
 def getrenderingjobs():
     import PyClient.movie_render
     CurrentJobs = PyClient.movie_render.get_render_queue_jobs()
+    PyClient.movie_render.is_rendering_queue()
     for job in CurrentJobs:
         print(job.job_name)
     return CurrentJobs
