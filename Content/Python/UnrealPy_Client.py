@@ -209,6 +209,8 @@ class input_dialog(QWidget):
 
     def saveProfile(self):
         list = {'Name': self.le.text(), 'User': self.le1.text(), "Pwd": self.le2.text(), 'Host': self.le3.text(), 'Depot': self.le4.text(), 'Workspace': self.le5.text()}
+        print(type(list))
+        print(list)
         settings.rewrite_exist_profile(list)
 
     def dlg_quit(self):
@@ -242,9 +244,10 @@ class MyWidget(QtWidgets.QWidget):
             ServerAnswerTextEdit.setText(tanswer+" : "+feedback) #JsonTextEdit.toPlainText()
             tabwidget.setCurrentIndex(1)
             FillShots(feedback)
-            progressBar.setValue(100)
+            progressBar.setValue(70)
             #Ask about Rendering Movie  status
             Get_Remote_Info()
+            progressBar.setValue(100)
 
         def ServerAnsweredSetShotRender(feedback):
             UpdateStatusOnline(HostLineEdit.text())
@@ -284,9 +287,10 @@ class MyWidget(QtWidgets.QWidget):
             #Fill Queue Combobox
             FillQueueJobs(feedback)
             comboBoxQueue.setCurrentIndex(0)
-            progressBar.setValue(100)
+            progressBar.setValue(70)
             #Ask about Rendering Movie  status
             Get_Remote_Info()
+            progressBar.setValue(100)
 
         def ServerAnsweredGetRemoteInfo(feedback):
             cleandata = feedback.split('"ReturnValue": "')[-1].split('"\\r\\n}\\r\\n}''')[0]

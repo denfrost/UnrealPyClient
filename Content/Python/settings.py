@@ -37,9 +37,10 @@ def get_Settings_profile():
         settings_file = json.load(f)
         return settings_file
 
-def rewrite_exist_profile(list={}):
-    settings_file_preset = {'Name': list[0], 'User': list[1], "Pwd": list[2], 'Host': list[3], 'Depot': list[4],
-                            'Workspace': list[5]}
+def rewrite_exist_profile(list):
+    print(type(list))
+    settings_file_preset = {'Name': list['Name'], 'User': list['User'], "Pwd": list["Pwd"], 'Host': list['Host'], 'Depot': list['Depot'],
+                            'Workspace': list['Workspace']}
     with open(Json_settings, 'w') as f:
         json.dump(settings_file_preset, f)
 
