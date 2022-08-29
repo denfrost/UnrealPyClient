@@ -73,3 +73,8 @@ def set_HostServer(Host):
     settings_file_preset = {'HostServer': Host, 'Test1': '', "Test2": ''}
     with open(Json_remote, 'w') as f:
         json.dump(settings_file_preset, f)
+
+def OpenLogPerforce():
+    import subprocess
+    Remote_log_file = USER_FOLDER + "/M2remote.log"
+    subprocess.Popen(f'explorer "{USER_FOLDER}"')

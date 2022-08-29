@@ -547,6 +547,11 @@ class MyWidget(QtWidgets.QWidget):
             SendSocket(ClearAnswer, HostServer, json.dumps(Json_UpdatePerforce), ServerAnsweredPerforce)
 
         @QtCore.Slot()
+        def onOpenLogPerforce():
+            settings.OpenLogPerforce()
+            print()
+
+        @QtCore.Slot()
         def SetPerforceProfile():
             ex = input_dialog()
             ex.show()
@@ -718,11 +723,17 @@ class MyWidget(QtWidgets.QWidget):
         self.connect(CheckTransferToggleBtn, QtCore.SIGNAL("clicked()"), onClickedToggleTransfer)
         GroupboxAuto5.layout().addWidget(CheckTransferToggleBtn)
 
-        OpenFolderBtn = QtWidgets.QPushButton("Open Folder..")
-        OpenFolderBtn.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
-        OpenFolderBtn.setEnabled(False)
-        self.connect(OpenFolderBtn, QtCore.SIGNAL("clicked()"), onOpenFolder)
-        GroupboxAuto5.layout().addWidget(OpenFolderBtn)
+        OpenFolderImagesBtn = QtWidgets.QPushButton("Open Images Folder..")
+        OpenFolderImagesBtn.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Bold))
+        OpenFolderImagesBtn.setEnabled(False)
+        self.connect(OpenFolderImagesBtn, QtCore.SIGNAL("clicked()"), onOpenFolder)
+        GroupboxAuto5.layout().addWidget(OpenFolderImagesBtn)
+
+        OpenLogImagesBtn = QtWidgets.QPushButton("Open Log..")
+        OpenLogImagesBtn.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Bold))
+        OpenLogImagesBtn.setEnabled(False)
+        self.connect(OpenLogImagesBtn, QtCore.SIGNAL("clicked()"), onOpenFolder)
+        GroupboxAuto5.layout().addWidget(OpenLogImagesBtn)
 
         GroupboxAuto0 = QtWidgets.QGroupBox("Found Sequences")
         GroupboxAuto0.setChecked(True)
@@ -757,15 +768,20 @@ class MyWidget(QtWidgets.QWidget):
         GroupboxAuto2.layout().addWidget(PerforceLabel)
 
         SetPerforceBtn = QtWidgets.QPushButton("Settings")
-        SetPerforceBtn.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
+        SetPerforceBtn.setFont(QtGui.QFont("Times", 16, QtGui.QFont.Bold))
         self.connect(SetPerforceBtn, QtCore.SIGNAL("clicked()"),SetPerforceProfile)
         GroupboxAuto2.layout().addWidget(SetPerforceBtn)
 
 
         UpdatePerforceBtn = QtWidgets.QPushButton("Update Perforce")
-        UpdatePerforceBtn.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
-        self.connect(UpdatePerforceBtn, QtCore.SIGNAL("clicked()"),UpdatePerforce)
+        UpdatePerforceBtn.setFont(QtGui.QFont("Times", 16, QtGui.QFont.Bold))
+        self.connect(UpdatePerforceBtn, QtCore.SIGNAL("clicked()"), UpdatePerforce)
         GroupboxAuto2.layout().addWidget(UpdatePerforceBtn)
+
+        OpenLogPerforceBtn = QtWidgets.QPushButton("Open Log..")
+        OpenLogPerforceBtn.setFont(QtGui.QFont("Times", 16, QtGui.QFont.Bold))
+        self.connect(OpenLogPerforceBtn, QtCore.SIGNAL("clicked()"), onOpenLogPerforce)
+        GroupboxAuto2.layout().addWidget(OpenLogPerforceBtn)
 
 
         GroupboxAuto3 = QtWidgets.QGroupBox("Batch Mode Rendering [Warning: Will Heavy busy server!]")
