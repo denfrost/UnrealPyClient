@@ -61,9 +61,10 @@ def addlog(info,num=0):
 
 def get_HostServer():
     Json_remote = USER_FOLDER + '\M2_Remote.json'
-    with open(Json_remote, 'r') as f:
-        settings_file = json.load(f)
-        return settings_file['HostServer']
+    if os.path.isfile(Json_remote):
+        with open(Json_remote, 'r') as f:
+            settings_file = json.load(f)
+            return settings_file['HostServer']
 
 def set_HostServer(Host):
     print('Save in cfg : '+Host)
