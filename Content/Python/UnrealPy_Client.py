@@ -389,6 +389,7 @@ class MyWidget(QtWidgets.QWidget):
                 progressBar.setValue(0)
                 create_connection(HostLineEdit.text(), 5)
                 ChangeStatus(True)
+                settings.set_HostServer(HostLineEdit.text())
             except:
                 ChangeStatus(False)
 
@@ -595,7 +596,7 @@ class MyWidget(QtWidgets.QWidget):
         FilterLineEdit.setFont(QtGui.QFont("Times", 10, QtGui.QFont.Medium))
         FilterToggleBtn.setChecked(False)
         FilterToggleBtn.setFixedWidth(80)
-        FilterLineEdit.setFixedWidth(80)
+        FilterLineEdit.setFixedWidth(150)
         self.connect(FilterToggleBtn, QtCore.SIGNAL("clicked()"), onClickedFilter)
         self.connect(FilterLineEdit, QtCore.SIGNAL("returnPressed()"), onEnterFilterLine)
 
@@ -673,6 +674,10 @@ class MyWidget(QtWidgets.QWidget):
         self.connect(quit, QtCore.SIGNAL("clicked()"), MyQuit)
         layout.addWidget(quit)
 
+        #get last server save cfg
+        h = settings.get_HostServer()
+        if h:
+            HostLineEdit.setText(h)
         CheckServer()
 
 

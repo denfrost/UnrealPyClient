@@ -58,3 +58,16 @@ def addlog(info,num=0):
         logger.warning(info)
     if num == 2:
         logger.error(info)
+
+def get_HostServer():
+    Json_remote = USER_FOLDER + '\M2_Remote.json'
+    with open(Json_remote, 'r') as f:
+        settings_file = json.load(f)
+        return settings_file['HostServer']
+
+def set_HostServer(Host):
+    print('Save in cfg : '+Host)
+    Json_remote = USER_FOLDER + '\M2_Remote.json'
+    settings_file_preset = {'HostServer': Host, 'Test1': '', "Test2": ''}
+    with open(Json_remote, 'w') as f:
+        json.dump(settings_file_preset, f)
