@@ -233,6 +233,7 @@ def OpenFolderImages():
     subprocess.Popen(f'explorer "{image_directories}"')
 
 def get_render_queue_jobs():
+    print('Queue get_render_queue_jobs : ')
     render_queue_system = unreal.get_editor_subsystem(unreal.MoviePipelineQueueSubsystem)
     render_queue = render_queue_system.get_queue()
     render_jobs = render_queue.get_jobs()

@@ -140,3 +140,13 @@ class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
         '''
         unreal.log_warning("Job Render. Images Job ready: " + CurrentJob.job_name + ' Transfer to Shotgun :'+str(bFtp_transfer))
         PyClientMovie.render_jobs(output_folder, bFtp_transfer)
+
+
+        @unreal.ufunction(
+            ret=str, static=True, meta=dict(Category="Samples Python BlueprintFunctionLibrary")
+        )
+        def unreal_python_get_queue_jobs():
+            CurrentJobs = PyClientMovie.get_render_queue_jobs()
+            for job in CurrentJobs:
+                print(job.job_name)
+            return CurrentJobs

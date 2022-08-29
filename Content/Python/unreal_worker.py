@@ -150,3 +150,10 @@ def My_Render_Images(sequence=''):
 def openFolderImages():
     import PyClient.movie_render
     print(PyClient.movie_render.image_directories)
+
+def getrenderingjobs():
+    import PyClient.movie_render
+    CurrentJobs = PyClient.movie_render.get_render_queue_jobs()
+    for job in CurrentJobs:
+        print(job.job_name)
+    return CurrentJobs

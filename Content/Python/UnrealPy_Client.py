@@ -117,6 +117,22 @@ Json_RequestRemoteStaticFunction = \
         }
     }
 
+Json_RequestRemoteQueueJobs = \
+    {
+        "MessageName": "http",
+        "Parameters": {
+            "Url": "/remote/object/call",
+            "Verb": "PUT",
+            "Body": {
+                "objectPath": "/Engine/PythonTypes.Default__SamplePythonBlueprintLibrary",
+                "functionName": "unreal_python_get_queue_jobs",
+                "parameters": {
+                    "result": 'return string'
+                }
+            }
+        }
+    }
+
 Json_RequestDescribe =\
     {
     "MessageName": "http",
@@ -239,6 +255,18 @@ class MyWidget(QtWidgets.QWidget):
             PerforceLabel.setText("Perforce Updated : "+tanswer)
             progressBar.setValue(100)
 
+        def ServerAnsweredGetAllQueueJobs(feedback):
+            StatusLabel.setText("Unreal Server Status Online : " + HostServer)
+            print("Got Server Answer : GetAllQueueJobs")
+            tanswer =dt.now().strftime("%H:%M:%S")
+            ServerAnswerTextEdit.clear()
+            ServerAnswerTextEdit.setText(tanswer+" : "+feedback)
+            tabwidget.setCurrentIndex(1)
+            #Fill Queue Combobox
+            FillQueueJobs(feedback)
+            comboBoxQueue.setCurrentIndex(0)
+            progressBar.setValue(100)
+
 
         @QtCore.Slot()
         def StatusUpdate(status):
@@ -303,6 +331,18 @@ class MyWidget(QtWidgets.QWidget):
                         comboBox.addItem("" + res[i])
                         listing.addItem("" + res[i])
             listing.setMaximumHeight(200)
+
+        def FillQueueJobs(feedback):
+            res = feedback.split(",")
+            res.sort()
+            print(res[1])
+            comboBoxQueue.clear()
+            print('Start Sorting:')
+            for i, name in enumerate(res):
+                print('Feedback ['+str(i)+']: '+res[i])
+                if (res[i].find('_SEQ') > 0):
+                    mlist = res[i].split('.')[-1].split('_')
+                    comboBoxQueue.addItem("" + res[i])
 
         def printItemText(self):
             items = listing.selectedItems()
@@ -467,6 +507,16 @@ class MyWidget(QtWidgets.QWidget):
 
 
         @QtCore.Slot()
+        def Get_Queue_Jobs():
+            print('Get_Queue_Jobs')
+            JsonTextEdit.setText(json.dumps(Json_RequestRemoteQueueJobs))
+            progressBar.setValue(0)
+            progressBar.setValue(50)
+            print("Send Command To Server :"+JsonTextEdit.toPlainText())
+            HostServer = HostLineEdit.text()
+            SendSocket(ClearAnswer, HostServer, JsonTextEdit.toPlainText(), ServerAnsweredGetAllQueueJobs) #Send Json to Unreal
+
+        @QtCore.Slot()
         def MyQuit():
             app.quit()
 
@@ -533,6 +583,21 @@ class MyWidget(QtWidgets.QWidget):
         tabwidget.addTab(ServerAnswerTextEdit, "Answer Server")
         GroupboxCommand.layout().addWidget(tabwidget)
 
+        GroupboxQueue = QtWidgets.QGroupBox("Movie Rendering Queue")
+        GroupboxQueue.setChecked(True)
+        vbox50 = QtWidgets.QHBoxLayout()
+        GroupboxQueue.setLayout(vbox50)
+
+        get_queue = QtWidgets.QPushButton("Get Queue Jobs")
+        get_queue.setFont(QtGui.QFont("Times", 10, QtGui.QFont.Bold))
+        get_queue.setFixedWidth(150)
+        self.connect(get_queue, QtCore.SIGNAL("clicked()"), Get_Queue_Jobs)
+        GroupboxQueue.layout().addWidget(get_queue)
+
+        comboBoxQueue = QtWidgets.QComboBox(self)
+        comboBoxQueue.setFont(QtGui.QFont("Times", 10, QtGui.QFont.Medium))
+        comboBoxQueue.addItem("EMPTY")
+        GroupboxQueue.layout().addWidget(comboBoxQueue)
 
         GroupboxAuto = QtWidgets.QGroupBox("Rendering Shots")
         GroupboxAuto.setChecked(True)
@@ -656,6 +721,8 @@ class MyWidget(QtWidgets.QWidget):
         GroupboxMain.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Bold))
         vbox5 = QtWidgets.QVBoxLayout()
         GroupboxMain.setLayout(vbox5)
+
+        GroupboxMain.layout().addWidget(GroupboxQueue)
         GroupboxMain.layout().addWidget(GroupboxAuto)
         GroupboxMain.layout().addWidget(GroupboxAuto5)
         GroupboxMain.layout().addWidget(GroupboxAuto0)
