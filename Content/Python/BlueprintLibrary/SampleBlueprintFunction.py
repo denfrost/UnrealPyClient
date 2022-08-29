@@ -152,5 +152,13 @@ class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
             print('JobName: '+job.job_name)
             print('JobProgress: '+str(job.get_status_progress()))
             print('JobStatus: ' + str(job.get_status_message()))
-            output = output +',' + job.job_name + '-' + str(job.get_status_progress())+'-'+job.get_status_message()+','
+            output = output +',' + job.job_name + '-' + str(job.get_status_progress())+'-'+job.get_status_message()+'-'+str(PyClientMovie.is_rendering_queue())+','
         return output
+
+    @unreal.ufunction(
+        ret=str, static=True, meta=dict(Category="Samples Python BlueprintFunctionLibrary")
+    )
+    def unreal_python_get_info_remote():
+        output_json = {"MoviePipelineRndering": False}
+        return output_json
+

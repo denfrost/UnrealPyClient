@@ -145,6 +145,23 @@ Json_RequestDescribe =\
     }
     }
 
+#SuperMessage Remote tool
+Json_RequestRemoteInfo = \
+    {
+        "MessageName": "http",
+        "Parameters": {
+            "Url": "/remote/object/call",
+            "Verb": "PUT",
+            "Body": {
+                "objectPath": "/Engine/PythonTypes.Default__SamplePythonBlueprintLibrary",
+                "functionName": "unreal_python_get_info_remote",
+                "parameters": {
+                    "result": 'return string'
+                }
+            }
+        }
+    }
+
 class input_dialog(QWidget):
     def __init__(self, parent=None):
         super(input_dialog, self).__init__(parent)
@@ -267,6 +284,16 @@ class MyWidget(QtWidgets.QWidget):
             comboBoxQueue.setCurrentIndex(0)
             progressBar.setValue(100)
 
+        def ServerAnsweredGetRemoteInfo(feedback):
+            StatusLabel.setText("Unreal Server Status Online : " + HostServer)
+            print("Got Server Answer : GetRemoteInfo")
+            tanswer =dt.now().strftime("%H:%M:%S")
+            ServerAnswerTextEdit.clear()
+            ServerAnswerTextEdit.setText(tanswer+" : "+feedback)
+            tabwidget.setCurrentIndex(1)
+            #Parse super json from server
+            progressBar.setValue(100)
+
 
         @QtCore.Slot()
         def StatusUpdate(status):
@@ -333,15 +360,16 @@ class MyWidget(QtWidgets.QWidget):
             listing.setMaximumHeight(200)
 
         def FillQueueJobs(feedback):
+            cleandata = feedback.split('"ReturnValue": "')[-1].split('"\\r\\n}\\r\\n}''')[0]
+            print('Clean :'+cleandata)
             if feedback == '':
                 print('FillQueueJobs :'+feedback[2])
             else:
-                print('FillQueueJobs :'+feedback[3])
+                comboBoxQueue.clear()
                 print('FillQueueJobs :'+feedback)
             res = feedback.split(",")
             res.sort()
             print(res[1])
-            comboBoxQueue.clear()
             print('Start Sorting:')
             for i, name in enumerate(res):
                 print('Feedback ['+str(i)+']: '+res[i])
@@ -522,6 +550,16 @@ class MyWidget(QtWidgets.QWidget):
             SendSocket(ClearAnswer, HostServer, JsonTextEdit.toPlainText(), ServerAnsweredGetAllQueueJobs) #Send Json to Unreal
 
         @QtCore.Slot()
+        def Get_Remote_Info():
+            print('Get_Queue_Jobs')
+            JsonTextEdit.setText(json.dumps(Json_RequestRemoteInfo))
+            progressBar.setValue(0)
+            progressBar.setValue(50)
+            print("Send Command To Server :"+JsonTextEdit.toPlainText())
+            HostServer = HostLineEdit.text()
+            SendSocket(ClearAnswer, HostServer, JsonTextEdit.toPlainText(), ServerAnsweredGetRemoteInfo) #Send Json to Unreal
+
+        @QtCore.Slot()
         def MyQuit():
             app.quit()
 
@@ -570,10 +608,15 @@ class MyWidget(QtWidgets.QWidget):
         GroupboxCommand.setLayout(vbox2)
         layout.addWidget(GroupboxCommand)
 
-        Command = QtWidgets.QPushButton("Send Command")
-        Command.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
-        self.connect(Command, QtCore.SIGNAL("clicked()"), SendCommand)
-        GroupboxCommand.layout().addWidget(Command)
+        GetInfoBtn = QtWidgets.QPushButton("Get Info")
+        GetInfoBtn.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
+        self.connect(GetInfoBtn, QtCore.SIGNAL("clicked()"), Get_Remote_Info)
+        GroupboxCommand.layout().addWidget(GetInfoBtn)
+
+        CommandBtn = QtWidgets.QPushButton("Send Command")
+        CommandBtn.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
+        self.connect(CommandBtn, QtCore.SIGNAL("clicked()"), SendCommand)
+        GroupboxCommand.layout().addWidget(CommandBtn)
 
         JsonTextEdit = QtWidgets.QTextEdit(json.dumps(Json_RequestRemoteStaticFunction))
         JsonTextEdit.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Medium))
