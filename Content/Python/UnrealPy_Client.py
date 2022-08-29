@@ -226,7 +226,7 @@ class MyWidget(QtWidgets.QWidget):
             SendSocket(ClearAnswer, HostServer, JsonTextEdit.toPlainText(), ServerAnswered) #Send Json to Unreal
 
         def ServerAnswered(feedback):
-            StatusLabel.setText("Unreal Server Status Online : " + HostServer)
+            UpdateStatusOnline(HostLineEdit.text())
             print("Got Server Answer")
             tanswer =dt.now().strftime("%H:%M:%S")
             ServerAnswerTextEdit.clear()
@@ -235,7 +235,7 @@ class MyWidget(QtWidgets.QWidget):
             progressBar.setValue(100)
 
         def ServerAnsweredGetAllShots(feedback):
-            StatusLabel.setText("Unreal Server Status Online : " + HostServer)
+            UpdateStatusOnline(HostLineEdit.text())
             print("Got Server Answer : Getallshots")
             tanswer =dt.now().strftime("%H:%M:%S")
             ServerAnswerTextEdit.clear()
@@ -243,9 +243,11 @@ class MyWidget(QtWidgets.QWidget):
             tabwidget.setCurrentIndex(1)
             FillShots(feedback)
             progressBar.setValue(100)
+            #Ask about Rendering Movie  status
+            Get_Remote_Info()
 
         def ServerAnsweredSetShotRender(feedback):
-            StatusLabel.setText("Unreal Server Status Online : " + HostServer)
+            UpdateStatusOnline(HostLineEdit.text())
             print("Got Server Answer : SetShotRender")
             tanswer = dt.now().strftime("%H:%M:%S")
             ServerAnswerTextEdit.clear()
@@ -254,7 +256,7 @@ class MyWidget(QtWidgets.QWidget):
             progressBar.setValue(100)
 
         def ServerAnsweredImagesRender(feedback):
-            StatusLabel.setText("Unreal Server Status Online : " + HostServer)
+            UpdateStatusOnline(HostLineEdit.text())
             print("Got Server Answer : ImagesRenderTool")
             tanswer = dt.now().strftime("%H:%M:%S")
             ServerAnswerTextEdit.clear()
@@ -263,7 +265,7 @@ class MyWidget(QtWidgets.QWidget):
             progressBar.setValue(100)
 
         def ServerAnsweredPerforce(feedback):
-            StatusLabel.setText("Unreal Server Status Online : " + HostServer)
+            UpdateStatusOnline(HostLineEdit.text())
             print("Got Server Answer : Try Update server")
             tanswer =dt.now().strftime("%H:%M:%S")
             ServerAnswerTextEdit.clear()
@@ -283,6 +285,8 @@ class MyWidget(QtWidgets.QWidget):
             FillQueueJobs(feedback)
             comboBoxQueue.setCurrentIndex(0)
             progressBar.setValue(100)
+            #Ask about Rendering Movie  status
+            Get_Remote_Info()
 
         def ServerAnsweredGetRemoteInfo(feedback):
             cleandata = feedback.split('"ReturnValue": "')[-1].split('"\\r\\n}\\r\\n}''')[0]
@@ -299,18 +303,21 @@ class MyWidget(QtWidgets.QWidget):
             #Parse super json from server
             print(type(json_remote_data))
             print('Movie Rendering Working : ' +json_remote_data["MoviePipelineRendering"])
-            if json_remote_data["MoviePipelineRendering"]=='True':
+            if json_remote_data["MoviePipelineRendering"] == 'True':
                 Groupbox.setTitle('Server Status : Rendering Movie ')
             else:
                 Groupbox.setTitle('Server Status : Available for Render ')
-                Groupbox.setAlignment(100)
-                Groupbox.setStyleSheet("QLabel { color : green; }")
             print('Movie Rendering Working 2 : ' + json_remote_data["MoviePipelineRendering2"])
 
             progressBar.setValue(100)
 
         def UpdateStatusOnline(server_str):
+            StatusLabel.setStyleSheet("QLabel { color : green; }")
             StatusLabel.setText("Unreal Server Status Online : " + server_str)
+
+        def UpdateStatusOffline(server_str):
+            StatusLabel.setStyleSheet("QLabel { background-color : yellow; color : red; }")
+            StatusLabel.setText("Unreal Server Status Offline : " + server_str)
 
         @QtCore.Slot()
         def StatusUpdate(status):
@@ -485,12 +492,10 @@ class MyWidget(QtWidgets.QWidget):
         def ChangeStatus(check):
             tm = dt.now().strftime("%H:%M:%S")
             if check:
-                StatusLabel.setText("Unreal Server Status Online : " + HostLineEdit.text() + ' ' + tm)
-                StatusLabel.setStyleSheet("QLabel { color : green; }")
+                UpdateStatusOnline(HostLineEdit.text() + ' ' + tm)
                 progressBar.setValue(100)
             else:
-                StatusLabel.setStyleSheet("QLabel { background-color : yellow; color : red; }")
-                StatusLabel.setText("Unreal Server Status Offline : " + HostLineEdit.text() + ' ' + tm)
+                UpdateStatusOffline(HostLineEdit.text() + ' ' + tm)
 
         @QtCore.Slot()
         def onClickedToggle():
@@ -593,6 +598,7 @@ class MyWidget(QtWidgets.QWidget):
 
 
         Groupbox = QtWidgets.QGroupBox("Server Status")
+        Groupbox.setAlignment(100)
         Groupbox.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Bold))
         vbox = QtWidgets.QHBoxLayout()
         Groupbox.setLayout(vbox)
