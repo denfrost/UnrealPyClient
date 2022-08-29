@@ -13,6 +13,12 @@ def extend_editor():
         label="Render Images Sequence",
         command_string="import importlib; import unreal_startup; import unreal_worker; unreal_worker.My_Render_Images('')", #Render_Images_Sequence()
     )
+    #UnrealMovieRender
+    me_renderimagessequence = unreal_uiutils.create_menu_button(
+        name="RenderImagesBtn",
+        label="Render Images Sequence",
+        command_string="import importlib; import unreal_startup; import unreal_worker; unreal_worker.My_Render_Images('')", #Render_Images_Sequence()
+    )
     #UnrealPyClient
     me_startunrealclient = unreal_uiutils.create_menu_button(
         name="StartClientBtn",

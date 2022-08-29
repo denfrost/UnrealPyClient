@@ -173,8 +173,8 @@ def render_jobs(image_dirs,transfer=False):
                 transfer (bool): transffering files after render
     '''
         
-    subsystem = unreal.get_editor_subsystem(unreal.MoviePipelineQueueSubsystem)
-    pipelineQueue = subsystem.get_queue()
+    render_queue_system = unreal.get_editor_subsystem(unreal.MoviePipelineQueueSubsystem)
+    pipelineQueue = render_queue_system.get_queue()
 
     global NewExecutor
     global image_directories
@@ -189,12 +189,21 @@ def render_jobs(image_dirs,transfer=False):
         else:
             unreal.log_warning('Cleanup Render folder finished : ' + str(image_directories))
 
-    NewExecutor = subsystem.render_queue_with_executor(unreal.MoviePipelinePIEExecutor)
-    
+    if not render_queue_system.is_rendering():
+        NewExecutor = render_queue_system.render_queue_with_executor(unreal.MoviePipelinePIEExecutor)
+    else:
+        print('Failed start Render. Active executor working on producing a movie: %s' % (image_directories))
+        unreal.log_error('Failed start Render. Active executor working on producing a movie: %s' % (image_directories))
+        return
+
     if transfer:
         NewExecutor.on_executor_finished_delegate.add_callable_unique(file_transfer_callback)
 
     NewExecutor.on_executor_finished_delegate.add_callable_unique(delete_MoviePipelineJob)
+
+    #Check abort and erors during proccess
+    NewExecutor.on_executor_errored_delegate.add_callable_unique(errored_MoviePipelineJob)
+
 
 def delete_MoviePipelineJob(inJob, success):
     print('Delete Queue succes' + str(success))
@@ -222,5 +231,20 @@ def delete_MoviePipelineJob(inJob, success):
 def OpenFolderImages():
     print('Images directories : '+image_directories)
     subprocess.Popen(f'explorer "{image_directories}"')
+
+def get_render_queue_jobs():
+    render_queue_system = unreal.get_editor_subsystem(unreal.MoviePipelineQueueSubsystem)
+    render_queue = render_queue_system.get_queue()
+    render_jobs = render_queue.get_jobs()
+    return render_jobs
+
+def errored_MoviePipelineJob(Exec, inJob, is_fatal, errortext):
+    print('Abort Queue Exec : ' + str(Exec))
+    print('Abort Queue inJob : '+str(inJob))
+    print('Abort Queue job fatal : ' + str(is_fatal))
+    print('Abort Queue job error : ' + str(errortext))
+    unreal.log_warning('Job Render. Aborted!')
+    delete_MoviePipelineJob(inJob, is_fatal)
+
 
 

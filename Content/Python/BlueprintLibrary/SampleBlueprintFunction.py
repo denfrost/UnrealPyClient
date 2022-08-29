@@ -30,7 +30,7 @@ class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
     )
     def python_test_bp_action_return():
         result = "Success !!!"
-        #unreal.log("Execute Bluerprint Action Return")
+        unreal.log("Execute Bluerprint Action Return")
         return result
 
 

@@ -575,7 +575,7 @@ class MyWidget(QtWidgets.QWidget):
 
 
         CheckTransferToggleBtn = QtWidgets.QCheckBox("Transfer")
-        CheckTransferToggleBtn.setChecked(True)
+        CheckTransferToggleBtn.setChecked(False)
         self.connect(CheckTransferToggleBtn, QtCore.SIGNAL("clicked()"), onClickedToggleTransfer)
         GroupboxAuto5.layout().addWidget(CheckTransferToggleBtn)
 
