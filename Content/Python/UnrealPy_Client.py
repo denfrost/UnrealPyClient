@@ -273,7 +273,7 @@ class MyWidget(QtWidgets.QWidget):
             progressBar.setValue(100)
 
         def ServerAnsweredGetAllQueueJobs(feedback):
-            StatusLabel.setText("Unreal Server Status Online : " + HostServer)
+            UpdateStatusOnline(HostLineEdit.text())
             print("Got Server Answer : GetAllQueueJobs")
             tanswer =dt.now().strftime("%H:%M:%S")
             ServerAnswerTextEdit.clear()
@@ -285,15 +285,32 @@ class MyWidget(QtWidgets.QWidget):
             progressBar.setValue(100)
 
         def ServerAnsweredGetRemoteInfo(feedback):
-            StatusLabel.setText("Unreal Server Status Online : " + HostServer)
+            cleandata = feedback.split('"ReturnValue": "')[-1].split('"\\r\\n}\\r\\n}''')[0]
+            print('Clean Data :'+cleandata)
+            cleandata = cleandata.replace('\\', '')
+            print("Clean feedback :"+cleandata)
+            json_remote_data = json.loads(cleandata)
+
             print("Got Server Answer : GetRemoteInfo")
             tanswer =dt.now().strftime("%H:%M:%S")
             ServerAnswerTextEdit.clear()
             ServerAnswerTextEdit.setText(tanswer+" : "+feedback)
             tabwidget.setCurrentIndex(1)
             #Parse super json from server
+            print(type(json_remote_data))
+            print('Movie Rendering Working : ' +json_remote_data["MoviePipelineRendering"])
+            if json_remote_data["MoviePipelineRendering"]=='True':
+                Groupbox.setTitle('Server Status : Rendering Movie ')
+            else:
+                Groupbox.setTitle('Server Status : Available for Render ')
+                Groupbox.setAlignment(100)
+                Groupbox.setStyleSheet("QLabel { color : green; }")
+            print('Movie Rendering Working 2 : ' + json_remote_data["MoviePipelineRendering2"])
+
             progressBar.setValue(100)
 
+        def UpdateStatusOnline(server_str):
+            StatusLabel.setText("Unreal Server Status Online : " + server_str)
 
         @QtCore.Slot()
         def StatusUpdate(status):
@@ -362,14 +379,12 @@ class MyWidget(QtWidgets.QWidget):
         def FillQueueJobs(feedback):
             cleandata = feedback.split('"ReturnValue": "')[-1].split('"\\r\\n}\\r\\n}''')[0]
             print('Clean :'+cleandata)
-            if feedback == '':
-                print('FillQueueJobs :'+feedback[2])
-            else:
-                comboBoxQueue.clear()
-                print('FillQueueJobs :'+feedback)
-            res = feedback.split(",")
+            print(len(cleandata))
+            if len(cleandata) == 0:
+                return
+            res = cleandata.split(",")
             res.sort()
-            print(res[1])
+            comboBoxQueue.clear()
             print('Start Sorting:')
             for i, name in enumerate(res):
                 print('Feedback ['+str(i)+']: '+res[i])
@@ -468,7 +483,7 @@ class MyWidget(QtWidgets.QWidget):
 
         @QtCore.Slot()
         def ChangeStatus(check):
-            tm=dt.now().strftime("%H:%M:%S")
+            tm = dt.now().strftime("%H:%M:%S")
             if check:
                 StatusLabel.setText("Unreal Server Status Online : " + HostLineEdit.text() + ' ' + tm)
                 StatusLabel.setStyleSheet("QLabel { color : green; }")
@@ -551,7 +566,7 @@ class MyWidget(QtWidgets.QWidget):
 
         @QtCore.Slot()
         def Get_Remote_Info():
-            print('Get_Queue_Jobs')
+            print('Get_Remote_Info')
             JsonTextEdit.setText(json.dumps(Json_RequestRemoteInfo))
             progressBar.setValue(0)
             progressBar.setValue(50)

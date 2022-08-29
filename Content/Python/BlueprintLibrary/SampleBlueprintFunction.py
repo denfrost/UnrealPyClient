@@ -159,6 +159,9 @@ class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
         ret=str, static=True, meta=dict(Category="Samples Python BlueprintFunctionLibrary")
     )
     def unreal_python_get_info_remote():
-        output_json = {"MoviePipelineRndering": False}
-        return output_json
+        output_json_str = '{' \
+                          '"MoviePipelineRendering":"' + str(PyClientMovie.is_rendering_queue()) + '",' \
+                          '"MoviePipelineRendering2":"' + str(PyClientMovie.is_rendering_queue()) + '"' \
+                                                  '}'
+        return output_json_str
 
