@@ -212,6 +212,7 @@ class input_dialog(QWidget):
         print(type(list))
         print(list)
         settings.rewrite_exist_profile(list)
+        self.close()
 
     def dlg_quit(self):
         self.close()
