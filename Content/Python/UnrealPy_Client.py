@@ -271,10 +271,11 @@ class MyWidget(QtWidgets.QWidget):
             UpdateStatusOnline(HostLineEdit.text())
             print("Got Server Answer : Try Update server")
             tanswer =dt.now().strftime("%H:%M:%S")
+            tused = dt.now()-trequest
             ServerAnswerTextEdit.clear()
             ServerAnswerTextEdit.setText(tanswer+" : "+feedback) #JsonTextEdit.toPlainText()
             tabwidget.setCurrentIndex(1)
-            PerforceLabel.setText("Perforce Updated : "+tanswer)
+            PerforceLabel.setText("Perforce Updated : "+tanswer + '[' +str(tused) + ']')
             progressBar.setValue(100)
 
         def ServerAnsweredGetAllQueueJobs(feedback):
@@ -538,6 +539,8 @@ class MyWidget(QtWidgets.QWidget):
 
         @QtCore.Slot()
         def UpdatePerforce():
+            global trequest
+            trequest = dt.now()
             print("Perforce ")
             progressBar.setValue(0)
             JsonTextEdit.setText(json.dumps(Json_UpdatePerforce))
@@ -835,8 +838,6 @@ class MyWidget(QtWidgets.QWidget):
         if h:
             HostLineEdit.setText(h)
         CheckServer()
-
-
 
 def SendSocket(ClearAnswer, HostServer,Json_request, ServerAnswered):
     ws = create_connection(HostServer)

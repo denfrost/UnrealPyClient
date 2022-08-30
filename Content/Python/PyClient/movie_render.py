@@ -16,14 +16,10 @@ try:
 except ImportError as ie:
     print("Try load: It cannot import module and submodule", ie)
 
-
-
 import importlib
 importlib.reload(utils)
 importlib.reload(ftp_transfer)
 
-
-#global image_directories
 image_directories = []
 
 def file_transfer_callback(inJob, success):
