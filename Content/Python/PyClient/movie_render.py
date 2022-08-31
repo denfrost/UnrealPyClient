@@ -27,7 +27,7 @@ importlib.reload(ftp_transfer)
 image_directories = []
 
 def file_transfer_callback(inJob, success):
-
+    unreal.log_warning('Job Render. Transfer start')
     # sleep for 2 secons to all files be written to disk
     time.sleep(3)
 
@@ -43,6 +43,9 @@ def file_transfer_callback(inJob, success):
 
     medias = []
     shotgun_media = []
+
+    outputSetting = Current_Render_Job.get_configuration().find_setting_by_class(unreal.MoviePipelineOutputSetting)
+    image_directories = outputSetting.output_directory.path
 
     unreal.log_warning('Job Render. image_directories : '+str(image_directories))
 
