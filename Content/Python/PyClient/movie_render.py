@@ -211,8 +211,51 @@ def render_jobs(image_dirs,transfer=False):
     NewExecutor.on_executor_errored_delegate.add_callable_unique(errored_MoviePipelineJob)
 
 
-def render_selected_job():
-    settings.addlog('start_render_selected_job')
+def render_selected_job(JobName):
+    unreal.log_warning('Try Cleanup Render folder: '+str(image_directories))
+    settings.addlog('start_render_selected_job : '+JobName)
+    unreal.log_warning('Start_Render_Selected_Job : '+JobName)
+    render_queue_system = unreal.get_editor_subsystem(unreal.MoviePipelineQueueSubsystem)
+    render_queue = render_queue_system.get_queue()
+    render_jobs = render_queue.get_jobs()
+
+    global Current_Render_Job
+    global NewExecutor
+
+    for job in render_jobs:
+        if JobName == job.job_name:
+            print('Found Render Job in Queue : '+job.job_name)
+            unreal.log_warning('Found Render Job in Queue : '+job.job_name)
+            Current_Render_Job = job
+            if not render_queue_system.is_rendering():
+                NewExecutor = render_queue_system.render_queue_with_executor(unreal.MoviePipelinePIEExecutor)
+
+    NewExecutor.on_executor_errored_delegate.add_callable_unique(errored_MoviePipelineJob)
+    NewExecutor.on_individual_job_finished_delegate.add_callable_unique(delete_job)
+    NewExecutor.on_individual_job_finished_delegate.add_callable_unique(file_transfer_callback)
+    NewExecutor.on_executor_finished_delegate.add_callable_unique(delete_all_jobs)
+
+def delete_job(inJob, success):
+    print('Render Job finished succes : ' + str(Current_Render_Job.job_name))
+    unreal.log_warning('Render Job finished succes : ' + str(Current_Render_Job.job_name))
+    render_queue_system = unreal.get_editor_subsystem(unreal.MoviePipelineQueueSubsystem)
+    render_queue = render_queue_system.get_queue()
+    print('Finished Queue inJob :' + str(inJob))
+    outputSetting = Current_Render_Job.get_configuration().find_setting_by_class(unreal.MoviePipelineOutputSetting)
+    print('Finished Queue outputSetting : ' + str(outputSetting))
+    existed_jobs = render_queue.get_jobs()
+    for job in existed_jobs:
+        unreal.log_warning(f'All Render Jobs: {job.job_name}')
+        if Current_Render_Job.job_name == job.job_name:
+            print('Render Job finished found and delete : ' + str(job.job_name))
+            unreal.log_warning(f'Render Job finished found and delete : {str(job)}')
+            job.author = 'Rendered'
+            #render_queue.delete_job(job)
+
+def delete_all_jobs(inJob, success):
+    render_queue_system = unreal.get_editor_subsystem(unreal.MoviePipelineQueueSubsystem)
+    render_queue = render_queue_system.get_queue()
+    render_queue.delete_all_jobs()
 
 def delete_MoviePipelineJob(inJob, success):
     print('Delete Queue succes' + str(success))

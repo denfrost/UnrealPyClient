@@ -135,7 +135,7 @@ Json_RequestRemoteQueueJobs = \
         }
     }
 
-Json_RequestStartRenderJobs = \
+Json_RequestStartRenderJob = \
     {
         "MessageName": "http",
         "Parameters": {
@@ -143,8 +143,9 @@ Json_RequestStartRenderJobs = \
             "Verb": "PUT",
             "Body": {
                 "objectPath": "/Engine/PythonTypes.Default__SamplePythonBlueprintLibrary",
-                "functionName": "unreal_python_start_render_jobs",
+                "functionName": "unreal_python_start_render_job",
                 "parameters": {
+                    "sJobName": 'SH0005',
                     "result": 'return string'
                 }
             }
@@ -335,7 +336,8 @@ class MyWidget(QtWidgets.QWidget):
             progressBar.setValue(100)
 
         def ServerAnsweredStartRenderJobs(feedback):
-            print(feedback)
+            cleandata = feedback.split('"ReturnValue": "')[-1].split('"\\r\\n}\\r\\n}''')[0]
+            print('Clean Data :' + cleandata)
 
 
         def UpdateStatusOnline(server_str):
@@ -489,8 +491,12 @@ class MyWidget(QtWidgets.QWidget):
             HostServer = HostLineEdit.text()
             SendSocket(ClearAnswer, HostServer, json.dumps(Json_RequestMakeRenderJob), ServerAnsweredMakeRenderJob)
 
-        def StartRenderJobs():
-            SendSocket(ClearAnswer, HostServer, json.dumps(Json_RequestStartRenderJobs), ServerAnsweredStartRenderJobs)
+        def StartRenderJobs(job_name):
+            Json_RequestStartRenderJob["Parameters"]["Body"]["parameters"]["sJobName"] = job_name
+            JsonTextEdit.setText(json.dumps(Json_RequestStartRenderJob))
+            tabwidget.setCurrentIndex(0)
+            HostServer = HostLineEdit.text()
+            SendSocket(ClearAnswer, HostServer, json.dumps(Json_RequestStartRenderJob), ServerAnsweredStartRenderJobs)
 
         @QtCore.Slot()
         def MakeRenderJob():
@@ -498,7 +504,9 @@ class MyWidget(QtWidgets.QWidget):
 
         @QtCore.Slot()
         def StartRendering():
-            StartRenderJobs()
+            job_name = comboBoxQueue.currentText().split('-')[0]
+            print('split - '+job_name)
+            StartRenderJobs(job_name)
 
         @QtCore.Slot()
         def RenderMovie(): #arguments

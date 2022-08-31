@@ -146,10 +146,13 @@ class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
         unreal.log_warning("Job Render. Images Job ready: " + CurrentJob.job_name + ' Transfer to Shotgun :'+str(bFtp_transfer))
         #PyClientMovie.render_jobs(output_folder, bFtp_transfer)
 
-    @unreal.ufunction(ret=str, static=True)
-    def unreal_python_start_rendering():
-        #PyClientMovie.render_jobs(output_folder, Ftp_transfer)
-        print('Start Render')
+    @unreal.ufunction(
+        params=[str], ret=str, static=True)
+    def unreal_python_start_render_job(sJobName):
+        print('Start Render Job: '+sJobName)
+        PyClientMovie.render_selected_job(sJobName)
+        output = 'Start Render Job: '+sJobName
+        return output
 
     @unreal.ufunction(
         ret=str, static=True, meta=dict(Category="Samples Python BlueprintFunctionLibrary")
