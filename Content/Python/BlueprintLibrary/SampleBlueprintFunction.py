@@ -153,6 +153,9 @@ class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
         if render_queue_system.is_rendering():
             output = 'Rendering executed before and will render your Job: ' + sJobName
             return output
+
+        PyClientMovie.preload_assets()
+
         print('Start Render Job: '+sJobName)
         PyClientMovie.render_selected_job(sJobName)
         output = 'Start Render Job: '+sJobName
