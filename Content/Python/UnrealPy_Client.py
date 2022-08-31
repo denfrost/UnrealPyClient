@@ -15,6 +15,8 @@ from PySide2.QtWidgets import *
 #pip install websocket-client
 from websocket import create_connection
 
+import settings as settings
+
 Server = "ws://"+"10.66.7.80:30020"
 
 #describe calls checking umap, uasset.

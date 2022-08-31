@@ -167,7 +167,6 @@ def transfer_data(data):
             ftp_hndl.storbinary('STOR ' + ftp_server_path, fileObject)
         print( f'transferring {path} done\n')
 
-    
     quit(ftp_hndl)
     print('---------TRANSFERRING OF FILES FINISHED---------\n\n')
 
