@@ -162,6 +162,7 @@ class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
         ret=str, static=True, meta=dict(Category="Samples Python BlueprintFunctionLibrary")
     )
     def unreal_python_get_queue_jobs():
+        PyClientMovie.preload_assets()
         output = ''
         CurrentJobs = PyClientMovie.get_render_queue_jobs()
         for job in CurrentJobs:

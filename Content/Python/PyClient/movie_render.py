@@ -25,16 +25,20 @@ importlib.reload(utils)
 importlib.reload(ftp_transfer)
 
 image_directories = []
+preloaded_presets = []
 
-Presets = ['/Game/Cinematics/MoviePipeline/Presets/Render_Settings_001.Render_Settings_001',
+def preload_assets():
+    Presets = ['/Game/Cinematics/MoviePipeline/Presets/Render_Settings_001.Render_Settings_001',
            '/Game/Cinematics/MoviePipeline/Presets/Render_Settings_002_veryLow.Render_Settings_002_veryLow',
            '/Game/Cinematics/MoviePipeline/Presets/Render_Settings_002_Low.Render_Settings_002_Low',
            '/Game/Cinematics/MoviePipeline/Presets/Render_Settings_003_VeryHigh.Render_Settings_003_VeryHigh']
-preloaded_presets = []
-for pr in Presets:
-    preloaded_presets.append(utils.load_asset(pr))
-    print('Preload presets quality : '+pr)
-    unreal.log_warning('Preload presets quality : ' + str(preloaded_presets))
+    test = unreal.EditorAssetLibrary.load_asset('/Game/Cinematics/MoviePipeline/Presets/Render_Settings_003_VeryHigh.Render_Settings_003_VeryHigh')
+    print('Preload test presets quality : ' + test)
+    if len(preloaded_presets) < 2:
+        for pr in Presets:
+            preloaded_presets.append(utils.load_asset(pr))
+            print('Preload presets quality : '+pr)
+            unreal.log_warning('Preload presets quality : ' + str(preloaded_presets))
 
 def file_transfer_callback(inJob, success):
     unreal.log_warning('Job Render. Transfer start')
