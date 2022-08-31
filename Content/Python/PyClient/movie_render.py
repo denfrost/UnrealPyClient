@@ -33,7 +33,7 @@ def preload_assets():
            '/Game/Cinematics/MoviePipeline/Presets/Render_Settings_002_Low.Render_Settings_002_Low',
            '/Game/Cinematics/MoviePipeline/Presets/Render_Settings_003_VeryHigh.Render_Settings_003_VeryHigh']
     test = unreal.EditorAssetLibrary.load_asset('/Game/Cinematics/MoviePipeline/Presets/Render_Settings_003_VeryHigh.Render_Settings_003_VeryHigh')
-    print('Preload test presets quality : ' + test)
+    print('Preload test presets quality : ' + str(test))
     if len(preloaded_presets) < 2:
         for pr in Presets:
             preloaded_presets.append(utils.load_asset(pr))
