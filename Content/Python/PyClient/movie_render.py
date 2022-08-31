@@ -134,7 +134,7 @@ def cleanup_queue():
         pipelineQueue.delete_job(job)
 
 
-def make_render_job(name,sequencer, world,output_folder,preset_addr):
+def make_render_job(name,sequencer, world,output_folder,preset_addr,transfer=False):
     settings.addlog('make_render_job')
     '''
     Add a render job to render queue
@@ -157,7 +157,8 @@ def make_render_job(name,sequencer, world,output_folder,preset_addr):
     
     job.sequence = unreal.SoftObjectPath(sequencer)
     job.map = unreal.SoftObjectPath(world)
-    job.job_name  = name
+    job.job_name = name
+    job.author = 'Transfer ['+str(transfer)+']'
     
     outputSetting = job.get_configuration().find_setting_by_class(unreal.MoviePipelineOutputSetting)
     #outputSetting.output_resolution = unreal.IntPoint(1920,1080)
@@ -168,7 +169,7 @@ def make_render_job(name,sequencer, world,output_folder,preset_addr):
 
 
 def render_jobs(image_dirs,transfer=False):
-    settings.addlog('start_render_job')
+    settings.addlog('start_render_jobs')
     '''
     Render jobs already in render queue
 
@@ -209,6 +210,9 @@ def render_jobs(image_dirs,transfer=False):
     #Check abort and erors during proccess
     NewExecutor.on_executor_errored_delegate.add_callable_unique(errored_MoviePipelineJob)
 
+
+def render_selected_job():
+    settings.addlog('start_render_selected_job')
 
 def delete_MoviePipelineJob(inJob, success):
     print('Delete Queue succes' + str(success))

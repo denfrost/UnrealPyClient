@@ -84,7 +84,7 @@ Json_RequestSetShotRender = \
         }
     }
 
-Json_RequestRenderImages = \
+Json_RequestMakeRenderJob = \
     {
         "MessageName": "http",
         "Parameters": {
@@ -92,7 +92,7 @@ Json_RequestRenderImages = \
             "Verb": "PUT",
             "Body": {
                 "objectPath": "/Engine/PythonTypes.Default__SamplePythonBlueprintLibrary",
-                "functionName": "unreal_python_render_images",
+                "functionName": "unreal_python_make_render_job",
                 "parameters": {
                 "sSeqName" : 'SH0005',
                 "iQualityPreset" : 3,
@@ -135,6 +135,21 @@ Json_RequestRemoteQueueJobs = \
         }
     }
 
+Json_RequestStartRenderJobs = \
+    {
+        "MessageName": "http",
+        "Parameters": {
+            "Url": "/remote/object/call",
+            "Verb": "PUT",
+            "Body": {
+                "objectPath": "/Engine/PythonTypes.Default__SamplePythonBlueprintLibrary",
+                "functionName": "unreal_python_start_render_jobs",
+                "parameters": {
+                    "result": 'return string'
+                }
+            }
+        }
+    }
 Json_RequestDescribe =\
     {
     "MessageName": "http",
@@ -261,9 +276,9 @@ class MyWidget(QtWidgets.QWidget):
             tabwidget.setCurrentIndex(1)
             progressBar.setValue(100)
 
-        def ServerAnsweredImagesRender(feedback):
+        def ServerAnsweredMakeRenderJob(feedback):
             UpdateStatusOnline(HostLineEdit.text())
-            print("Got Server Answer : ImagesRenderTool")
+            print("Got Server Answer : MakeRenderJob")
             tanswer = dt.now().strftime("%H:%M:%S")
             ServerAnswerTextEdit.clear()
             ServerAnswerTextEdit.setText(tanswer + " : " + feedback)  # JsonTextEdit.toPlainText()
@@ -318,6 +333,10 @@ class MyWidget(QtWidgets.QWidget):
             print('Movie Rendering Working 2 : ' + json_remote_data["MoviePipelineRendering2"])
 
             progressBar.setValue(100)
+
+        def ServerAnsweredStartRenderJobs(feedback):
+            print(feedback)
+
 
         def UpdateStatusOnline(server_str):
             StatusLabel.setStyleSheet("QLabel { color : green; }")
@@ -402,11 +421,11 @@ class MyWidget(QtWidgets.QWidget):
             res = cleandata.split(",")
             res.sort()
             comboBoxQueue.clear()
-            print('Start Sorting:')
+            current_project = settings.get_Current_project()
+            print('Start Sorting for Project :'+current_project)
             for i, name in enumerate(res):
                 print('Feedback ['+str(i)+']: '+res[i])
-                if (res[i].find('_SEQ') > 0):
-                    mlist = res[i].split('.')[-1].split('_')
+                if (res[i].find(current_project) > -1):
                     comboBoxQueue.addItem("" + res[i])
 
         def printItemText(self):
@@ -459,20 +478,28 @@ class MyWidget(QtWidgets.QWidget):
 
         def MakeImagesTool(sequence, iQualityPreset=3, bFtp_transfer=True):
             print('Send Render for ImagesTool Render : '+sequence + ' Quality - '+str(iQualityPreset)+' Ftp transfer - '+str(bFtp_transfer))
-            Json_RequestRenderImages["Parameters"]["Body"]["parameters"]["sSeqName"] = sequence
-            Json_RequestRenderImages["Parameters"]["Body"]["parameters"]["iQuality"] = iQualityPreset
-            Json_RequestRenderImages["Parameters"]["Body"]["parameters"]["bFtp_transfer"] = bFtp_transfer
+            Json_RequestMakeRenderJob["Parameters"]["Body"]["parameters"]["sSeqName"] = sequence
+            Json_RequestMakeRenderJob["Parameters"]["Body"]["parameters"]["iQuality"] = iQualityPreset
+            Json_RequestMakeRenderJob["Parameters"]["Body"]["parameters"]["bFtp_transfer"] = bFtp_transfer
             progressBar.setValue(0)
-            JsonTextEdit.setText(json.dumps(Json_RequestRenderImages))
+            JsonTextEdit.setText(json.dumps(Json_RequestMakeRenderJob))
             tabwidget.setCurrentIndex(0)
             print("Sending....")
             progressBar.setValue(50)
             HostServer = HostLineEdit.text()
-            SendSocket(ClearAnswer, HostServer, json.dumps(Json_RequestRenderImages), ServerAnsweredImagesRender)
+            SendSocket(ClearAnswer, HostServer, json.dumps(Json_RequestMakeRenderJob), ServerAnsweredMakeRenderJob)
+
+        def StartRenderJobs():
+            SendSocket(ClearAnswer, HostServer, json.dumps(Json_RequestStartRenderJobs), ServerAnsweredStartRenderJobs)
 
         @QtCore.Slot()
-        def RenderImages():
+        def MakeRenderJob():
             MakeImagesTool(comboBox.currentText(), comboBoxQ.currentIndex(), CheckTransferToggleBtn.isChecked())
+
+        @QtCore.Slot()
+        def StartRendering():
+            StartRenderJobs()
+
         @QtCore.Slot()
         def RenderMovie(): #arguments
             MakeRenderTool(comboBox.currentText())
@@ -701,10 +728,15 @@ class MyWidget(QtWidgets.QWidget):
         self.connect(render, QtCore.SIGNAL("clicked()"), RenderMovie)
         GroupboxAuto.layout().addWidget(render)
 
-        render_images = QtWidgets.QPushButton("Render Images Sequence")
-        render_images.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
-        self.connect(render_images, QtCore.SIGNAL("clicked()"), RenderImages)
-        GroupboxAuto.layout().addWidget(render_images)
+        make_render_job_btn = QtWidgets.QPushButton("Make Render Job")
+        make_render_job_btn.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
+        self.connect(make_render_job_btn, QtCore.SIGNAL("clicked()"), MakeRenderJob)
+        GroupboxAuto.layout().addWidget(make_render_job_btn)
+
+        start_render_jobs_btn = QtWidgets.QPushButton("Start Render Jobs")
+        start_render_jobs_btn.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
+        self.connect(start_render_jobs_btn, QtCore.SIGNAL("clicked()"), StartRendering)
+        GroupboxAuto.layout().addWidget(start_render_jobs_btn)
 
         GroupboxAuto5 = QtWidgets.QGroupBox("Rendering Settings")
         GroupboxAuto5.setChecked(True)

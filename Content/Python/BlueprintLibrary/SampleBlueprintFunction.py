@@ -5,6 +5,8 @@ from unreal_global import settings as settings
 from unreal_global import *
 from unreal_global import PyClientMovie as PyClientMovie
 
+from datetime import datetime as dt
+
 @unreal.uclass()
 class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
     @unreal.ufunction(
@@ -102,7 +104,7 @@ class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
         static=True,
         meta=dict(Category="Samples Python BlueprintFunctionLibrary"),
     )
-    def unreal_python_render_images(sSeqName, iQuality=3, bFtp_transfer=True):
+    def unreal_python_make_render_job(sSeqName, iQuality=3, bFtp_transfer=True):
         Presets = ['/Game/Cinematics/MoviePipeline/Presets/Render_Settings_001.Render_Settings_001',
                    '/Game/Cinematics/MoviePipeline/Presets/Render_Settings_002_veryLow.Render_Settings_002_veryLow',
                    '/Game/Cinematics/MoviePipeline/Presets/Render_Settings_002_Low.Render_Settings_002_Low',
@@ -111,16 +113,16 @@ class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
         global CurrentJob
         job_work_folder = '/LIVE' #'/UnrealRenderImages'
         job_sequence_path = sSeqName
-        job_name = sSeqName.split('.')[-1]
+        job_shot_name = sSeqName.split('.')[-1]
         job_anim_dir = sSeqName.split('.')[0]
-        job_anim_dir = job_anim_dir.split(job_name)[0]
+        job_anim_dir = job_anim_dir.split(job_shot_name)[0]
         job_map_dir = job_anim_dir
         # ['C:\\Users\\mostafa.ari\\LIVE\\WHM\\EPWHH\\COMMON\\RENDER\\WHM_EPWHH_SH0170',
         #/Game/SHOTS/EPWHH/SH0000/
 
         print(f'Job AnimDir: {job_anim_dir}')
 
-        job_map = str(job_name).split('_SEQ')[0]
+        job_map = str(job_shot_name).split('_SEQ')[0]
         job_map_path = job_map_dir+job_map+'.'+job_map
         user_folder = os.path.expanduser('~')
 
@@ -128,10 +130,13 @@ class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
         Episode = job_anim_dir.split('SHOTS/')[-1].split('/')[0]
         print(f'Job server AnimDir: {CurrentProject}/{Episode}/COMMON/RENDER/{CurrentProject}_{Episode}_{job_map}')
         server_anim_dir = f'/{CurrentProject}/{Episode}/COMMON/RENDER/{CurrentProject}_{Episode}_{job_map}'
-
+        #global Ftp_transfer
+        #Ftp_transfer = bFtp_transfer
+        #global output_folder
         output_folder = user_folder+job_work_folder+server_anim_dir
-        print(f'Job : Name: {job_name} SeqPath: {job_sequence_path} Map: {job_anim_dir}{job_map} OutputFolder : {output_folder} Preset : {Presets[iQuality]}')
-        CurrentJob = PyClientMovie.make_render_job(job_name, job_sequence_path, job_map_path, output_folder, Presets[iQuality])
+        print(f'Job : Name: {job_shot_name} SeqPath: {job_sequence_path} Map: {job_anim_dir}{job_map} OutputFolder : {output_folder} Preset : {Presets[iQuality]}')
+        job_name = f'{CurrentProject}_{Episode}_{job_map}'+'['+dt.now().strftime("%H:%M:%S")+']'
+        CurrentJob = PyClientMovie.make_render_job(job_name, job_sequence_path, job_map_path, output_folder, Presets[iQuality], bFtp_transfer)
         '''
         CurrentJob = PyClientMovie.make_render_job('NewMap_Anim_SEQ', '/Game/NewMap_Anim_SEQ.NewMap_Anim_SEQ',
                                                            '/Game/NewMap_Anim.NewMap_Anim',
@@ -139,8 +144,12 @@ class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
                                                            '/Game/Cinematics/MoviePipeline/Presets/Render_Settings_003_VeryHigh.Render_Settings_003_VeryHigh')
         '''
         unreal.log_warning("Job Render. Images Job ready: " + CurrentJob.job_name + ' Transfer to Shotgun :'+str(bFtp_transfer))
-        PyClientMovie.render_jobs(output_folder, bFtp_transfer)
+        #PyClientMovie.render_jobs(output_folder, bFtp_transfer)
 
+    @unreal.ufunction(ret=str, static=True)
+    def unreal_python_start_rendering():
+        #PyClientMovie.render_jobs(output_folder, Ftp_transfer)
+        print('Start Render')
 
     @unreal.ufunction(
         ret=str, static=True, meta=dict(Category="Samples Python BlueprintFunctionLibrary")
@@ -152,7 +161,7 @@ class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
             print('JobName: '+job.job_name)
             print('JobProgress: '+str(job.get_status_progress()))
             print('JobStatus: ' + str(job.get_status_message()))
-            output = output +',' + job.job_name + '-' + str(job.get_status_progress())+'-'+job.get_status_message()+'-'+str(PyClientMovie.is_rendering_queue())+','
+            output = output +',' + job.job_name + '-' + str(job.get_status_progress())+'-'+job.author+','
         return output
 
     @unreal.ufunction(
