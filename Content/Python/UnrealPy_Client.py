@@ -396,6 +396,8 @@ class MyWidget(QtWidgets.QWidget):
             print('Clean :'+cleandata)
             print(len(cleandata))
             if len(cleandata) == 0:
+                comboBoxQueue.clear()
+                comboBoxQueue.addItem("EMPTY")
                 return
             res = cleandata.split(",")
             res.sort()
