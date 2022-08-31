@@ -136,7 +136,7 @@ class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
         output_folder = user_folder+job_work_folder+server_anim_dir
         print(f'Job : Name: {job_shot_name} SeqPath: {job_sequence_path} Map: {job_anim_dir}{job_map} OutputFolder : {output_folder} Preset : {Presets[iQuality]}')
         job_name = f'{CurrentProject}_{Episode}_{job_map}'+'['+dt.now().strftime("%H:%M:%S")+']'
-        CurrentJob = PyClientMovie.make_render_job(job_name, job_sequence_path, job_map_path, output_folder, Presets[iQuality], bFtp_transfer)
+        CurrentJob = PyClientMovie.make_render_job(job_name, job_sequence_path, job_map_path, output_folder, iQuality, bFtp_transfer)
         '''
         CurrentJob = PyClientMovie.make_render_job('NewMap_Anim_SEQ', '/Game/NewMap_Anim_SEQ.NewMap_Anim_SEQ',
                                                            '/Game/NewMap_Anim.NewMap_Anim',
@@ -149,6 +149,10 @@ class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
     @unreal.ufunction(
         params=[str], ret=str, static=True)
     def unreal_python_start_render_job(sJobName):
+        render_queue_system = unreal.get_editor_subsystem(unreal.MoviePipelineQueueSubsystem)
+        if render_queue_system.is_rendering():
+            output = 'Rendering executed before and will render your Job: ' + sJobName
+            return output
         print('Start Render Job: '+sJobName)
         PyClientMovie.render_selected_job(sJobName)
         output = 'Start Render Job: '+sJobName

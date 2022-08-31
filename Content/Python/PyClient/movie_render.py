@@ -26,6 +26,16 @@ importlib.reload(ftp_transfer)
 
 image_directories = []
 
+Presets = ['/Game/Cinematics/MoviePipeline/Presets/Render_Settings_001.Render_Settings_001',
+           '/Game/Cinematics/MoviePipeline/Presets/Render_Settings_002_veryLow.Render_Settings_002_veryLow',
+           '/Game/Cinematics/MoviePipeline/Presets/Render_Settings_002_Low.Render_Settings_002_Low',
+           '/Game/Cinematics/MoviePipeline/Presets/Render_Settings_003_VeryHigh.Render_Settings_003_VeryHigh']
+preloaded_presets = []
+for pr in Presets:
+    preloaded_presets.append(utils.load_asset(pr))
+    print('Preload presets quality : '+pr)
+    unreal.log_warning('Preload presets quality : ' + str(preloaded_presets))
+
 def file_transfer_callback(inJob, success):
     unreal.log_warning('Job Render. Transfer start')
     # sleep for 2 secons to all files be written to disk
@@ -137,7 +147,7 @@ def cleanup_queue():
         pipelineQueue.delete_job(job)
 
 
-def make_render_job(name,sequencer, world,output_folder,preset_addr,transfer=False):
+def make_render_job(name, sequencer, world, output_folder, preset_index, transfer=False):
     settings.addlog('make_render_job')
     '''
     Add a render job to render queue
@@ -155,12 +165,11 @@ def make_render_job(name,sequencer, world,output_folder,preset_addr,transfer=Fal
     pipelineQueue = subsystem.get_queue()
     
     job = pipelineQueue.allocate_new_job(unreal.MoviePipelineExecutorJob)
-    preset = utils.load_asset(preset_addr)
-    if preset:
-        print(str(preset))
-    unreal.log_warning('try set_configuration done :' + str(preset))
-    job.set_configuration(preset)
-    
+    unreal.log_warning('try set_configuration done : index ' + str(preset_index) )
+    choosen_preset = preloaded_presets[preset_index]
+    for p in preloaded_presets: print(str(p))
+    job.set_configuration(choosen_preset)
+
     job.sequence = unreal.SoftObjectPath(sequencer)
     job.map = unreal.SoftObjectPath(world)
     job.job_name = name
