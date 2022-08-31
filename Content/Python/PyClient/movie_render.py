@@ -156,6 +156,9 @@ def make_render_job(name,sequencer, world,output_folder,preset_addr,transfer=Fal
     
     job = pipelineQueue.allocate_new_job(unreal.MoviePipelineExecutorJob)
     preset = utils.load_asset(preset_addr)
+    if preset:
+        print(str(preset))
+    unreal.log_warning('try set_configuration done :' + str(preset))
     job.set_configuration(preset)
     
     job.sequence = unreal.SoftObjectPath(sequencer)
@@ -168,6 +171,7 @@ def make_render_job(name,sequencer, world,output_folder,preset_addr,transfer=Fal
     outputSetting.output_directory = unreal.DirectoryPath(output_folder)
     if job:
         settings.addlog('make_render_job done :'+str(job))
+        unreal.log_warning('make_render_job done :'+str(job))
     return job
 
 
