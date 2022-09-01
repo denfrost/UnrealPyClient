@@ -119,6 +119,7 @@ class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
         global CurrentJob
         job_work_folder = '/LIVE' #'/UnrealRenderImages'
         job_sequence_path = sSeqName
+        sequencer_softobject = unreal.SoftObjectPath(sSeqName) # check sequencer
         job_shot_name = sSeqName.split('.')[-1]
         job_anim_dir = sSeqName.split('.')[0]
         job_anim_dir = job_anim_dir.split(job_shot_name)[0]
@@ -136,13 +137,11 @@ class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
         Episode = job_anim_dir.split('SHOTS/')[-1].split('/')[0]
         print(f'Job server AnimDir: {CurrentProject}/{Episode}/COMMON/RENDER/{CurrentProject}_{Episode}_{job_map}')
         server_anim_dir = f'/{CurrentProject}/{Episode}/COMMON/RENDER/{CurrentProject}_{Episode}_{job_map}'
-        #global Ftp_transfer
-        #Ftp_transfer = bFtp_transfer
-        #global output_folder
+
         output_folder = user_folder+job_work_folder+server_anim_dir
         print(f'Job : Name: {job_shot_name} SeqPath: {job_sequence_path} Map: {job_anim_dir}{job_map} OutputFolder : {output_folder} Preset : {sQuality}')
         job_name = f'{CurrentProject}_{Episode}_{job_map}'+'['+dt.now().strftime("%H:%M:%S")+']'
-        CurrentJob = PyClientMovie.make_render_job(job_name, job_sequence_path, job_map_path, output_folder, choosen_loaded_preset, bFtp_transfer, setname)
+        CurrentJob = PyClientMovie.make_render_job(job_name, sequencer_softobject, job_map_path, output_folder, choosen_loaded_preset, bFtp_transfer, setname)
         '''
         CurrentJob = PyClientMovie.make_render_job('NewMap_Anim_SEQ', '/Game/NewMap_Anim_SEQ.NewMap_Anim_SEQ',
                                                            '/Game/NewMap_Anim.NewMap_Anim',
@@ -175,11 +174,11 @@ class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
             # outputSetting.output_resolution = unreal.IntPoint(1920,1080
             print('Setting config: ' + str(job.get_configuration()))
             print('SettingObj setting: ' + str(job_outputSetting))
-            print('Setting name : ' + str(job_outputSetting.file_name_format))
+            #print('Setting name : ' + str(job_outputSetting.file_name_format))
             print('JobName: '+job.job_name)
             print('JobProgress: '+str(job.get_status_progress()))
             print('JobStatus: ' + str(job.get_status_message()))
-            output = output +',' + job.job_name + '-' + str(job.get_status_progress())+'-'+job.author+'-'+str(job_outputSetting.file_name_format)+','
+            output = output +',' + job.job_name + '-' + str(job.get_status_progress())+'-'+job.author+','
         return output
 
     @unreal.ufunction(

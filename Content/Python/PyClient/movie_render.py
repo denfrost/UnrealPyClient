@@ -139,7 +139,8 @@ def file_transfer_callback(inJob, success):
     files_list = []
     unreal.log_warning('Frames dir : '+output_folder)
     files = glob.glob(image_directories + '/*')
-
+    for f in files:
+        unreal.log_warning('files in folder dir : ' + str(f))
     settings.addlog('transfer_render_job')
     if len(files):
         folder = f'{image_directories}/V{version}'
@@ -148,13 +149,16 @@ def file_transfer_callback(inJob, success):
             os.makedirs(folder)
 
         for f in files:
-            copied_file = shutil.copy2(f, folder)
-            files_list.append(copied_file)
+            if '_SEQ' in f:
+                copied_file = shutil.copy2(f, folder)
+                files_list.append(copied_file)
 
-                # add hero file
-        files_list.extend(files)
-
-        l_drive_files = ftp_transfer.transfer_data(files_list)
+        # add hero file
+        #files_list.extend(files)
+        unreal.log_warning('Files for transfer: ')
+        for f in files_list:
+            unreal.log_warning('File: '+f)
+        #l_drive_files = ftp_transfer.transfer_data(files_list)
     settings.addlog('transfer_render_job succes finished')
 
 def cleanup_queue():
@@ -171,8 +175,11 @@ def cleanup_queue():
         pipelineQueue.delete_job(job)
 
 
-def make_render_job(name, sequencer, world, output_folder, loaded_preset, transfer=False, setting_name=''):
+def make_render_job(name, sequencer_softobj, world, output_folder, loaded_preset, transfer=False):
     settings.addlog('make_render_job : '+name)
+    unreal.log_warning('make_render_job : '+name)
+    unreal.log_warning('sequencer : ' + str(sequencer_softobj))
+    unreal.log_warning('world : ' + world)
     '''
     Add a render job to render queue
 
@@ -187,20 +194,34 @@ def make_render_job(name, sequencer, world, output_folder, loaded_preset, transf
     
     subsystem = unreal.get_editor_subsystem(unreal.MoviePipelineQueueSubsystem)
     pipelineQueue = subsystem.get_queue()
-    
+
     job = pipelineQueue.allocate_new_job(unreal.MoviePipelineExecutorJob)
     unreal.log_warning('try set_configuration done : preset ' + str(loaded_preset))
     job.set_configuration(loaded_preset)
 
-    job.sequence = unreal.SoftObjectPath(sequencer)
+    try:
+        job.sequence = sequencer_softobj #unreal.SoftObjectPath(sequencer)
+    except:
+        unreal.log_warning("Job Render. Create Render Job : ")
+    else:
+        unreal.log_warning('Error try set_configuration : preset ' + str(loaded_preset))
+        render_queue_system = unreal.get_editor_subsystem(unreal.MoviePipelineQueueSubsystem)
+        render_queue = render_queue_system.get_queue()
+        render_queue.delete_job(job)
+        unreal.log_error("Job Render. Failed create Render Job : ")
+        return
+
+    unreal.log_warning('try set_configuration : preset ' + str(loaded_preset))
     job.map = unreal.SoftObjectPath(world)
     job.job_name = name
-    job.author = 'Transfer ['+str(transfer)+']'
-    
+    job.author = 'Transfer [' + str(transfer) + '] ' + str(setting_name)
+    unreal.log_warning('name : ' + name)
+    unreal.log_warning('job name : ' + job.job_name)
+
     outputSetting = job.get_configuration().find_setting_by_class(unreal.MoviePipelineOutputSetting)
     #outputSetting.output_resolution = unreal.IntPoint(1920,1080)
     outputSetting.output_directory = unreal.DirectoryPath(output_folder)
-    outputSetting.file_name_format = setting_name
+    #outputSetting.file_name_format #file nameing for output files rendering
     if job:
         settings.addlog('make_render_job done :'+str(job))
         unreal.log_warning('make_render_job done :'+str(job))
@@ -261,13 +282,33 @@ def render_selected_job(JobName):
     global Current_Render_Job
     global NewExecutor
 
+    found_job = False
     for job in render_jobs:
+        if JobName == job.job_name:
+            found_job = True
+    if not found_job: return
+
+    for job in render_jobs:
+        outputSetting = job.get_configuration().find_setting_by_class(unreal.MoviePipelineOutputSetting)
+        for_delete_folder = outputSetting.output_directory.path
+        print(for_delete_folder)
+        unreal.log_warning('Try Cleanup Render folder: ' + str(for_delete_folder))
+
+        if os.path.exists(for_delete_folder):
+            try:
+                shutil.rmtree(for_delete_folder)
+            except Exception as e:
+                print('Failed to delete %s. Reason: %s' % (for_delete_folder, e))
+            else:
+                unreal.log_warning('Cleanup Render folder finished : ' + str(for_delete_folder))
         if JobName == job.job_name:
             print('Found Render Job in Queue : '+job.job_name)
             unreal.log_warning('Found Render Job in Queue : '+job.job_name)
             Current_Render_Job = job
             if not render_queue_system.is_rendering():
                 NewExecutor = render_queue_system.render_queue_with_executor(unreal.MoviePipelinePIEExecutor)
+
+
 
     NewExecutor.on_executor_errored_delegate.add_callable_unique(errored_MoviePipelineJob)
     NewExecutor.on_individual_job_finished_delegate.add_callable_unique(delete_job)
