@@ -101,13 +101,21 @@ class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
         return perforcebat
 
     @unreal.ufunction(
-        params=[str, int, bool],
+        params=[str, str, bool],
         static=True,
         meta=dict(Category="Samples Python BlueprintFunctionLibrary"),
     )
-    def unreal_python_make_render_job(sSeqName, iQuality=3, bFtp_transfer=True):
+    def unreal_python_make_render_job(sSeqName, sQuality = '', bFtp_transfer=True):
         Loaded_Presets_Dict = PyClientMovie.get_preload_assets()
-        unreal.log_warning("Job Render. Make Render Images Job : "+sSeqName+' Quality : '+str(Loaded_Presets_Dict[iQuality])+' Transfer Publish : '+str(bFtp_transfer))
+        choosen_loaded_preset = None
+        setname = ''
+        for p in Loaded_Presets_Dict:
+            if str(p) == sQuality:
+                unreal.log_warning(f'Found "{str(p)}" == "{sQuality}')
+                choosen_loaded_preset = Loaded_Presets_Dict[p][1]
+                setname = Loaded_Presets_Dict[p][0]
+
+        unreal.log_warning("Job Render. Make Render Images Job : "+sSeqName+' Quality : '+sQuality+' Transfer Publish : '+str(bFtp_transfer))
         global CurrentJob
         job_work_folder = '/LIVE' #'/UnrealRenderImages'
         job_sequence_path = sSeqName
@@ -132,9 +140,9 @@ class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
         #Ftp_transfer = bFtp_transfer
         #global output_folder
         output_folder = user_folder+job_work_folder+server_anim_dir
-        print(f'Job : Name: {job_shot_name} SeqPath: {job_sequence_path} Map: {job_anim_dir}{job_map} OutputFolder : {output_folder} Preset : {Loaded_Presets_Dict[iQuality]}')
+        print(f'Job : Name: {job_shot_name} SeqPath: {job_sequence_path} Map: {job_anim_dir}{job_map} OutputFolder : {output_folder} Preset : {sQuality}')
         job_name = f'{CurrentProject}_{Episode}_{job_map}'+'['+dt.now().strftime("%H:%M:%S")+']'
-        CurrentJob = PyClientMovie.make_render_job(job_name, job_sequence_path, job_map_path, output_folder, iQuality, bFtp_transfer)
+        CurrentJob = PyClientMovie.make_render_job(job_name, job_sequence_path, job_map_path, output_folder, choosen_loaded_preset, bFtp_transfer, setname)
         '''
         CurrentJob = PyClientMovie.make_render_job('NewMap_Anim_SEQ', '/Game/NewMap_Anim_SEQ.NewMap_Anim_SEQ',
                                                            '/Game/NewMap_Anim.NewMap_Anim',
@@ -163,10 +171,15 @@ class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
         output = ''
         CurrentJobs = PyClientMovie.get_render_queue_jobs()
         for job in CurrentJobs:
+            job_outputSetting = job.get_configuration().find_setting_by_class(unreal.MoviePipelineOutputSetting)
+            # outputSetting.output_resolution = unreal.IntPoint(1920,1080
+            print('Setting config: ' + str(job.get_configuration()))
+            print('SettingObj setting: ' + str(job_outputSetting))
+            print('Setting name : ' + str(job_outputSetting.file_name_format))
             print('JobName: '+job.job_name)
             print('JobProgress: '+str(job.get_status_progress()))
             print('JobStatus: ' + str(job.get_status_message()))
-            output = output +',' + job.job_name + '-' + str(job.get_status_progress())+'-'+job.author+','
+            output = output +',' + job.job_name + '-' + str(job.get_status_progress())+'-'+job.author+'-'+str(job_outputSetting.file_name_format)+','
         return output
 
     @unreal.ufunction(

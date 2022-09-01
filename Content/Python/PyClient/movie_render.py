@@ -161,7 +161,7 @@ def cleanup_queue():
         pipelineQueue.delete_job(job)
 
 
-def make_render_job(name, sequencer, world, output_folder, preset_index, transfer=False):
+def make_render_job(name, sequencer, world, output_folder, loaded_preset, transfer=False, setting_name=''):
     settings.addlog('make_render_job : '+name)
     '''
     Add a render job to render queue
@@ -179,9 +179,8 @@ def make_render_job(name, sequencer, world, output_folder, preset_index, transfe
     pipelineQueue = subsystem.get_queue()
     
     job = pipelineQueue.allocate_new_job(unreal.MoviePipelineExecutorJob)
-    unreal.log_warning('try set_configuration done : index ' + str(preset_index) )
-    unreal.log_warning('try set_configuration done : preset ' + str(preloaded_presets[preset_index]))
-    job.set_configuration(preloaded_presets[preset_index])
+    unreal.log_warning('try set_configuration done : preset ' + str(loaded_preset))
+    job.set_configuration(loaded_preset)
 
     job.sequence = unreal.SoftObjectPath(sequencer)
     job.map = unreal.SoftObjectPath(world)
@@ -191,6 +190,7 @@ def make_render_job(name, sequencer, world, output_folder, preset_index, transfe
     outputSetting = job.get_configuration().find_setting_by_class(unreal.MoviePipelineOutputSetting)
     #outputSetting.output_resolution = unreal.IntPoint(1920,1080)
     outputSetting.output_directory = unreal.DirectoryPath(output_folder)
+    outputSetting.file_name_format = setting_name
     if job:
         settings.addlog('make_render_job done :'+str(job))
         unreal.log_warning('make_render_job done :'+str(job))

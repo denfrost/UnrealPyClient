@@ -95,7 +95,7 @@ Json_RequestMakeRenderJob = \
                 "functionName": "unreal_python_make_render_job",
                 "parameters": {
                 "sSeqName" : 'SH0005',
-                "iQualityPreset" : 3,
+                "sQualityPreset" : '',
                 }
             }
         }
@@ -358,6 +358,10 @@ class MyWidget(QtWidgets.QWidget):
         def ServerAnsweredGetRenderPresets(feedback):
             cleandata = feedback.split('"ReturnValue": "')[-1].split('"\\r\\n}\\r\\n}''')[0]
             print('GetRenderPresets Clean Data :' + cleandata)
+            if len(cleandata) == 0:
+                comboBoxQueue.clear()
+                comboBoxQueue.addItem("EMPTY")
+                return
             tanswer =dt.now().strftime("%H:%M:%S")
             ServerAnswerTextEdit.clear()
             ServerAnswerTextEdit.setText(tanswer+" : "+feedback)
@@ -391,14 +395,6 @@ class MyWidget(QtWidgets.QWidget):
             for i, name in enumerate(names):
                 comboBox.addItem(""+names[i])
 
-        @QtCore.Slot()
-        def GetShots():
-            names = "Make sequences list only test!"
-            print(len(names))
-            comboBox.clear()
-            for i, name in enumerate(names):
-                comboBox.addItem("" + names[i])
-
         def ParsedShots(feedback):
             print('Json string : '+feedback)
             res = feedback.replace("\\", '').replace('rnt', '').replace('rn', '').replace('b', '').replace('t"', '"') #clean json string
@@ -415,7 +411,7 @@ class MyWidget(QtWidgets.QWidget):
             ServerAnswerTextEdit.setText(tanswer + " : " +s1)
             ServerAnswerTextEdit.append(json.dumps(dict['ResponseBody']))
 
-        def GetAllServerShots():
+        def Get_All_Server_Shots():
             FilterToggleBtn.setChecked(False)
             tabwidget.setCurrentIndex(0)
             JsonTextEdit.setText(json.dumps(Json_RequestGetAllShots))
@@ -509,13 +505,13 @@ class MyWidget(QtWidgets.QWidget):
             HostServer = HostLineEdit.text()
             SendSocket(ClearAnswer, HostServer, json.dumps(Json_RequestSetShotRender), ServerAnsweredSetShotRender)
 
-        def MakeImagesTool(sequence, iQualityPreset=3, bFtp_transfer=True):
+        def MakeImagesTool(sequence, sQualityPreset='', bFtp_transfer=True):
             if sequence == 'EMPTY':
                 print("Wrong sequence name!")
                 return
-            print('Send Render for ImagesTool Render : '+sequence + ' Quality - '+str(iQualityPreset)+' Ftp transfer - '+str(bFtp_transfer))
+            print('Send Render for ImagesTool Render : '+sequence + ' Quality - '+str(sQualityPreset)+' Ftp transfer - '+str(bFtp_transfer))
             Json_RequestMakeRenderJob["Parameters"]["Body"]["parameters"]["sSeqName"] = sequence
-            Json_RequestMakeRenderJob["Parameters"]["Body"]["parameters"]["iQuality"] = iQualityPreset
+            Json_RequestMakeRenderJob["Parameters"]["Body"]["parameters"]["sQuality"] = sQualityPreset
             Json_RequestMakeRenderJob["Parameters"]["Body"]["parameters"]["bFtp_transfer"] = bFtp_transfer
             progressBar.setValue(0)
             JsonTextEdit.setText(json.dumps(Json_RequestMakeRenderJob))
@@ -540,7 +536,7 @@ class MyWidget(QtWidgets.QWidget):
 
         @QtCore.Slot()
         def MakeRenderJob():
-            MakeImagesTool(comboBox.currentText(), comboBoxQ.currentIndex(), CheckTransferToggleBtn.isChecked())
+            MakeImagesTool(comboBox.currentText(), comboBoxQ.currentText(), CheckTransferToggleBtn.isChecked())
 
         @QtCore.Slot()
         def StartRendering():
@@ -772,7 +768,7 @@ class MyWidget(QtWidgets.QWidget):
 
         getshot = QtWidgets.QPushButton("Get Server Sequences")
         getshot.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
-        self.connect(getshot, QtCore.SIGNAL("clicked()"), GetAllServerShots)
+        self.connect(getshot, QtCore.SIGNAL("clicked()"), Get_All_Server_Shots)
         GroupboxAuto.layout().addWidget(getshot)
 
         render = QtWidgets.QPushButton("Render Movie Sequence")
@@ -930,6 +926,10 @@ class MyWidget(QtWidgets.QWidget):
         if h:
             HostLineEdit.setText(h)
         CheckServer()
+        Get_Remote_Info()
+        Get_Render_Presets()
+        Get_All_Server_Shots()
+        Get_Queue_Jobs()
 
 def SendSocket(ClearAnswer, HostServer,Json_request, ServerAnswered):
     ws = create_connection(HostServer)
@@ -944,6 +944,7 @@ def SendSocket(ClearAnswer, HostServer,Json_request, ServerAnswered):
     ws.close()
 
 def unreal_working_dirs():
+    import unreal
     print('main dir program')
     prog_dir = unreal.Paths.project_plugins_dir() + 'UnrealPyClient'
     print('Plugin UnrealPyClient Directory: ' + prog_dir)
@@ -978,6 +979,8 @@ else:
 widget = MyWidget()
 widget.show()
 print("Py App checking server...")
+
+unreal_working_dirs()
 if app:
     sys.exit(app.exec_())  # for Windows external launch
 if "unreal" in dir():
