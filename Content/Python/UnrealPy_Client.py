@@ -151,6 +151,23 @@ Json_RequestStartRenderJob = \
             }
         }
     }
+
+Json_RequestGetRenderPresets = \
+    {
+        "MessageName": "http",
+        "Parameters": {
+            "Url": "/remote/object/call",
+            "Verb": "PUT",
+            "Body": {
+                "objectPath": "/Engine/PythonTypes.Default__SamplePythonBlueprintLibrary",
+                "functionName": "unreal_python_get_render_presets",
+                "parameters": {
+                    "result": 'return string'
+                }
+            }
+        }
+    }
+
 Json_RequestDescribe =\
     {
     "MessageName": "http",
@@ -321,8 +338,7 @@ class MyWidget(QtWidgets.QWidget):
 
             print("Got Server Answer : GetRemoteInfo")
             tanswer =dt.now().strftime("%H:%M:%S")
-            ServerAnswerTextEdit.clear()
-            ServerAnswerTextEdit.setText(tanswer+" : "+feedback)
+            ServerAnswerTextEdit.setText(ServerAnswerTextEdit.toPlainText() + '  ' + tanswer+" : "+feedback)
             tabwidget.setCurrentIndex(1)
             #Parse super json from server
             print(type(json_remote_data))
@@ -337,7 +353,22 @@ class MyWidget(QtWidgets.QWidget):
 
         def ServerAnsweredStartRenderJobs(feedback):
             cleandata = feedback.split('"ReturnValue": "')[-1].split('"\\r\\n}\\r\\n}''')[0]
-            print('Clean Data :' + cleandata)
+            print('RenderJobs Clean Data :' + cleandata)
+
+        def ServerAnsweredGetRenderPresets(feedback):
+            cleandata = feedback.split('"ReturnValue": "')[-1].split('"\\r\\n}\\r\\n}''')[0]
+            print('GetRenderPresets Clean Data :' + cleandata)
+            tanswer =dt.now().strftime("%H:%M:%S")
+            ServerAnswerTextEdit.clear()
+            ServerAnswerTextEdit.setText(tanswer+" : "+feedback)
+            tabwidget.setCurrentIndex(1)
+            list_presets = cleandata.split(',')
+            work_list_presets = []
+            comboBoxQ.clear()
+            for p in  list_presets:
+                if 'Render' in p:
+                    work_list_presets.append(p)
+                    comboBoxQ.addItem(p)
 
 
         def UpdateStatusOnline(server_str):
@@ -479,6 +510,9 @@ class MyWidget(QtWidgets.QWidget):
             SendSocket(ClearAnswer, HostServer, json.dumps(Json_RequestSetShotRender), ServerAnsweredSetShotRender)
 
         def MakeImagesTool(sequence, iQualityPreset=3, bFtp_transfer=True):
+            if sequence == 'EMPTY':
+                print("Wrong sequence name!")
+                return
             print('Send Render for ImagesTool Render : '+sequence + ' Quality - '+str(iQualityPreset)+' Ftp transfer - '+str(bFtp_transfer))
             Json_RequestMakeRenderJob["Parameters"]["Body"]["parameters"]["sSeqName"] = sequence
             Json_RequestMakeRenderJob["Parameters"]["Body"]["parameters"]["iQuality"] = iQualityPreset
@@ -498,6 +532,12 @@ class MyWidget(QtWidgets.QWidget):
             HostServer = HostLineEdit.text()
             SendSocket(ClearAnswer, HostServer, json.dumps(Json_RequestStartRenderJob), ServerAnsweredStartRenderJobs)
 
+        def Get_Render_Presets():
+            JsonTextEdit.setText(json.dumps(Json_RequestGetRenderPresets))
+            tabwidget.setCurrentIndex(0)
+            HostServer = HostLineEdit.text()
+            SendSocket(ClearAnswer, HostServer, json.dumps(Json_RequestGetRenderPresets), ServerAnsweredGetRenderPresets)
+
         @QtCore.Slot()
         def MakeRenderJob():
             MakeImagesTool(comboBox.currentText(), comboBoxQ.currentIndex(), CheckTransferToggleBtn.isChecked())
@@ -507,6 +547,11 @@ class MyWidget(QtWidgets.QWidget):
             job_name = comboBoxQueue.currentText().split('-')[0]
             print('split - '+job_name)
             StartRenderJobs(job_name)
+
+        @QtCore.Slot()
+        def GetRenderPresets():
+            print('GetRenderPresets')
+            Get_Render_Presets()
 
         @QtCore.Slot()
         def RenderMovie(): #arguments
@@ -756,15 +801,17 @@ class MyWidget(QtWidgets.QWidget):
 
         preset = QtWidgets.QLabel("Quality")
         GroupboxAuto5.layout().addWidget(preset)
+
+        GetRenderPresetsBtn = QtWidgets.QPushButton("GetRenderPresets")
+        GetRenderPresetsBtn.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Bold))
+        self.connect(GetRenderPresetsBtn, QtCore.SIGNAL("clicked()"), GetRenderPresets)
+        GroupboxAuto5.layout().addWidget(GetRenderPresetsBtn)
+
         comboBoxQ = QtWidgets.QComboBox(self)
         comboBoxQ.setFont(QtGui.QFont("Times", 10, QtGui.QFont.Medium))
-        comboBoxQ.addItem("Preset01")
-        comboBoxQ.addItem("Preset02VeryLow")
-        comboBoxQ.addItem("Preset02LoW")
-        comboBoxQ.addItem("Preset03VeryHigh")
-        comboBoxQ.setCurrentIndex(3)
+        comboBoxQ.setFixedWidth(200)
+        comboBoxQ.addItem("Epmty")
         GroupboxAuto5.layout().addWidget(comboBoxQ)
-
 
         CheckTransferToggleBtn = QtWidgets.QCheckBox("Transfer")
         CheckTransferToggleBtn.setChecked(False)

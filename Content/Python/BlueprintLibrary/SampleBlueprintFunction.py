@@ -40,7 +40,7 @@ class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
         ret=str, static=True, meta=dict(Category="Samples Python BlueprintFunctionLibrary")
     )
     def unreal_python_get_all_shots():
-        PyClientMovie.preload_assets()
+        PyClientMovie.get_preload_assets()
         output = ''
         asset_reg = unreal.AssetRegistryHelpers.get_asset_registry()
         assets = asset_reg.get_assets_by_class('LevelSequence', search_sub_classes=False)
@@ -106,11 +106,8 @@ class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
         meta=dict(Category="Samples Python BlueprintFunctionLibrary"),
     )
     def unreal_python_make_render_job(sSeqName, iQuality=3, bFtp_transfer=True):
-        Presets = ['/Game/Cinematics/MoviePipeline/Presets/Render_Settings_001.Render_Settings_001',
-                   '/Game/Cinematics/MoviePipeline/Presets/Render_Settings_002_veryLow.Render_Settings_002_veryLow',
-                   '/Game/Cinematics/MoviePipeline/Presets/Render_Settings_002_Low.Render_Settings_002_Low',
-                   '/Game/Cinematics/MoviePipeline/Presets/Render_Settings_003_VeryHigh.Render_Settings_003_VeryHigh']
-        unreal.log_warning("Job Render. Make Render Images Job : "+sSeqName+' Quality : '+Presets[iQuality]+' Transfer Publish : '+str(bFtp_transfer))
+        Loaded_Presets_Dict = PyClientMovie.get_preload_assets()
+        unreal.log_warning("Job Render. Make Render Images Job : "+sSeqName+' Quality : '+str(Loaded_Presets_Dict[iQuality])+' Transfer Publish : '+str(bFtp_transfer))
         global CurrentJob
         job_work_folder = '/LIVE' #'/UnrealRenderImages'
         job_sequence_path = sSeqName
@@ -135,7 +132,7 @@ class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
         #Ftp_transfer = bFtp_transfer
         #global output_folder
         output_folder = user_folder+job_work_folder+server_anim_dir
-        print(f'Job : Name: {job_shot_name} SeqPath: {job_sequence_path} Map: {job_anim_dir}{job_map} OutputFolder : {output_folder} Preset : {Presets[iQuality]}')
+        print(f'Job : Name: {job_shot_name} SeqPath: {job_sequence_path} Map: {job_anim_dir}{job_map} OutputFolder : {output_folder} Preset : {Loaded_Presets_Dict[iQuality]}')
         job_name = f'{CurrentProject}_{Episode}_{job_map}'+'['+dt.now().strftime("%H:%M:%S")+']'
         CurrentJob = PyClientMovie.make_render_job(job_name, job_sequence_path, job_map_path, output_folder, iQuality, bFtp_transfer)
         '''
@@ -154,9 +151,6 @@ class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
         if render_queue_system.is_rendering():
             output = 'Rendering executed before and will render your Job: ' + sJobName
             return output
-
-        PyClientMovie.preload_assets()
-
         print('Start Render Job: '+sJobName)
         PyClientMovie.render_selected_job(sJobName)
         output = 'Start Render Job: '+sJobName
@@ -166,7 +160,6 @@ class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
         ret=str, static=True, meta=dict(Category="Samples Python BlueprintFunctionLibrary")
     )
     def unreal_python_get_queue_jobs():
-        PyClientMovie.preload_assets()
         output = ''
         CurrentJobs = PyClientMovie.get_render_queue_jobs()
         for job in CurrentJobs:
@@ -185,4 +178,14 @@ class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
                           '"MoviePipelineRendering2":"' + str(PyClientMovie.is_rendering_queue()) + '"' \
                                                   '}'
         return output_json_str
+
+    @unreal.ufunction(
+        ret=str, static=True, meta=dict(Category="Samples Python BlueprintFunctionLibrary")
+    )
+    def unreal_python_get_render_presets():
+        output = ''
+        presets_rendering_dict = PyClientMovie.get_preload_assets()
+        for pr in presets_rendering_dict:
+            output = output + ',' + str(pr)
+        return output
 
