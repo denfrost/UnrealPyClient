@@ -102,7 +102,7 @@ def file_transfer_callback(inJob, success):
         
     print (conversion_cmd)
     CREATE_NO_WINDOW = 0x08000000
-    subprocess.call( conversion_cmd,creationflags=CREATE_NO_WINDOW)
+    subprocess.call( conversion_cmd, creationflags=CREATE_NO_WINDOW)
 
     unreal.log_warning('Job Render. conversion_cmd : ' + str(conversion_cmd))
     of = Path(output_mov)
@@ -119,14 +119,21 @@ def file_transfer_callback(inJob, success):
             version = shotgun.publish_shot(name_shot, l_drive_media[0])
             print('MSH :'+str(version))
         except:
-            print('error in submit to shotgun')
+            print('error get version in submit to shotgun')
             version = '001'
         else:
-            unreal.log_warning('Job Render. Get version shotgun of not exist..')
+            unreal.log_warning('Job Render. Get version shotgun if not exist..')
 
     # transfer rendered frames to Render folder in L
     # duplicate for version first
-        
+    folder = f'{image_directories}/V{version}'
+
+    while os.path.exists(folder):
+        version = version+1
+        folder = f'{image_directories}/V{version}'
+
+    unreal.log_warning(f'Job Render. Make fake version shotgun : V{version}')
+
     files_list = []
     unreal.log_warning('Frames dir : '+output_folder)
     files = glob.glob(image_directories + '/*')
