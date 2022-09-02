@@ -141,7 +141,38 @@ class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
         output_folder = user_folder+job_work_folder+server_anim_dir
         print(f'Job : Name: {job_shot_name} SeqPath: {job_sequence_path} Map: {job_anim_dir}{job_map} OutputFolder : {output_folder} Preset : {sQuality}')
         job_name = f'{CurrentProject}_{Episode}_{job_map}'+'['+dt.now().strftime("%H:%M:%S")+']'
-        CurrentJob = PyClientMovie.make_render_job(job_name, sequencer_softobject, job_map_path, output_folder, choosen_loaded_preset, bFtp_transfer, setname)
+
+        subsystem = unreal.get_editor_subsystem(unreal.MoviePipelineQueueSubsystem)
+        pipelineQueue = subsystem.get_queue()
+
+        job = pipelineQueue.allocate_new_job(unreal.MoviePipelineExecutorJob)
+        unreal.log_warning('try set_configuration done : preset ' + str(choosen_loaded_preset))
+        job.set_configuration(choosen_loaded_preset)
+
+        try:
+            job.sequence = sequencer_softobject  # unreal.SoftObjectPath(sequencer)
+        except:
+            unreal.log_warning("Job Render. Create Render Job : ")
+        else:
+            unreal.log_warning('Error try set_configuration : preset ' + str(choosen_loaded_preset))
+            render_queue_system = unreal.get_editor_subsystem(unreal.MoviePipelineQueueSubsystem)
+            render_queue = render_queue_system.get_queue()
+            render_queue.delete_job(job)
+            unreal.log_error("Job Render. Failed create Render Job : ")
+            return
+
+        unreal.log_warning('try set_configuration : preset ' + str(choosen_loaded_preset))
+        job.map = unreal.SoftObjectPath(job_map_path)
+        job.job_name = job_name
+        job.author = 'Transfer [' + str(bFtp_transfer) + '] ' + str(setname)
+        unreal.log_warning('name : ' + job_name)
+        unreal.log_warning('job name : ' + job.job_name)
+
+        outputSetting = job.get_configuration().find_setting_by_class(unreal.MoviePipelineOutputSetting)
+        # outputSetting.output_resolution = unreal.IntPoint(1920,1080)
+        outputSetting.output_directory = unreal.DirectoryPath(output_folder)
+
+        CurrentJob = PyClientMovie.make_render_job(job, bFtp_transfer, setname)
         '''
         CurrentJob = PyClientMovie.make_render_job('NewMap_Anim_SEQ', '/Game/NewMap_Anim_SEQ.NewMap_Anim_SEQ',
                                                            '/Game/NewMap_Anim.NewMap_Anim',

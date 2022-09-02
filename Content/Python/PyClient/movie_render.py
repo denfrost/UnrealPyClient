@@ -175,11 +175,9 @@ def cleanup_queue():
         pipelineQueue.delete_job(job)
 
 
-def make_render_job(name, sequencer_softobj, world, output_folder, loaded_preset, transfer=False):
-    settings.addlog('make_render_job : '+name)
-    unreal.log_warning('make_render_job : '+name)
-    unreal.log_warning('sequencer : ' + str(sequencer_softobj))
-    unreal.log_warning('world : ' + world)
+def make_render_job(job, transfer=False):
+    settings.addlog('make_render_job : '+job.job_name)
+    unreal.log_warning('make_render_job : '+job.job_name)
     '''
     Add a render job to render queue
 
@@ -192,36 +190,8 @@ def make_render_job(name, sequencer_softobj, world, output_folder, loaded_preset
     
     '''
     
-    subsystem = unreal.get_editor_subsystem(unreal.MoviePipelineQueueSubsystem)
-    pipelineQueue = subsystem.get_queue()
 
-    job = pipelineQueue.allocate_new_job(unreal.MoviePipelineExecutorJob)
-    unreal.log_warning('try set_configuration done : preset ' + str(loaded_preset))
-    job.set_configuration(loaded_preset)
-
-    try:
-        job.sequence = sequencer_softobj #unreal.SoftObjectPath(sequencer)
-    except:
-        unreal.log_warning("Job Render. Create Render Job : ")
-    else:
-        unreal.log_warning('Error try set_configuration : preset ' + str(loaded_preset))
-        render_queue_system = unreal.get_editor_subsystem(unreal.MoviePipelineQueueSubsystem)
-        render_queue = render_queue_system.get_queue()
-        render_queue.delete_job(job)
-        unreal.log_error("Job Render. Failed create Render Job : ")
-        return
-
-    unreal.log_warning('try set_configuration : preset ' + str(loaded_preset))
-    job.map = unreal.SoftObjectPath(world)
-    job.job_name = name
-    job.author = 'Transfer [' + str(transfer) + '] ' + str(setting_name)
-    unreal.log_warning('name : ' + name)
-    unreal.log_warning('job name : ' + job.job_name)
-
-    outputSetting = job.get_configuration().find_setting_by_class(unreal.MoviePipelineOutputSetting)
-    #outputSetting.output_resolution = unreal.IntPoint(1920,1080)
-    outputSetting.output_directory = unreal.DirectoryPath(output_folder)
-    #outputSetting.file_name_format #file nameing for output files rendering
+     #outputSetting.file_name_format #file nameing for output files rendering
     if job:
         settings.addlog('make_render_job done :'+str(job))
         unreal.log_warning('make_render_job done :'+str(job))
