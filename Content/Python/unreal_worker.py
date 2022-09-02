@@ -62,10 +62,16 @@ def start():
 def Start_UnrealPy_Client():
     script_dir = os.path.abspath(__file__).split('unreal_worker.py')[0]
     print('Plugin UnrealPyClient Directory: ' + script_dir)
-    clientbat = script_dir + "start_client.bat"
-    unreal_client_path = script_dir + 'UnrealPy_Client.py'
-    os.system(clientbat+' '+unreal_client_path)
-    print('Start UnrealPy_Client! : '+clientbat+' '+unreal_client_path)
+    if os.path.exists('M:\SCRIPTS\PACKAGES\Python39\python.exe'):
+        clientbat = script_dir + "start_m2client.bat"
+        unreal_client_path = script_dir + 'UnrealPy_Client.py'
+        os.system(clientbat+' '+unreal_client_path)
+        print('Start M2 UnrealPy_Client! : ' + script_dir + "start_UnrealPy_Client.bat")
+    else:
+        clientbat = script_dir + "start_client.bat"
+        unreal_client_path = script_dir + 'UnrealPy_Client.py'
+        os.system(clientbat+' '+unreal_client_path)
+        print('Start Standard UnrealPy_Client! : '+clientbat+' '+unreal_client_path)
 
 def ShowWorkingDirs():
     import unreal
