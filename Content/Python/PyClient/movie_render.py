@@ -158,7 +158,7 @@ def file_transfer_callback(inJob, success):
         unreal.log_warning('Files for transfer: ')
         for f in files_list:
             unreal.log_warning('File: '+f)
-        #l_drive_files = ftp_transfer.transfer_data(files_list)
+        l_drive_files = ftp_transfer.transfer_data(files_list)
     settings.addlog('transfer_render_job succes finished')
 
 def cleanup_queue():
@@ -254,9 +254,17 @@ def render_selected_job(JobName):
 
     found_job = False
     for job in render_jobs:
+        if job.job_name == '':
+            unreal.log_warning('Broken job found : ' + str(job))
+            render_queue_system = unreal.get_editor_subsystem(unreal.MoviePipelineQueueSubsystem)
+            render_queue = render_queue_system.get_queue()
+            render_queue.delete_job(job)
+            unreal.log_error("Job Render. Failed job was delete : " + str(job))
         if JobName == job.job_name:
             found_job = True
-    if not found_job: return
+
+    if not found_job:
+        return
 
     for job in render_jobs:
         outputSetting = job.get_configuration().find_setting_by_class(unreal.MoviePipelineOutputSetting)

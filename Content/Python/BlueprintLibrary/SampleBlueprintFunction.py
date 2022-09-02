@@ -116,10 +116,10 @@ class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
                 setname = Loaded_Presets_Dict[p][0]
 
         unreal.log_warning("Job Render. Make Render Images Job : "+sSeqName+' Quality : '+sQuality+' Transfer Publish : '+str(bFtp_transfer))
-        global CurrentJob
+
         job_work_folder = '/LIVE' #'/UnrealRenderImages'
         job_sequence_path = sSeqName
-        sequencer_softobject = unreal.SoftObjectPath(sSeqName) # check sequencer
+        # check sequencer
         job_shot_name = sSeqName.split('.')[-1]
         job_anim_dir = sSeqName.split('.')[0]
         job_anim_dir = job_anim_dir.split(job_shot_name)[0]
@@ -149,18 +149,7 @@ class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
         unreal.log_warning('try set_configuration done : preset ' + str(choosen_loaded_preset))
         job.set_configuration(choosen_loaded_preset)
 
-        try:
-            job.sequence = sequencer_softobject  # unreal.SoftObjectPath(sequencer)
-        except:
-            unreal.log_warning("Job Render. Create Render Job : ")
-        else:
-            unreal.log_warning('Error try set_configuration : preset ' + str(choosen_loaded_preset))
-            render_queue_system = unreal.get_editor_subsystem(unreal.MoviePipelineQueueSubsystem)
-            render_queue = render_queue_system.get_queue()
-            render_queue.delete_job(job)
-            unreal.log_error("Job Render. Failed create Render Job : ")
-            return
-
+        job.sequence = unreal.SoftObjectPath(sSeqName)  # unreal.SoftObjectPath(sequencer)
         unreal.log_warning('try set_configuration : preset ' + str(choosen_loaded_preset))
         job.map = unreal.SoftObjectPath(job_map_path)
         job.job_name = job_name
@@ -172,15 +161,13 @@ class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
         # outputSetting.output_resolution = unreal.IntPoint(1920,1080)
         outputSetting.output_directory = unreal.DirectoryPath(output_folder)
 
-        CurrentJob = PyClientMovie.make_render_job(job, bFtp_transfer)
         '''
         CurrentJob = PyClientMovie.make_render_job('NewMap_Anim_SEQ', '/Game/NewMap_Anim_SEQ.NewMap_Anim_SEQ',
                                                            '/Game/NewMap_Anim.NewMap_Anim',
                                                            'C:/Users/UnrealWorkstation/LIVE/NewMap_Anim/COMMON/RENDER/NewMap_Anim',
                                                            '/Game/Cinematics/MoviePipeline/Presets/Render_Settings_003_VeryHigh.Render_Settings_003_VeryHigh')
         '''
-        unreal.log_warning("Job Render. Images Job ready: " + CurrentJob.job_name + ' Transfer to Shotgun :'+str(bFtp_transfer))
-        #PyClientMovie.render_jobs(output_folder, bFtp_transfer)
+        unreal.log_warning("Job Render. Images Job ready: " + job.job_name + ' Transfer to Shotgun :'+str(bFtp_transfer))
 
     @unreal.ufunction(
         params=[str], ret=str, static=True)
