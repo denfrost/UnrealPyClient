@@ -153,6 +153,23 @@ Json_RequestStartRenderJob = \
         }
     }
 
+Json_RequestDeleteRenderJob = \
+    {
+        "MessageName": "http",
+        "Parameters": {
+            "Url": "/remote/object/call",
+            "Verb": "PUT",
+            "Body": {
+                "objectPath": "/Engine/PythonTypes.Default__SamplePythonBlueprintLibrary",
+                "functionName": "unreal_python_delete_render_job",
+                "parameters": {
+                    "sJobName": 'SH0005',
+                    "result": 'return string'
+                }
+            }
+        }
+    }
+
 Json_RequestGetRenderPresets = \
     {
         "MessageName": "http",
@@ -179,6 +196,22 @@ Json_RequestDescribe =\
             "ObjectPath": "/Game/Remote/Test.Test",
         }
     }
+    }
+
+Json_RequestDeleteAllRenderJobs = \
+    {
+        "MessageName": "http",
+        "Parameters": {
+            "Url": "/remote/object/call",
+            "Verb": "PUT",
+            "Body": {
+                "objectPath": "/Engine/PythonTypes.Default__SamplePythonBlueprintLibrary",
+                "functionName": "unreal_python_delete_all_render_jobs",
+                "parameters": {
+                    "result": 'return string'
+                }
+            }
+        }
     }
 
 #SuperMessage Remote tool
@@ -283,7 +316,7 @@ class MyWidget(QtWidgets.QWidget):
             FillShots(feedback)
             progressBar.setValue(70)
             #Ask about Rendering Movie  status
-            Get_Remote_Info()
+            GetRemoteInfo()
             progressBar.setValue(100)
 
         def ServerAnsweredSetShotRender(feedback):
@@ -327,7 +360,31 @@ class MyWidget(QtWidgets.QWidget):
             comboBoxQueue.setCurrentIndex(0)
             progressBar.setValue(70)
             #Ask about Rendering Movie  status
-            Get_Remote_Info()
+            GetRemoteInfo()
+            progressBar.setValue(100)
+
+        def ServerAnsweredDeleteRenderJob(feedback):
+            UpdateStatusOnline(HostLineEdit.text())
+            print("Got Server Answer : DeleteRenderJob")
+            tanswer =dt.now().strftime("%H:%M:%S")
+            ServerAnswerTextEdit.clear()
+            ServerAnswerTextEdit.setText(tanswer+" : "+feedback)
+            tabwidget.setCurrentIndex(1)
+            progressBar.setValue(70)
+            cleandata = feedback.split('"ReturnValue": "')[-1].split('"\\r\\n}\\r\\n}''')[0]
+            print('DeleteRenderJob Clean Data :'+cleandata)
+            progressBar.setValue(100)
+
+        def ServerAnsweredDeleteAllRenderJobs(feedback):
+            UpdateStatusOnline(HostLineEdit.text())
+            print("Got Server Answer : DeleteAllRenderJobs")
+            tanswer =dt.now().strftime("%H:%M:%S")
+            ServerAnswerTextEdit.clear()
+            ServerAnswerTextEdit.setText(tanswer+" : "+feedback)
+            tabwidget.setCurrentIndex(1)
+            progressBar.setValue(70)
+            cleandata = feedback.split('"ReturnValue": "')[-1].split('"\\r\\n}\\r\\n}''')[0]
+            print('DeleteRenderJob Clean Data :'+cleandata)
             progressBar.setValue(100)
 
         def ServerAnsweredGetRemoteInfo(feedback):
@@ -567,13 +624,18 @@ class MyWidget(QtWidgets.QWidget):
         @QtCore.Slot()
         def CheckServer():
             print("Connect to Unreal websocket : " + HostLineEdit.text())
+            Check_Server()
+
+        def Check_Server():
             try:
                 progressBar.setValue(0)
                 create_connection(HostLineEdit.text(), 5)
                 ChangeStatus(True)
                 settings.set_HostServer(HostLineEdit.text())
+                return True
             except:
                 ChangeStatus(False)
+            return False
 
         @QtCore.Slot()
         def ChangeStatus(check):
@@ -654,8 +716,8 @@ class MyWidget(QtWidgets.QWidget):
 
 
         @QtCore.Slot()
-        def Get_Queue_Jobs():
-            print('Get_Queue_Jobs')
+        def GetQueueJobs():
+            print('GetQueueJobs')
             JsonTextEdit.setText(json.dumps(Json_RequestRemoteQueueJobs))
             progressBar.setValue(0)
             progressBar.setValue(50)
@@ -664,8 +726,33 @@ class MyWidget(QtWidgets.QWidget):
             SendSocket(ClearAnswer, HostServer, JsonTextEdit.toPlainText(), ServerAnsweredGetAllQueueJobs) #Send Json to Unreal
 
         @QtCore.Slot()
-        def Get_Remote_Info():
-            print('Get_Remote_Info')
+        def DeleteRenderJob():
+            selected_job_name = comboBoxQueue.currentText().split('-')[0]
+            print('DeleteRenderJob :'+selected_job_name)
+            Delete_Render_Job(selected_job_name)
+
+
+        def Delete_Render_Job(job_name):
+            Json_RequestDeleteRenderJob["Parameters"]["Body"]["parameters"]["sJobName"] = job_name
+            JsonTextEdit.setText(json.dumps(Json_RequestDeleteRenderJob))
+            tabwidget.setCurrentIndex(0)
+            HostServer = HostLineEdit.text()
+            progressBar.setValue(0)
+            progressBar.setValue(50)
+            SendSocket(ClearAnswer, HostServer, json.dumps(Json_RequestDeleteRenderJob), ServerAnsweredDeleteRenderJob)
+
+        @QtCore.Slot()
+        def DeleteAllRenderJobs():
+            JsonTextEdit.setText(json.dumps(Json_RequestDeleteAllRenderJobs))
+            tabwidget.setCurrentIndex(0)
+            HostServer = HostLineEdit.text()
+            progressBar.setValue(0)
+            progressBar.setValue(50)
+            SendSocket(ClearAnswer, HostServer, json.dumps(Json_RequestDeleteAllRenderJobs), ServerAnsweredDeleteAllRenderJobs)
+
+        @QtCore.Slot()
+        def GetRemoteInfo():
+            print('GetRemoteInfo')
             JsonTextEdit.setText(json.dumps(Json_RequestRemoteInfo))
             progressBar.setValue(0)
             progressBar.setValue(50)
@@ -725,7 +812,7 @@ class MyWidget(QtWidgets.QWidget):
 
         GetInfoBtn = QtWidgets.QPushButton("Get Info")
         GetInfoBtn.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
-        self.connect(GetInfoBtn, QtCore.SIGNAL("clicked()"), Get_Remote_Info)
+        self.connect(GetInfoBtn, QtCore.SIGNAL("clicked()"), GetRemoteInfo)
         GroupboxCommand.layout().addWidget(GetInfoBtn)
 
         CommandBtn = QtWidgets.QPushButton("Send Command")
@@ -754,13 +841,26 @@ class MyWidget(QtWidgets.QWidget):
         get_queue = QtWidgets.QPushButton("Get Queue Jobs")
         get_queue.setFont(QtGui.QFont("Times", 10, QtGui.QFont.Bold))
         get_queue.setFixedWidth(150)
-        self.connect(get_queue, QtCore.SIGNAL("clicked()"), Get_Queue_Jobs)
+        self.connect(get_queue, QtCore.SIGNAL("clicked()"), GetQueueJobs)
         GroupboxQueue.layout().addWidget(get_queue)
 
         comboBoxQueue = QtWidgets.QComboBox(self)
         comboBoxQueue.setFont(QtGui.QFont("Times", 10, QtGui.QFont.Medium))
         comboBoxQueue.addItem("EMPTY")
         GroupboxQueue.layout().addWidget(comboBoxQueue)
+
+        delete_queue = QtWidgets.QPushButton("Delete Job")
+        delete_queue.setFont(QtGui.QFont("Times", 10, QtGui.QFont.Bold))
+        delete_queue.setFixedWidth(100)
+        self.connect(delete_queue, QtCore.SIGNAL("clicked()"), DeleteRenderJob)
+        GroupboxQueue.layout().addWidget(delete_queue)
+
+        delete_all_queue = QtWidgets.QPushButton("Delete All Jobs!")
+        delete_all_queue.setFont(QtGui.QFont("Times", 10, QtGui.QFont.Bold))
+        delete_all_queue.setFixedWidth(150)
+        self.connect(delete_all_queue, QtCore.SIGNAL("clicked()"), DeleteAllRenderJobs)
+        GroupboxQueue.layout().addWidget(delete_all_queue)
+
 
         GroupboxAuto = QtWidgets.QGroupBox("Rendering Shots")
         GroupboxAuto.setChecked(True)
@@ -926,11 +1026,12 @@ class MyWidget(QtWidgets.QWidget):
         h = settings.get_HostServer()
         if h:
             HostLineEdit.setText(h)
-        CheckServer()
-        Get_Remote_Info()
-        Get_Render_Presets()
-        Get_All_Server_Shots()
-        Get_Queue_Jobs()
+
+        if Check_Server():
+            GetRemoteInfo()
+            Get_Render_Presets()
+            Get_All_Server_Shots()
+            GetQueueJobs()
 
 def SendSocket(ClearAnswer, HostServer,Json_request, ServerAnswered):
     ws = create_connection(HostServer)
@@ -981,7 +1082,6 @@ widget = MyWidget()
 widget.show()
 print("Py App checking server...")
 
-unreal_working_dirs()
 if app:
     sys.exit(app.exec_())  # for Windows external launch
 if "unreal" in dir():

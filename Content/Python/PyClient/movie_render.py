@@ -308,7 +308,7 @@ def delete_job(inJob, success):
             print('Render Job finished found and delete : ' + str(job.job_name))
             unreal.log_warning(f'Render Job finished found and delete : {str(job)}')
             job.author = 'Rendered'
-            #render_queue.delete_job(job)
+            render_queue.delete_job(job)
 
 def delete_all_jobs(inJob, success):
     render_queue_system = unreal.get_editor_subsystem(unreal.MoviePipelineQueueSubsystem)

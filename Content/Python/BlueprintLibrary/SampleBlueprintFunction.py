@@ -175,10 +175,42 @@ class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
 
     @unreal.ufunction(
         params=[str], ret=str, static=True)
+    def unreal_python_delete_render_job(sJobName):
+        render_queue_system = unreal.get_editor_subsystem(unreal.MoviePipelineQueueSubsystem)
+        if render_queue_system.is_rendering():
+            if PyClientMovie.Current_Render_Job.job_name == sJobName:
+                output = 'Failed delete : Rendering executed render with Job what you try delete : ' + sJobName
+            return output
+        render_queue = render_queue_system.get_queue()
+        existed_jobs = render_queue.get_jobs()
+        print('Try Delete Render Job: '+sJobName)
+        for job in existed_jobs:
+            unreal.log_warning(f'All Render Jobs: {job.job_name}')
+            if sJobName == job.job_name:
+                render_queue.delete_job(job)
+                print('Render Job deleted : ' + str(job.job_name))
+                unreal.log_warning(f'Render Job deleted : {str(job)}')
+        output = 'Deleted Render Job: '+sJobName
+        return output
+
+    @unreal.ufunction(
+        ret=str, static=True)
+    def unreal_python_delete_all_render_jobs():
+        render_queue_system = unreal.get_editor_subsystem(unreal.MoviePipelineQueueSubsystem)
+        render_queue = render_queue_system.get_queue()
+        existed_jobs = render_queue.get_jobs()
+        if len(existed_jobs) > 0:
+            render_queue.delete_all_jobs()
+            return 'All render jobs deleted'
+        else:
+            return 'Render queue dont have any jobs'
+
+    @unreal.ufunction(
+        params=[str], ret=str, static=True)
     def unreal_python_start_render_job(sJobName):
         render_queue_system = unreal.get_editor_subsystem(unreal.MoviePipelineQueueSubsystem)
         if render_queue_system.is_rendering():
-            output = 'Rendering executed before and will render your Job: ' + sJobName
+            output = 'Rendering executed before and also will render your Job: ' + sJobName
             return output
         print('Start Render Job: '+sJobName)
         PyClientMovie.render_selected_job(sJobName)
