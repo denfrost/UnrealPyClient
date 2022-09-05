@@ -94,8 +94,9 @@ Json_RequestMakeRenderJob = \
                 "objectPath": "/Engine/PythonTypes.Default__SamplePythonBlueprintLibrary",
                 "functionName": "unreal_python_make_render_job",
                 "parameters": {
-                "sSeqName" : 'SH0005',
-                "sQualityPreset" : '',
+                    "sSeqName" : 'SH0005',
+                    "sQualityPreset" : '',
+                    "result" : 'return string'
                 }
             }
         }

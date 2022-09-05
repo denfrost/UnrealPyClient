@@ -101,6 +101,7 @@ class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
         return perforcebat
 
     @unreal.ufunction(
+        ret=str,
         params=[str, str, bool],
         static=True,
         meta=dict(Category="Samples Python BlueprintFunctionLibrary"),
@@ -168,6 +169,9 @@ class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
                                                            '/Game/Cinematics/MoviePipeline/Presets/Render_Settings_003_VeryHigh.Render_Settings_003_VeryHigh')
         '''
         unreal.log_warning("Job Render. Images Job ready: " + job.job_name + ' Transfer to Shotgun :'+str(bFtp_transfer))
+        output = ''
+        output = output + ',' + job.job_name + '-' + str(job.get_status_progress()) + '-' + job.author + ','
+        return output
 
     @unreal.ufunction(
         params=[str], ret=str, static=True)
