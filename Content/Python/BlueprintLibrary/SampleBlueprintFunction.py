@@ -154,7 +154,7 @@ class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
         unreal.log_warning('try set_configuration : preset ' + str(choosen_loaded_preset))
         job.map = unreal.SoftObjectPath(job_map_path)
         job.job_name = job_name
-        job.author = 'Transfer [' + str(bFtp_transfer) + '] ' + str(setname)
+        job.author = str(setname) + ' Transfer [' + str(bFtp_transfer) + '] '
         unreal.log_warning('name : ' + job_name)
         unreal.log_warning('job name : ' + job.job_name)
 
@@ -187,7 +187,7 @@ class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
         for job in existed_jobs:
             unreal.log_warning(f'All Render Jobs: {job.job_name}')
             if sJobName == job.job_name:
-                render_queue.delete_job(job)
+                render_queue.delete_job_inrendering(job)
                 print('Render Job deleted : ' + str(job.job_name))
                 unreal.log_warning(f'Render Job deleted : {str(job)}')
         output = 'Deleted Render Job: '+sJobName
@@ -197,6 +197,9 @@ class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
         ret=str, static=True)
     def unreal_python_delete_all_render_jobs():
         render_queue_system = unreal.get_editor_subsystem(unreal.MoviePipelineQueueSubsystem)
+        if render_queue_system.is_rendering():
+            output = 'Failed delete all jobs: Rendering working'
+            return output
         render_queue = render_queue_system.get_queue()
         existed_jobs = render_queue.get_jobs()
         if len(existed_jobs) > 0:

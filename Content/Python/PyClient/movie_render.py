@@ -50,16 +50,17 @@ def get_preload_assets():
     return preloaded_presets_dict
 
 def on_individual_job_finished(inJob, success):
-    unreal.log_warning('Job Render. on_individual_job_finished : '+Current_Render_Job.job_name)
-    if 'Transfer [True]' in Current_Render_Job.author:
+    unreal.log_warning('Job Render. on_individual_job_finished : '+inJob.job_name)
+    if 'Transfer [True]' in inJob.author:
         file_transfer_callback(inJob, success)
+        delete_job_inrendering(inJob, success)
     else:
-        delete_job(inJob, success)
+        delete_job_inrendering(inJob, success)
 
 def file_transfer_callback(inJob, success):
     unreal.log_warning('Job Render. Transfer start')
     ftp_detected = False
-    outputSetting = Current_Render_Job.get_configuration().find_setting_by_class(unreal.MoviePipelineOutputSetting)
+    outputSetting = inJob.get_configuration().find_setting_by_class(unreal.MoviePipelineOutputSetting)
     image_directories = outputSetting.output_directory.path
     # sleep for 2 secons to all files be written to disk
     time.sleep(3)
@@ -174,9 +175,6 @@ def file_transfer_callback(inJob, success):
 
     settings.addlog('transfer_render_job succes finished')
     unreal.log_warning('transfer_render_job succes finished')
-    render_queue_system = unreal.get_editor_subsystem(unreal.MoviePipelineQueueSubsystem)
-    render_queue = render_queue_system.get_queue()
-    render_queue.delete_job(Current_Render_Job)
 
 def cleanup_queue():
     '''
@@ -266,7 +264,7 @@ def render_selected_job(JobName):
     render_queue = render_queue_system.get_queue()
     render_jobs = render_queue.get_jobs()
 
-    global Current_Render_Job
+    #global Current_Render_Job
     global NewExecutor
 
     found_job = False
@@ -299,7 +297,7 @@ def render_selected_job(JobName):
         if JobName == job.job_name:
             print('Found Render Job in Queue : '+job.job_name)
             unreal.log_warning('Found Render Job in Queue : '+job.job_name)
-            Current_Render_Job = job
+            #Current_Render_Job = job
             if not render_queue_system.is_rendering():
                 NewExecutor = render_queue_system.render_queue_with_executor(unreal.MoviePipelinePIEExecutor)
 
@@ -309,22 +307,17 @@ def render_selected_job(JobName):
 
     NewExecutor.on_executor_finished_delegate.add_callable_unique(delete_all_jobs)
 
-def delete_job(inJob, success):
-    print('Start Delete Job on individual finished : ' + str(Current_Render_Job.job_name))
-    unreal.log_warning('Start Delete Job on individual finished : ' + str(Current_Render_Job.job_name))
-    render_queue_system = unreal.get_editor_subsystem(unreal.MoviePipelineQueueSubsystem)
-    render_queue = render_queue_system.get_queue()
+def delete_job_inrendering(inJob, success):
+    print('Start Delete Job on individual finished : ' + str(inJob.job_name))
+    unreal.log_warning('Start Delete Job on individual finished : ' + str(inJob.job_name))
     print('Try delete Finished Queue inJob :' + str(inJob))
-    outputSetting = Current_Render_Job.get_configuration().find_setting_by_class(unreal.MoviePipelineOutputSetting)
-    print('Finished Queue outputSetting : ' + str(outputSetting))
-    existed_jobs = render_queue.get_jobs()
-    for job in existed_jobs:
-        unreal.log_warning(f'All Render Jobs: {job.job_name}')
-        if Current_Render_Job.job_name == job.job_name:
-            unreal.log_warning(f'Render Job finished found and delete : {str(job)}')
-            job.author = 'Rendered'
-            print('Render Job finished found and delete : ' + str(job.job_name)+' '+str(job.author))
-            render_queue.delete_job(job)
+    outputSetting = inJob.get_configuration().find_setting_by_class(unreal.MoviePipelineOutputSetting)
+    print('Finished Queue outputSetting : ' + str(inJob.job_name))
+    unreal.log_warning('Finished Queue outputSetting : ' + str(inJob.job_name))
+    inJob.author = inJob.author.replace('Transfer [True]', ' Rendered & Transfered')
+    inJob.author = inJob.author.replace('Transfer [False]', ' Rendered')
+    print('Render Job finished found and delete : ' + str(inJob.job_name)+' author: ['+str(inJob.author)+']')
+    unreal.log_warning('Render Job finished found and delete : ' + str(inJob.job_name)+' author: ['+str(inJob.author) + ']')
 
 def delete_all_jobs(inJob, success):
     render_queue_system = unreal.get_editor_subsystem(unreal.MoviePipelineQueueSubsystem)
@@ -354,7 +347,7 @@ def delete_MoviePipelineJob(inJob, success):
         outputSetting = job.get_configuration().find_setting_by_class(unreal.MoviePipelineOutputSetting)
         print(outputSetting.output_directory.path)
         if outputSetting.output_directory.path == image_directories:
-            pipelineQueue.delete_job(job)
+            pipelineQueue.delete_job_inrendering(job)
             print('Deleted Finished Job succes : '+job.job_name)
             unreal.log_warning('Job Render. Deleted Finished Job succes :'+job.job_name)
             settings.addlog('Job Render. Deleted Finished Job succes :'+job.job_name)
