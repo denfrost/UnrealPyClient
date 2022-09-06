@@ -315,9 +315,11 @@ class MyWidget(QtWidgets.QWidget):
             tabwidget.setCurrentIndex(1)
             FillShots(feedback)
             progressBar.setValue(70)
-            #Ask about Rendering Movie  status
-            GetRemoteInfo()
             progressBar.setValue(100)
+            # Ask about Rendering Movie  status
+            if (RefreshQueueToggleBtn.isChecked()): GetQueueJobs()
+            else: GetRemoteInfo()
+
 
         def ServerAnsweredSetShotRender(feedback):
             UpdateStatusOnline(HostLineEdit.text())
@@ -359,9 +361,9 @@ class MyWidget(QtWidgets.QWidget):
             FillQueueJobs(feedback)
             comboBoxQueue.setCurrentIndex(0)
             progressBar.setValue(70)
+            progressBar.setValue(100)
             #Ask about Rendering Movie  status
             GetRemoteInfo()
-            progressBar.setValue(100)
 
         def ServerAnsweredDeleteRenderJob(feedback):
             UpdateStatusOnline(HostLineEdit.text())
@@ -374,6 +376,9 @@ class MyWidget(QtWidgets.QWidget):
             cleandata = feedback.split('"ReturnValue": "')[-1].split('"\\r\\n}\\r\\n}''')[0]
             print('DeleteRenderJob Clean Data :'+cleandata)
             progressBar.setValue(100)
+            if (RefreshQueueToggleBtn.isChecked()): GetQueueJobs()
+            else: GetRemoteInfo()
+
 
         def ServerAnsweredDeleteAllRenderJobs(feedback):
             UpdateStatusOnline(HostLineEdit.text())
@@ -386,6 +391,8 @@ class MyWidget(QtWidgets.QWidget):
             cleandata = feedback.split('"ReturnValue": "')[-1].split('"\\r\\n}\\r\\n}''')[0]
             print('DeleteRenderJob Clean Data :'+cleandata)
             progressBar.setValue(100)
+            if (RefreshQueueToggleBtn.isChecked()): GetQueueJobs()
+            else: GetRemoteInfo()
 
         def ServerAnsweredGetRemoteInfo(feedback):
             cleandata = feedback.split('"ReturnValue": "')[-1].split('"\\r\\n}\\r\\n}''')[0]
@@ -595,12 +602,20 @@ class MyWidget(QtWidgets.QWidget):
         @QtCore.Slot()
         def MakeRenderJob():
             MakeImagesTool(comboBox.currentText(), comboBoxQ.currentText(), CheckTransferToggleBtn.isChecked())
+            if (RefreshQueueToggleBtn.isChecked()):
+                GetQueueJobs()
+            else:
+                GetRemoteInfo()
 
         @QtCore.Slot()
         def StartRendering():
             job_name = comboBoxQueue.currentText().split('-')[0]
             print('split - '+job_name)
             StartRenderJobs(job_name)
+            if (RefreshQueueToggleBtn.isChecked()):
+                GetQueueJobs()
+            else:
+                GetRemoteInfo()
 
         @QtCore.Slot()
         def GetRenderPresets():
@@ -726,6 +741,10 @@ class MyWidget(QtWidgets.QWidget):
             SendSocket(ClearAnswer, HostServer, JsonTextEdit.toPlainText(), ServerAnsweredGetAllQueueJobs) #Send Json to Unreal
 
         @QtCore.Slot()
+        def onRefreshQueueToggle():
+            GetQueueBtn.setEnabled(not RefreshQueueToggleBtn.isChecked())
+
+        @QtCore.Slot()
         def DeleteRenderJob():
             selected_job_name = comboBoxQueue.currentText().split('-')[0]
             print('DeleteRenderJob :'+selected_job_name)
@@ -838,11 +857,17 @@ class MyWidget(QtWidgets.QWidget):
         vbox50 = QtWidgets.QHBoxLayout()
         GroupboxQueue.setLayout(vbox50)
 
-        get_queue = QtWidgets.QPushButton("Get Queue Jobs")
-        get_queue.setFont(QtGui.QFont("Times", 10, QtGui.QFont.Bold))
-        get_queue.setFixedWidth(150)
-        self.connect(get_queue, QtCore.SIGNAL("clicked()"), GetQueueJobs)
-        GroupboxQueue.layout().addWidget(get_queue)
+        GetQueueBtn = QtWidgets.QPushButton("Get Queue Jobs")
+        GetQueueBtn.setFont(QtGui.QFont("Times", 10, QtGui.QFont.Bold))
+        GetQueueBtn.setFixedWidth(150)
+        self.connect(GetQueueBtn, QtCore.SIGNAL("clicked()"), GetQueueJobs)
+        GroupboxQueue.layout().addWidget(GetQueueBtn)
+
+        RefreshQueueToggleBtn = QtWidgets.QCheckBox("Auto refresh")
+        RefreshQueueToggleBtn.setChecked(True)
+        self.connect(RefreshQueueToggleBtn, QtCore.SIGNAL("clicked()"), onRefreshQueueToggle)
+        GetQueueBtn.setEnabled(not RefreshQueueToggleBtn.isChecked())
+        GroupboxQueue.layout().addWidget(RefreshQueueToggleBtn)
 
         comboBoxQueue = QtWidgets.QComboBox(self)
         comboBoxQueue.setFont(QtGui.QFont("Times", 10, QtGui.QFont.Medium))
