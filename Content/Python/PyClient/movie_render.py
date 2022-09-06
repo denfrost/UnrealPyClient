@@ -53,9 +53,9 @@ def on_individual_job_finished(inJob, success):
     unreal.log_warning('Job Render. on_individual_job_finished : '+inJob.job_name)
     if 'Transfer [True]' in inJob.author:
         file_transfer_callback(inJob, success)
-        delete_job_inrendering(inJob, success)
+        finish_job_inrendering(inJob, success)
     else:
-        delete_job_inrendering(inJob, success)
+        finish_job_inrendering(inJob, success)
 
 def file_transfer_callback(inJob, success):
     unreal.log_warning('Job Render. Transfer start')
@@ -264,7 +264,6 @@ def render_selected_job(JobName):
     render_queue = render_queue_system.get_queue()
     render_jobs = render_queue.get_jobs()
 
-    #global Current_Render_Job
     global NewExecutor
 
     found_job = False
@@ -297,7 +296,6 @@ def render_selected_job(JobName):
         if JobName == job.job_name:
             print('Found Render Job in Queue : '+job.job_name)
             unreal.log_warning('Found Render Job in Queue : '+job.job_name)
-            #Current_Render_Job = job
             if not render_queue_system.is_rendering():
                 NewExecutor = render_queue_system.render_queue_with_executor(unreal.MoviePipelinePIEExecutor)
 
@@ -307,7 +305,7 @@ def render_selected_job(JobName):
 
     NewExecutor.on_executor_finished_delegate.add_callable_unique(delete_all_jobs)
 
-def delete_job_inrendering(inJob, success):
+def finish_job_inrendering(inJob, success):
     print('Start Delete Job on individual finished : ' + str(inJob.job_name))
     unreal.log_warning('Start Delete Job on individual finished : ' + str(inJob.job_name))
     print('Try delete Finished Queue inJob :' + str(inJob))
@@ -347,7 +345,7 @@ def delete_MoviePipelineJob(inJob, success):
         outputSetting = job.get_configuration().find_setting_by_class(unreal.MoviePipelineOutputSetting)
         print(outputSetting.output_directory.path)
         if outputSetting.output_directory.path == image_directories:
-            pipelineQueue.delete_job_inrendering(job)
+            pipelineQueue.delete_job(job)
             print('Deleted Finished Job succes : '+job.job_name)
             unreal.log_warning('Job Render. Deleted Finished Job succes :'+job.job_name)
             settings.addlog('Job Render. Deleted Finished Job succes :'+job.job_name)
