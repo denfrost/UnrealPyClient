@@ -49,9 +49,18 @@ def get_preload_assets():
 
     return preloaded_presets_dict
 
+def on_individual_job_finished(inJob, success):
+    unreal.log_warning('Job Render. on_individual_job_finished : '+Current_Render_Job.job_name)
+    if 'Transfer [True]' in Current_Render_Job.author:
+        file_transfer_callback(inJob, success)
+    else:
+        delete_job(inJob, success)
 
 def file_transfer_callback(inJob, success):
     unreal.log_warning('Job Render. Transfer start')
+    ftp_detected = False
+    outputSetting = Current_Render_Job.get_configuration().find_setting_by_class(unreal.MoviePipelineOutputSetting)
+    image_directories = outputSetting.output_directory.path
     # sleep for 2 secons to all files be written to disk
     time.sleep(3)
 
@@ -67,9 +76,6 @@ def file_transfer_callback(inJob, success):
 
     medias = []
     shotgun_media = []
-
-    outputSetting = Current_Render_Job.get_configuration().find_setting_by_class(unreal.MoviePipelineOutputSetting)
-    image_directories = outputSetting.output_directory.path
 
     unreal.log_warning('Job Render. image_directories : '+str(image_directories))
 
@@ -102,14 +108,15 @@ def file_transfer_callback(inJob, success):
         
     print (conversion_cmd)
     CREATE_NO_WINDOW = 0x08000000
-    subprocess.call( conversion_cmd, creationflags=CREATE_NO_WINDOW)
+    subprocess.call(conversion_cmd, creationflags=CREATE_NO_WINDOW)
 
     version = '001'
     unreal.log_warning('Job Render. conversion_cmd : ' + str(conversion_cmd))
     of = Path(output_mov)
     if of.exists():
         # send media file to L drive
-        l_drive_media = ftp_transfer.transfer_data([output_mov])
+        if ftp_detected:
+            l_drive_media = ftp_transfer.transfer_data([output_mov])
 
         # publish it to shotgun
         time.sleep(3)
@@ -131,7 +138,10 @@ def file_transfer_callback(inJob, success):
     i = 0
     while os.path.exists(folder_check):
         i = i+1
-        version = '00'+str(i)
+        if i < 10:
+            version = '00'+str(i)
+        else:
+            version = '0' + str(i)
         folder_check = f'{image_directories}/V{version}'
 
     unreal.log_warning(f'Job Render. Make fake version shotgun : V{version}')
@@ -158,8 +168,15 @@ def file_transfer_callback(inJob, success):
         unreal.log_warning('Files for transfer: ')
         for f in files_list:
             unreal.log_warning('File: '+f)
-        l_drive_files = ftp_transfer.transfer_data(files_list)
+
+        if ftp_detected:
+            l_drive_files = ftp_transfer.transfer_data(files_list)
+
     settings.addlog('transfer_render_job succes finished')
+    unreal.log_warning('transfer_render_job succes finished')
+    render_queue_system = unreal.get_editor_subsystem(unreal.MoviePipelineQueueSubsystem)
+    render_queue = render_queue_system.get_queue()
+    render_queue.delete_job(Current_Render_Job)
 
 def cleanup_queue():
     '''
@@ -286,34 +303,38 @@ def render_selected_job(JobName):
             if not render_queue_system.is_rendering():
                 NewExecutor = render_queue_system.render_queue_with_executor(unreal.MoviePipelinePIEExecutor)
 
-
-
     NewExecutor.on_executor_errored_delegate.add_callable_unique(errored_MoviePipelineJob)
-    NewExecutor.on_individual_job_finished_delegate.add_callable_unique(delete_job)
-    NewExecutor.on_individual_job_finished_delegate.add_callable_unique(file_transfer_callback)
+
+    NewExecutor.on_individual_job_finished_delegate.add_callable_unique(on_individual_job_finished)
+
     NewExecutor.on_executor_finished_delegate.add_callable_unique(delete_all_jobs)
 
 def delete_job(inJob, success):
-    print('Render Job finished succes : ' + str(Current_Render_Job.job_name))
-    unreal.log_warning('Render Job finished succes : ' + str(Current_Render_Job.job_name))
+    print('Start Delete Job on individual finished : ' + str(Current_Render_Job.job_name))
+    unreal.log_warning('Start Delete Job on individual finished : ' + str(Current_Render_Job.job_name))
     render_queue_system = unreal.get_editor_subsystem(unreal.MoviePipelineQueueSubsystem)
     render_queue = render_queue_system.get_queue()
-    print('Finished Queue inJob :' + str(inJob))
+    print('Try delete Finished Queue inJob :' + str(inJob))
     outputSetting = Current_Render_Job.get_configuration().find_setting_by_class(unreal.MoviePipelineOutputSetting)
     print('Finished Queue outputSetting : ' + str(outputSetting))
     existed_jobs = render_queue.get_jobs()
     for job in existed_jobs:
         unreal.log_warning(f'All Render Jobs: {job.job_name}')
         if Current_Render_Job.job_name == job.job_name:
-            print('Render Job finished found and delete : ' + str(job.job_name))
             unreal.log_warning(f'Render Job finished found and delete : {str(job)}')
             job.author = 'Rendered'
+            print('Render Job finished found and delete : ' + str(job.job_name)+' '+str(job.author))
             render_queue.delete_job(job)
 
 def delete_all_jobs(inJob, success):
     render_queue_system = unreal.get_editor_subsystem(unreal.MoviePipelineQueueSubsystem)
     render_queue = render_queue_system.get_queue()
-    render_queue.delete_all_jobs()
+    print('Job Render. Try Delete all jobs.')
+    unreal.log_warning('Job Render. Try Delete all jobs.')
+    if len(render_queue.get_jobs()) > 0:
+        render_queue.delete_all_jobs()
+        unreal.log_warning('Job Render. Deleted all jobs.')
+        print('Job Render. Deleted all jobs.')
 
 def delete_MoviePipelineJob(inJob, success):
     print('Delete Queue succes' + str(success))
