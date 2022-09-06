@@ -92,9 +92,9 @@ def file_transfer_callback(inJob, success):
     #output_folder = '/'.join(tl) + '/MEDIA'
     movie_dir = image_directories.split('RENDER/')[0]
     output_folder = movie_dir + '/MEDIA'
-    folder = Path(output_folder)
-    if not folder.exists():
-        os.makedirs(folder)
+    folder_version = Path(output_folder)
+    if not folder_version.exists():
+        os.makedirs(folder_version)
         
     # make media for shotgun
     output_mov = output_folder + '/' + 'UER_' + full_name_shot + '.mp4'
@@ -162,16 +162,17 @@ def file_transfer_callback(inJob, success):
         unreal.log_warning('files in folder dir : ' + str(f))
     settings.addlog('transfer_render_job')
     if len(files):
-        folder = f'{image_directories}/V{version}'
-        folder = folder.replace('\\', '/')
-        unreal.log_warning('work folder dir : ' + folder)
-        if not os.path.exists(folder):
-            os.makedirs(folder)
+        folder_version = f'{image_directories}/V{version}'
+        folder_version = folder_version.replace('\\', '/')
+        unreal.log_warning('work folder dir : ' + folder_version)
+        if not os.path.exists(folder_version):
+            os.makedirs(folder_version)
 
         for f in files:
             if '_SEQ' in f:
-                copied_file = shutil.copy2(f, folder)
+                copied_file = shutil.copy2(f, folder_version)
                 files_list.append(copied_file)
+                files_list.append(f)
 
         # add hero file
         #files_list.extend(files)
@@ -268,7 +269,6 @@ def render_jobs(image_dirs, transfer=False):
 
 
 def render_selected_job(JobName):
-    unreal.log_warning('Try Cleanup Render folder: '+str(image_directories))
     settings.addlog('start_render_selected_job : '+JobName)
     unreal.log_warning('Start_Render_Selected_Job : '+JobName)
     render_queue_system = unreal.get_editor_subsystem(unreal.MoviePipelineQueueSubsystem)
@@ -294,16 +294,20 @@ def render_selected_job(JobName):
     for job in render_jobs:
         outputSetting = job.get_configuration().find_setting_by_class(unreal.MoviePipelineOutputSetting)
         for_delete_folder = outputSetting.output_directory.path
+        for_delete_folder = for_delete_folder.replace('\\','/')
         print(for_delete_folder)
         unreal.log_warning('Try Cleanup Render folder: ' + str(for_delete_folder))
 
         if os.path.exists(for_delete_folder):
-            try:
-                shutil.rmtree(for_delete_folder)
-            except Exception as e:
-                print('Failed to delete %s. Reason: %s' % (for_delete_folder, e))
-            else:
-                unreal.log_warning('Cleanup Render folder finished : ' + str(for_delete_folder))
+            for filename in os.listdir(for_delete_folder):
+                file_path = os.path.join(for_delete_folder, filename)
+                file_path = file_path.replace('\\', '/')
+                try:
+                    os.remove(file_path)
+                except Exception as e:
+                    print('Failed to delete %s. Reason: %s' % (file_path, e))
+                else:
+                    unreal.log_warning('Delete Render file finished : ' + str(file_path))
         if JobName == job.job_name:
             print('Found Render Job in Queue : '+job.job_name)
             unreal.log_warning('Found Render Job in Queue : '+job.job_name)
