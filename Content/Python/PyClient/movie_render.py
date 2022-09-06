@@ -59,18 +59,16 @@ def on_individual_job_finished(inJob, success):
 
 def file_transfer_callback(inJob, success):
     unreal.log_warning('Job Render. Transfer start')
-    ftp_detected = False
+    ftp_detected = os.path.exists('L:')
+    unreal.log_warning('Job Render. ftp_detected : '+str(ftp_detected))
     outputSetting = inJob.get_configuration().find_setting_by_class(unreal.MoviePipelineOutputSetting)
     image_directories = outputSetting.output_directory.path
     # sleep for 2 secons to all files be written to disk
     time.sleep(3)
 
-    # image_directories
-    # ['C:\\Users\\mostafa.ari\\LIVE\\WHM\\EPWHH\\COMMON\\RENDER\\WHM_EPWHH_SH0170', 
-    # 'C:\\Users\\mostafa.ari\\LIVE\\WHM\\EPWHH\\COMMON\\RENDER\\WHM_EPWHH_SH0180']
-
     # new
     # C:\\UserFolder\\LIVE\\CurrentProject\\EPWHH\'\COMMON\\RENDER\'\ShotnameFolder  *.exr
+    # C:\\UserFolder\\LIVE\\CurrentProject\\EPWHH\'\COMMON\\RENDER\'\ShotnameFolder\Version  *.exr
     # C:\\UserFolder\\LIVE\\CurrentProject\\EPWHH\'\COMMON\\MEDIA\'\ShotnameFolder  *.mp4
 
     print('Start Transferring Files ...')
@@ -95,7 +93,7 @@ def file_transfer_callback(inJob, success):
     movie_dir = image_directories.split('RENDER/')[0]
     output_folder = movie_dir + '/MEDIA'
     folder = Path(output_folder)
-    if not folder.exists ():
+    if not folder.exists():
         os.makedirs(folder)
         
     # make media for shotgun
@@ -141,7 +139,9 @@ def file_transfer_callback(inJob, success):
     # transfer rendered frames to Render folder in L
     # duplicate for version first
     folder_check = f'{image_directories}/V{version}'
+    folder_check = folder_check.replace('\\' , '/')
 
+    unreal.log_warning('Job Render. folder checking: path['+folder_check + '] = ' + str(os.path.exists(folder_check)))
     i = 0
     while os.path.exists(folder_check):
         i = i+1
@@ -150,6 +150,8 @@ def file_transfer_callback(inJob, success):
         else:
             version = '0' + str(i)
         folder_check = f'{image_directories}/V{version}'
+        folder_check = folder_check.replace('\\', '/')
+        unreal.log_warning('Job Render. folder check: '+folder_check)
 
     unreal.log_warning(f'Job Render. Make fake version shotgun : V{version}')
 
@@ -161,6 +163,7 @@ def file_transfer_callback(inJob, success):
     settings.addlog('transfer_render_job')
     if len(files):
         folder = f'{image_directories}/V{version}'
+        folder = folder.replace('\\', '/')
         unreal.log_warning('work folder dir : ' + folder)
         if not os.path.exists(folder):
             os.makedirs(folder)

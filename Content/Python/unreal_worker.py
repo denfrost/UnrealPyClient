@@ -9,6 +9,12 @@ Reload Unreal Worker Script
 ####################
 
 """)
+def techtests():
+    dir = 'C:/Users/denis.balikhin/LIVE/WHM/WHPTEST/COMMON/RENDER/WHM_WHPTEST_SH0070/V001'
+    dir = dir.replace('/','\\')
+    print('Check ['+dir+'] : '+str(os.path.exists(dir)))
+    print('Check [' + dir + '] : ' + str(os.path.isdir(dir)))
+
 
 def spawn_actor(assetpath):
     import unreal
