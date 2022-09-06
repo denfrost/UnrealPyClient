@@ -239,12 +239,14 @@ def render_jobs(image_dirs, transfer=False):
     image_directories = image_dirs
     unreal.log_warning('Try Cleanup Render folder: '+str(image_directories))
     if os.path.exists(image_directories):
-        try:
-            shutil.rmtree(image_directories)
-        except Exception as e:
-            print('Failed to delete %s. Reason: %s' % (image_directories, e))
-        else:
-            unreal.log_warning('Cleanup Render folder finished : ' + str(image_directories))
+        for filename in os.listdir(image_directories):
+            file_path = os.path.join(image_directories, filename)
+            try:
+                shutil.rmtree(file_path)
+            except Exception as e:
+                print('Failed to delete %s. Reason: %s' % (image_directories, e))
+            else:
+                unreal.log_warning('Delete Render file finished : ' + str(file_path))
 
     if not render_queue_system.is_rendering():
         NewExecutor = render_queue_system.render_queue_with_executor(unreal.MoviePipelinePIEExecutor)
