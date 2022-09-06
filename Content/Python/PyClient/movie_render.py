@@ -59,7 +59,8 @@ def on_individual_job_finished(inJob, success):
 
 def file_transfer_callback(inJob, success):
     unreal.log_warning('Job Render. Transfer start')
-    ftp_detected = False
+    ftp_detected = os.path.exists('L:')
+    unreal.log_warning('Job Render. ftp_detected : '+str(ftp_detected))
     outputSetting = inJob.get_configuration().find_setting_by_class(unreal.MoviePipelineOutputSetting)
     image_directories = outputSetting.output_directory.path
     # sleep for 2 secons to all files be written to disk
@@ -150,6 +151,7 @@ def file_transfer_callback(inJob, success):
         else:
             version = '0' + str(i)
         folder_check = f'{image_directories}/V{version}'
+        unreal.log_warning('Job Render. folder check: '+folder_check)
 
     unreal.log_warning(f'Job Render. Make fake version shotgun : V{version}')
 

@@ -187,7 +187,7 @@ class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
         for job in existed_jobs:
             unreal.log_warning(f'All Render Jobs: {job.job_name}')
             if sJobName == job.job_name:
-                render_queue.finish_job_inrendering(job)
+                render_queue.delete_job(job)
                 print('Render Job deleted : ' + str(job.job_name))
                 unreal.log_warning(f'Render Job deleted : {str(job)}')
         output = 'Deleted Render Job: '+sJobName
