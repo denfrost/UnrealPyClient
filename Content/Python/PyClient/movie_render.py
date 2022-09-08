@@ -59,7 +59,8 @@ def on_individual_job_finished(inJob, success):
 
 def file_transfer_callback(inJob, success):
     unreal.log_warning('Job Render. Transfer start')
-    ftp_detected = os.path.exists('L:')
+    #ftp_detected = os.path.exists('L:')
+    ftp_detected = False
     unreal.log_warning('Job Render. ftp_detected : '+str(ftp_detected))
     outputSetting = inJob.get_configuration().find_setting_by_class(unreal.MoviePipelineOutputSetting)
     image_directories = outputSetting.output_directory.path
@@ -130,6 +131,7 @@ def file_transfer_callback(inJob, success):
         try:
             unreal.log_warning('Job Render. Get version shotgun')
             version = shotgun.publish_shot(name_shot, l_drive_media[0])
+            unreal.log_warning('Job Render. Get version shotgun finished')
             print('MSH :'+str(version))
         except:
             print('error get version in submit to shotgun')
