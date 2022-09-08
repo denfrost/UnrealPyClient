@@ -59,8 +59,8 @@ def on_individual_job_finished(inJob, success):
 
 def file_transfer_callback(inJob, success):
     unreal.log_warning('Job Render. Transfer start')
-    #ftp_detected = os.path.exists('L:')
-    ftp_detected = False
+    bUse_meme_version = True
+    ftp_detected = os.path.exists('L:')
     unreal.log_warning('Job Render. ftp_detected : '+str(ftp_detected))
     outputSetting = inJob.get_configuration().find_setting_by_class(unreal.MoviePipelineOutputSetting)
     image_directories = outputSetting.output_directory.path
@@ -116,7 +116,7 @@ def file_transfer_callback(inJob, success):
     CREATE_NO_WINDOW = 0x08000000
     subprocess.call(conversion_cmd, creationflags=CREATE_NO_WINDOW)
 
-    version = '001'
+
     unreal.log_warning('Job Render. conversion_cmd : ' + str(conversion_cmd))
     of = Path(output_mov)
     if of.exists():
@@ -127,36 +127,41 @@ def file_transfer_callback(inJob, success):
         # publish it to shotgun
         time.sleep(3)
 
-        unreal.log_warning('Get version shotgun before TRY..')
-        try:
-            unreal.log_warning('Job Render. Get version shotgun')
-            version = shotgun.publish_shot(name_shot, l_drive_media[0])
-            unreal.log_warning('Job Render. Get version shotgun finished')
-            print('MSH :'+str(version))
+        #try:
+        #version = '001'
+        unreal.log_warning('Job Render. Get version shotgun')
+        version = shotgun.publish_shot(full_name_shot, l_drive_media[0])
+        unreal.log_warning('Job Render. Get version shotgun finished')
+        print('Job Render. Get version from shotgun :'+str(version))
+        unreal.log_warning('Job Render. Get version  from shotgun :'+str(version))
+        '''    
         except:
             print('error get version in submit to shotgun')
         else:
             unreal.log_warning('Job Render. Get version shotgun if not exist..')
+        '''
 
-    # transfer rendered frames to Render folder in L
-    # duplicate for version first
-    folder_check = f'{image_directories}/V{version}'
-    folder_check = folder_check.replace('\\' , '/')
+    if not bUse_meme_version:
+        folder_check = f'{image_directories}/V{version}'
+        folder_check = folder_check.replace('\\' , '/')
+        unreal.log_warning('Job Render. folder checking: path['+folder_check + '] = ' + str(os.path.exists(folder_check)))
 
-    unreal.log_warning('Job Render. folder checking: path['+folder_check + '] = ' + str(os.path.exists(folder_check)))
-    i = 0
-    while os.path.exists(folder_check):
-        i = i+1
-        if i < 10:
-            version = '00'+str(i)
-        else:
-            version = '0' + str(i)
+        i = 0
+        while os.path.exists(folder_check):
+            i = i+1
+            if i < 10:
+                version = '00'+str(i)
+            else:
+                version = '0' + str(i)
         folder_check = f'{image_directories}/V{version}'
         folder_check = folder_check.replace('\\', '/')
         unreal.log_warning('Job Render. folder check: '+folder_check)
+        unreal.log_warning(f'Job Render. Create custom version : V{version}')
 
-    unreal.log_warning(f'Job Render. Make fake version shotgun : V{version}')
+    unreal.log_warning(f'Job Render. Ready version : V{version}')
 
+    # transfer rendered frames to Render folder in L
+    # duplicate for version first
     files_list = []
     unreal.log_warning('Frames dir : '+output_folder)
     files = glob.glob(image_directories + '/*')
