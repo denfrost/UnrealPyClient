@@ -871,6 +871,7 @@ class MyWidget(QtWidgets.QWidget):
 
         comboBoxQueue = QtWidgets.QComboBox(self)
         comboBoxQueue.setFont(QtGui.QFont("Times", 10, QtGui.QFont.Medium))
+        comboBoxQueue.setFixedWidth(750)
         comboBoxQueue.addItem("EMPTY")
         GroupboxQueue.layout().addWidget(comboBoxQueue)
 
