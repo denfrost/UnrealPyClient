@@ -94,9 +94,9 @@ def perforce_update(p4, depot, workspace):
             print('Try Force Sync File: ' + "{}#head".format(syncfile))
             settings.addlog('Try Force Sync File: ' + "{}#head".format(syncfile), 0)
             settings.addlog('Try Force Run command : sync -f ' + "{}#head".format(syncfile), 0)
-            sync = p4.run("sync", "-f", "{}#head".format(syncfile))
-            print('SYNC Force: '+str(sync))
-            settings.addlog('SYNC Force: '+str(sync), 0)
+            syncForce = p4.run("sync", "-f", "{}#head".format(syncfile))
+            print('SYNC Force: '+str(syncForce))
+            settings.addlog('SYNC Force: '+str(syncForce), 0)
     else:
         used_tn = dt.now() - start_tn
         settings.addlog('SYNC finished log : ' + str(sync), 0)

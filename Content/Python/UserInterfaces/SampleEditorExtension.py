@@ -13,6 +13,12 @@ def extend_editor():
         command_string="import importlib; import unreal_startup; import unreal_worker; unreal_worker.techtests()",
     )
 
+    me_checkmemory = unreal_uiutils.create_menu_button(
+        name="checkmemoryBtn",
+        label="Check All Memory",
+        command_string="import importlib; import unreal_startup; import unreal_worker; unreal_worker.checkAllmemory()",
+    )
+
     #UnrealMoviePipelineQueue
     me_getqueuejobs = unreal_uiutils.create_menu_button(
         name="QueueJobsBtn",
@@ -95,6 +101,7 @@ def extend_editor():
     # Create Standalone Menu and register menu entry created above
     new_mainmenu = unreal_uiutils.extend_mainmenu("M2remote", "M2remote")
     section = new_mainmenu.add_section("python.menu", "Python Tools")
+    new_mainmenu.add_menu_entry("python.menu", me_checkmemory)
     new_mainmenu.add_menu_entry("python.menu", me_techtests)
     new_mainmenu.add_menu_entry("python.menu", me_getqueuejobs)
     new_mainmenu.add_menu_entry("python.menu", me_renderimagessequence)
