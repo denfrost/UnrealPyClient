@@ -87,9 +87,13 @@ def perforce_update(p4, depot, workspace):
         for e in p4.errors:  # Display errors
             print('Perforce Error Sync fired: ' + e)
             settings.addlog('Perforce Error Sync fired: ' + e, 2)
-            syncfile = e.split(' ')[-1]
+            #unlink: C:\MI_Cantrollermonitor.uasset: The process cannot access the file because it is being used by another process.
+            syncfile = e.replace("unlink: ", "")
+            syncfile = syncfile.replace(": The process cannot access the file because it is being used by another process.", "")
+            settings.addlog('Perforce Error Sync need forced file: ' + syncfile, 2)
             print('Try Force Sync File: ' + "{}#head".format(syncfile))
             settings.addlog('Try Force Sync File: ' + "{}#head".format(syncfile), 0)
+            settings.addlog('Try Force Run command : sync -f ' + "{}#head".format(syncfile), 0)
             sync = p4.run("sync", "-f", "{}#head".format(syncfile))
             print('SYNC Force: '+str(sync))
             settings.addlog('SYNC Force: '+str(sync), 0)
