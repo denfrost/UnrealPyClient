@@ -60,7 +60,7 @@ class P4ProgressHandler(P4.Progress):
     def done(self, fail):
         if fail > 0:
             print("Failed Sync : %s " % self.curr_syncfile)
-            settings.addlog('Error perforce: ' + self.curr_syncfile, 2)
+            settings.addlog('Failed Sync : ' + self.curr_syncfile, 2)
 
 
 def perforce_update(p4, depot, workspace):
@@ -99,14 +99,15 @@ def perforce_update(p4, depot, workspace):
             settings.addlog('SYNC Force: '+str(sync), 0)
     else:
         used_tn = dt.now() - start_tn
+        settings.addlog('SYNC finished log : ' + str(sync), 0)
         print('Perforce Updated no exception! Used_time: ' + str(used_tn))
         settings.addlog('Perforce Updated no exception! Used_time: '+str(used_tn), 0)
+        p4.disconnect()
+        print('Perforce disconnected')
     finally:
         used_tn = dt.now() - start_tn
         print('Perforce Finally Updated. Used_time: '+str(used_tn))
         settings.addlog('Perforce Finally Updated. Used_time: '+str(used_tn), 0)
-        p4.disconnect()
-        print('Perforce disconnected')
 
 def get_perforce_info(show_info=False):
     p4 = P4.P4(port=settings.get_Settings_field('Host'))
