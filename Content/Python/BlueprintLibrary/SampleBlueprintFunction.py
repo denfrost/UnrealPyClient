@@ -92,13 +92,7 @@ class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
 
     @unreal.ufunction(ret=str, static=True)
     def unreal_update_perforce():
-        import unreal
         unreal.EditorLoadingAndSavingUtils().new_blank_map(save_existing_map=False)
-        for As in unreal.AssetRegistryHelpers.get_asset_registry().get_all_assets():
-            if As.is_asset_loaded():
-                if '/Game' in str(As.object_path):
-                    print(f'Loaded in memory : [{As.asset_name}] Class [{As.asset_class}] in Path: [{As.object_path}]')
-                    unreal.EditorAssetLibrary.delete_loaded_asset(As.get_asset())
         script_dir = os.path.abspath(__file__).split('BlueprintLibrary\SampleBlueprintFunction.py')[0]
         perforcebat = script_dir + "UpdatePerforce.bat"
         perforcePy = script_dir + "perforce.py"

@@ -11,9 +11,7 @@ Reload Unreal Worker Script
 """)
 
 def techtests():
-    checkAllmemory()
-    Unreal_CleanAllMemory()
-    checkAllmemory()
+    print('techtests')
 
 def forselectedassets():
     dir = 'C:/Users/denis.balikhin/LIVE/WHM/WHPTEST/COMMON/RENDER/WHM_WHPTEST_SH0070/V001'
@@ -43,7 +41,7 @@ def Unreal_CleanAllMemory(bPrint=False):
     GameLoadedAssets = checkAllmemory(False)
     for Ga in GameLoadedAssets:
         unreal.log_warning(f'Try Unloaded from memory : [{Ga.asset_name}] Class [{Ga.asset_class}] in Path: [{Ga.object_path}] Package [{Ga.package_name}]')
-        unreal.EditorAssetLibrary.delete_loaded_asset(Ga.get_asset())
+        #unreal.EditorAssetLibrary.delete_loaded_asset(Ga.get_asset())
 
 
 def checkAllmemory(bPrint=True):
