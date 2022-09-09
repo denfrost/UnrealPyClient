@@ -30,9 +30,9 @@ def forselectedassets():
         new_asset2 = str(new_asset).split('.')[1] + '_COPY'
         new_asset_path = new_asset1+'.'+new_asset2
         print(new_asset_path)
-        newass = unreal.EditorAssetLibrary.duplicate_asset(ass.object_path, new_asset_path)
-        unreal.EditorAssetLibrary.save_loaded_asset(newass, only_if_is_dirty=True)
-        unreal.EditorAssetLibrary.checkout_loaded_asset(newass)
+        #newass = unreal.EditorAssetLibrary.duplicate_asset(ass.object_path, new_asset_path)
+        #unreal.EditorAssetLibrary.save_loaded_asset(newass, only_if_is_dirty=True)
+        #unreal.EditorAssetLibrary.checkout_loaded_asset(newass)
         #unreal.EditorAssetLibrary.delete_loaded_asset(ass.get_asset())
         #unreal.EditorAssetLibrary.rename_asset(new_asset_path, ass.object_path)
 
@@ -150,7 +150,7 @@ def ShowWorkingDirs():
 def UpdatePerforce():
     import unreal
     import BlueprintLibrary.SampleBlueprintFunction as bp_lib
-    unreal.EditorLoadingAndSavingUtils().new_blank_map(save_existing_map=False)
+    Unreal_CleanAllMemory() #becarefull sure run with perforce Update only
     bp_lib.SamplePythonBlueprintLibrary.unreal_update_perforce()
 
 def Render_Images_Sequence():
