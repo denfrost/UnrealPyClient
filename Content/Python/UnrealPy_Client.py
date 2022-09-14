@@ -237,32 +237,32 @@ class input_dialog(QWidget):
 
         layout = QFormLayout()
         self.lbl = QLabel("Profile Name")
-        Name = settings.get_Settings_field('Name')
+        Name = settings.get_PerforceSettingsByName('Name')
         self.le = QLineEdit(Name)
         layout.addRow(self.lbl, self.le)
 
         self.lbl1 = QLabel("User")
-        User = settings.get_Settings_field('User')
+        User = settings.get_PerforceSettingsByName('User')
         self.le1 = QLineEdit(User)
         layout.addRow(self.lbl1, self.le1)
 
         self.lbl2 = QLabel("Password")
-        Pwd = settings.get_Settings_field('Pwd')
+        Pwd = settings.get_PerforceSettingsByName('Pwd')
         self.le2 = QLineEdit(Pwd)
         layout.addRow(self.lbl2, self.le2)
 
         self.lbl3 = QLabel("Host")
-        Host = settings.get_Settings_field('Host')
+        Host = settings.get_PerforceSettingsByName('Host')
         self.le3 = QLineEdit(Host)
         layout.addRow(self.lbl3, self.le3)
 
         self.lbl4 = QLabel("Depot")
-        Depot = settings.get_Settings_field('Depot')
+        Depot = settings.get_PerforceSettingsByName('Depot')
         self.le4 = QLineEdit(Depot)
         layout.addRow(self.lbl4, self.le4)
 
         self.lbl5 = QLabel("Workspace")
-        Workspace = settings.get_Settings_field('Workspace')
+        Workspace = settings.get_PerforceSettingsByName('Workspace')
         self.le5 = QLineEdit(Workspace)
         layout.addRow(self.lbl5, self.le5)
 
@@ -646,7 +646,7 @@ class MyWidget(QtWidgets.QWidget):
                 progressBar.setValue(0)
                 create_connection(HostLineEdit.text(), 5)
                 ChangeStatus(True)
-                settings.set_HostServer(HostLineEdit.text())
+                settings.set_HostServer(HostLineEdit.text(), RefreshQueueToggleBtn.isChecked())
                 return True
             except:
                 ChangeStatus(False)
@@ -743,6 +743,7 @@ class MyWidget(QtWidgets.QWidget):
         @QtCore.Slot()
         def onRefreshQueueToggle():
             GetQueueBtn.setEnabled(not RefreshQueueToggleBtn.isChecked())
+            settings.set_HostServer(HostLineEdit.text(), RefreshQueueToggleBtn.isChecked())
 
         @QtCore.Slot()
         def DeleteRenderJob():
@@ -1049,9 +1050,11 @@ class MyWidget(QtWidgets.QWidget):
         layout.addWidget(quit)
 
         #get last server save cfg
-        h = settings.get_HostServer()
-        if h:
-            HostLineEdit.setText(h)
+        host_text = settings.get_HostServer()
+        if host_text:
+            HostLineEdit.setText(host_text)
+        bAutorefresh = settings.get_ClientSettingsByName('RefreshQueueBool')
+        RefreshQueueToggleBtn.setChecked(bAutorefresh)
 
         if Check_Server():
             GetRemoteInfo()
