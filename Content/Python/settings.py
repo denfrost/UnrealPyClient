@@ -75,12 +75,13 @@ def get_ClientSettingsByName(name):
             return settings_file[name]
 
 
-def set_HostServer(Host, RefreshQueueBool):
+def set_ClientSettings(Host, RefreshQueueBool):
     print('Save in cfg : '+Host)
     Json_remote = USER_FOLDER + '\M2_Remote.json'
     settings_file_preset = {'HostServer': Host, 'RefreshQueueBool': RefreshQueueBool, "Test2": ''}
     with open(Json_remote, 'w') as f:
         json.dump(settings_file_preset, f)
+
 
 def OpenLogPerforce():
     import subprocess
