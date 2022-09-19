@@ -5,7 +5,8 @@ import os
 import json
 
 import logging
-
+# Client Log
+Client_Log = USER_FOLDER + "/M2remote.log"
 # User profile folder and some
 USER_FOLDER = os.environ['USERPROFILE']
 # User configs folder
@@ -48,13 +49,13 @@ def check_exist_profile():
 
 
 def open_or_create_Settings(list={}):
-    settings_file_preset = {'Name': list[0], 'User': list[1], "Pwd": list[2], 'Host': list[3], 'Depot': list[4], 'Workspace': list[5]}
+    settings_perforce_preset = {'Name': list[0], 'User': list[1], "Pwd": list[2], 'Host': list[3], 'Depot': list[4], 'Workspace': list[5]}
     if os.path.isfile(Json_settings_perforce):
         print("Settings exist " + Json_settings_perforce)
     else:
         print("Settings not exist! Create default")
         with open(Json_settings_perforce, 'w') as f:
-            json.dump(settings_file_preset, f)
+            json.dump(settings_perforce_preset, f)
 
 def get_PerforceSettings_profile():
     with open(Json_settings_perforce, 'r') as f:
@@ -63,10 +64,10 @@ def get_PerforceSettings_profile():
 
 def rewrite_exist_profile(list):
     print(type(list))
-    settings_file_preset = {'Name': list['Name'], 'User': list['User'], "Pwd": list["Pwd"], 'Host': list['Host'], 'Depot': list['Depot'],
+    settings_perforce_preset = {'Name': list['Name'], 'User': list['User'], "Pwd": list["Pwd"], 'Host': list['Host'], 'Depot': list['Depot'],
                             'Workspace': list['Workspace']}
     with open(Json_settings_perforce, 'w') as f:
-        json.dump(settings_file_preset, f)
+        json.dump(settings_perforce_preset, f)
 
 def get_Current_project():
     with open(Json_m2_project, 'r') as f:
@@ -82,27 +83,19 @@ def addlog(info,num=0):
     if num == 2:
         logger.error(info)
 
-def get_HostServer():
-    if os.path.isfile(Json_settings_client):
-        with open(Json_settings_client, 'r') as f:
-            settings_file = json.load(f)
-            return settings_file['HostServer']
-
 def get_ClientSettingsByName(name):
     if os.path.isfile(Json_settings_client):
         with open(Json_settings_client, 'r') as f:
             settings_file = json.load(f)
             return settings_file[name]
 
-
-def set_ClientSettings(Host, RefreshQueueBool):
-    print('Save in cfg : '+Host)
-    settings_file_preset = {'HostServer': Host, 'RefreshQueueBool': RefreshQueueBool, "Test2": ''}
-    with open(Json_settings_client, 'w') as f:
-        json.dump(settings_file_preset, f)
-
+def set_ClientSettingsByName(name, value):
+    data_set = settings_client_default
+    data_set[name] = value
+    if os.path.isfile(Json_settings_client):
+        with open(Json_settings_client, 'w') as f:
+            json.dump(data_set, f)
 
 def OpenLogPerforce():
     import subprocess
-    Remote_log_file = USER_FOLDER + "/M2remote.log"
     subprocess.Popen(f'explorer "{USER_FOLDER}"')

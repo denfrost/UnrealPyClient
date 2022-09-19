@@ -646,7 +646,7 @@ class MyWidget(QtWidgets.QWidget):
                 progressBar.setValue(0)
                 create_connection(HostLineEdit.text(), 5)
                 ChangeStatus(True)
-                settings.set_ClientSettings(HostLineEdit.text(), RefreshQueueToggleBtn.isChecked())
+                settings.set_ClientSettingsByName('HostServer', HostLineEdit.text())
                 return True
             except:
                 ChangeStatus(False)
@@ -743,7 +743,7 @@ class MyWidget(QtWidgets.QWidget):
         @QtCore.Slot()
         def onRefreshQueueToggle():
             GetQueueBtn.setEnabled(not RefreshQueueToggleBtn.isChecked())
-            settings.set_ClientSettings(HostLineEdit.text(), RefreshQueueToggleBtn.isChecked())
+            settings.set_ClientSettingsByName('RefreshQueueBool', RefreshQueueToggleBtn.isChecked())
 
         @QtCore.Slot()
         def DeleteRenderJob():
