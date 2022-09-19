@@ -280,7 +280,7 @@ class input_dialog(QWidget):
         list = {'Name': self.le.text(), 'User': self.le1.text(), "Pwd": self.le2.text(), 'Host': self.le3.text(), 'Depot': self.le4.text(), 'Workspace': self.le5.text()}
         print(type(list))
         print(list)
-        settings.rewrite_exist_profile(list)
+        settings.rewrite_perforce_settings(list)
         self.close()
 
     def dlg_quit(self):
@@ -1092,6 +1092,7 @@ def unreal_working_dirs():
 
 if __name__ == "__main__":
     print("Start Py App")
+    settings.print_log("Start Py App")
     settings.setup_all_configs_if_need()
     print('Current Project : '+settings.get_Current_project())
 if "unreal" not in dir():

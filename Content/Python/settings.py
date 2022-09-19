@@ -5,10 +5,10 @@ import os
 import json
 
 import logging
-# Client Log
-Client_Log = USER_FOLDER + "/M2remote.log"
 # User profile folder and some
 USER_FOLDER = os.environ['USERPROFILE']
+# Client Log
+Client_Log = USER_FOLDER + "/M2remote.log"
 # User configs folder
 Json_settings_client = USER_FOLDER + '\M2_Remote.json'
 Json_m2_project = USER_FOLDER + '\M2_Settings.json'
@@ -41,14 +41,13 @@ def setup_all_configs_if_need():
 
 def get_PerforceSettingsByName(name):
     with open(Json_settings_perforce, 'r') as f:
-        settings_file = json.load(f)
-        return settings_file[name]
+        json_perforce_settings = json.load(f)
+        return json_perforce_settings[name]
 
 def check_exist_profile():
     return (get_PerforceSettingsByName('Name') != '')
 
-
-def open_or_create_Settings(list={}):
+def open_or_create_perforce_settings(list={}):
     settings_perforce_preset = {'Name': list[0], 'User': list[1], "Pwd": list[2], 'Host': list[3], 'Depot': list[4], 'Workspace': list[5]}
     if os.path.isfile(Json_settings_perforce):
         print("Settings exist " + Json_settings_perforce)
@@ -57,12 +56,12 @@ def open_or_create_Settings(list={}):
         with open(Json_settings_perforce, 'w') as f:
             json.dump(settings_perforce_preset, f)
 
-def get_PerforceSettings_profile():
+def get_PerforceSettings():
     with open(Json_settings_perforce, 'r') as f:
-        settings_file = json.load(f)
-        return settings_file
+        json_perforce_settings = json.load(f)
+        return json_perforce_settings
 
-def rewrite_exist_profile(list):
+def rewrite_perforce_settings(list):
     print(type(list))
     settings_perforce_preset = {'Name': list['Name'], 'User': list['User'], "Pwd": list["Pwd"], 'Host': list['Host'], 'Depot': list['Depot'],
                             'Workspace': list['Workspace']}
@@ -71,10 +70,10 @@ def rewrite_exist_profile(list):
 
 def get_Current_project():
     with open(Json_m2_project, 'r') as f:
-        settings_file = json.load(f)
-        return settings_file['DefaultProject']
+        json_perforce_settings = json.load(f)
+        return json_perforce_settings['DefaultProject']
 
-def addlog(info,num=0):
+def print_log(info, num=0):
     logger = logging.getLogger()
     if num == 0:
         logger.info(info)
@@ -86,8 +85,8 @@ def addlog(info,num=0):
 def get_ClientSettingsByName(name):
     if os.path.isfile(Json_settings_client):
         with open(Json_settings_client, 'r') as f:
-            settings_file = json.load(f)
-            return settings_file[name]
+            client_settings = json.load(f)
+            return client_settings[name]
 
 def set_ClientSettingsByName(name, value):
     data_set = settings_client_default

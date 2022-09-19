@@ -167,7 +167,7 @@ def file_transfer_callback(inJob, success):
     files = glob.glob(image_directories + '/*')
     for f in files:
         unreal.log_warning('files in folder dir : ' + str(f))
-    settings.addlog('transfer_render_job')
+    settings.print_log('transfer_render_job')
     if len(files):
         folder_version = f'{image_directories}/V{version}'
         folder_version = folder_version.replace('\\', '/')
@@ -190,7 +190,7 @@ def file_transfer_callback(inJob, success):
         if ftp_detected:
             l_drive_files = ftp_transfer.transfer_data(files_list)
 
-    settings.addlog('transfer_render_job succes finished')
+    settings.print_log('transfer_render_job succes finished')
     unreal.log_warning('transfer_render_job succes finished')
 
 def cleanup_queue():
@@ -208,7 +208,7 @@ def cleanup_queue():
 
 
 def make_render_job(job, transfer=False):
-    settings.addlog('make_render_job : '+job.job_name)
+    settings.print_log('make_render_job : ' + job.job_name)
     unreal.log_warning('make_render_job : '+job.job_name)
     '''
     Add a render job to render queue
@@ -225,13 +225,13 @@ def make_render_job(job, transfer=False):
 
      #outputSetting.file_name_format #file nameing for output files rendering
     if job:
-        settings.addlog('make_render_job done :'+str(job))
+        settings.print_log('make_render_job done :' + str(job))
         unreal.log_warning('make_render_job done :'+str(job))
     return job
 
 
 def render_jobs(image_dirs, transfer=False):
-    settings.addlog('start_render_jobs')
+    settings.print_log('start_render_jobs')
     '''
     Render jobs already in render queue
 
@@ -276,7 +276,7 @@ def render_jobs(image_dirs, transfer=False):
 
 
 def render_selected_job(JobName):
-    settings.addlog('start_render_selected_job : '+JobName)
+    settings.print_log('start_render_selected_job : ' + JobName)
     unreal.log_warning('Start_Render_Selected_Job : '+JobName)
     render_queue_system = unreal.get_editor_subsystem(unreal.MoviePipelineQueueSubsystem)
     render_queue = render_queue_system.get_queue()
@@ -362,7 +362,7 @@ def delete_MoviePipelineJob(inJob, success):
     print('Delete jobs image directory : '+image_directories)
     print('Delete jobs job directory : ' + str(inJob))
     unreal.log_warning('Job Render. success :' + str(success))
-    settings.addlog('Job Render. success :' + str(success))
+    settings.print_log('Job Render. success :' + str(success))
     for job in existed_jobs:
         outputSetting = job.get_configuration().find_setting_by_class(unreal.MoviePipelineOutputSetting)
         print(outputSetting.output_directory.path)
@@ -370,7 +370,7 @@ def delete_MoviePipelineJob(inJob, success):
             pipelineQueue.delete_job(job)
             print('Deleted Finished Job succes : '+job.job_name)
             unreal.log_warning('Job Render. Deleted Finished Job succes :'+job.job_name)
-            settings.addlog('Job Render. Deleted Finished Job succes :'+job.job_name)
+            settings.print_log('Job Render. Deleted Finished Job succes :' + job.job_name)
         else:
             unreal.log_warning('Job Render.  Not found Finished Job something going wrong!')
 
@@ -391,7 +391,7 @@ def errored_MoviePipelineJob(Exec, inJob, is_fatal, errortext):
     print('Abort Queue job fatal : ' + str(is_fatal))
     print('Abort Queue job error : ' + str(errortext))
     unreal.log_warning('Job Render. Aborted!')
-    settings.addlog('Job Render. Aborted!')
+    settings.print_log('Job Render. Aborted!')
     delete_MoviePipelineJob(inJob, is_fatal)
 
 def is_rendering_queue():
