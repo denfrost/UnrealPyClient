@@ -8,11 +8,35 @@ import logging
 
 # User profile folder and some
 USER_FOLDER = os.environ['USERPROFILE']
+# User configs folder
+Json_settings_client = USER_FOLDER + '\M2_Remote.json'
+Json_m2_project = USER_FOLDER + '\M2_Settings.json'
 Json_settings_perforce = USER_FOLDER + '/M2_RemoteCfg.json'
+
+settings_client_default = {"HostServer": "ws://localhost:30020", "RefreshQueueBool": True, "Test2": ""}
+
+settings_m2_project_default = {"DefaultProject": "WHM", "AnotherNewSet": "value"}
+
+settings_perforce_default = {'Name': 'deafault', 'User': 'User', "Pwd": "Pwd", 'Host': 'Host', 'Depot': 'Depot', 'Workspace': 'Workspace'}
+
 
 logging.basicConfig(filename=USER_FOLDER + "/M2remote.log",
                     format='%(asctime)s %(message)s',
                     filemode='w', level=logging.INFO)
+
+def setup_all_configs_if_need():
+    if not os.path.isfile(Json_settings_client):
+        with open(Json_settings_client, 'w') as f:
+            json.dump(settings_client_default, f)
+            print("Settings Client not exist! Create default")
+    if not os.path.isfile(Json_m2_project):
+        with open(Json_m2_project, 'w') as f:
+            json.dump(settings_m2_project_default, f)
+            print("Settings M2 not exist! Create default")
+    if not os.path.isfile(Json_settings_perforce):
+        with open(Json_settings_perforce, 'w') as f:
+            json.dump(settings_perforce_default, f)
+            print("Settings Perforce not exist! Create default")
 
 def get_PerforceSettingsByName(name):
     with open(Json_settings_perforce, 'r') as f:
@@ -45,9 +69,7 @@ def rewrite_exist_profile(list):
         json.dump(settings_file_preset, f)
 
 def get_Current_project():
-    # User profile folder and some
-    Json_project = USER_FOLDER + '\M2_Settings.json'
-    with open(Json_project, 'r') as f:
+    with open(Json_m2_project, 'r') as f:
         settings_file = json.load(f)
         return settings_file['DefaultProject']
 
@@ -61,25 +83,22 @@ def addlog(info,num=0):
         logger.error(info)
 
 def get_HostServer():
-    Json_remote = USER_FOLDER + '\M2_Remote.json'
-    if os.path.isfile(Json_remote):
-        with open(Json_remote, 'r') as f:
+    if os.path.isfile(Json_settings_client):
+        with open(Json_settings_client, 'r') as f:
             settings_file = json.load(f)
             return settings_file['HostServer']
 
 def get_ClientSettingsByName(name):
-    Json_remote = USER_FOLDER + '\M2_Remote.json'
-    if os.path.isfile(Json_remote):
-        with open(Json_remote, 'r') as f:
+    if os.path.isfile(Json_settings_client):
+        with open(Json_settings_client, 'r') as f:
             settings_file = json.load(f)
             return settings_file[name]
 
 
 def set_ClientSettings(Host, RefreshQueueBool):
     print('Save in cfg : '+Host)
-    Json_remote = USER_FOLDER + '\M2_Remote.json'
     settings_file_preset = {'HostServer': Host, 'RefreshQueueBool': RefreshQueueBool, "Test2": ''}
-    with open(Json_remote, 'w') as f:
+    with open(Json_settings_client, 'w') as f:
         json.dump(settings_file_preset, f)
 
 

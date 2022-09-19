@@ -1092,6 +1092,7 @@ def unreal_working_dirs():
 
 if __name__ == "__main__":
     print("Start Py App")
+    settings.setup_all_configs_if_need()
     print('Current Project : '+settings.get_Current_project())
 if "unreal" not in dir():
     print("Warning: Unreal modules Not Loaded!")
