@@ -333,8 +333,7 @@ class MyWidget(QtWidgets.QWidget):
             progressBar.setValue(70)
             progressBar.setValue(100)
             # Ask about Rendering Movie  status
-            if (RefreshQueueToggleBtn.isChecked()): GetQueueJobs()
-            else: GetRemoteInfo()
+            if (RefreshQueueToggleBtn.isChecked()): GetAllRenderingInfo()
 
 
         def ServerAnsweredSetShotRender(feedback):
@@ -379,7 +378,7 @@ class MyWidget(QtWidgets.QWidget):
             progressBar.setValue(70)
             progressBar.setValue(100)
             #Ask about Rendering Movie  status
-            GetRemoteInfo()
+            if (RefreshQueueToggleBtn.isChecked()): GetAllRenderingInfo()
 
         def ServerAnsweredDeleteRenderJob(feedback):
             UpdateStatusOnline(HostLineEdit.text())
@@ -392,8 +391,7 @@ class MyWidget(QtWidgets.QWidget):
             cleandata = feedback.split('"ReturnValue": "')[-1].split('"\\r\\n}\\r\\n}''')[0]
             print('DeleteRenderJob Clean Data :'+cleandata)
             progressBar.setValue(100)
-            if (RefreshQueueToggleBtn.isChecked()): GetQueueJobs()
-            else: GetRemoteInfo()
+            if (RefreshQueueToggleBtn.isChecked()): GetAllRenderingInfo()
 
 
         def ServerAnsweredDeleteAllRenderJobs(feedback):
@@ -407,8 +405,7 @@ class MyWidget(QtWidgets.QWidget):
             cleandata = feedback.split('"ReturnValue": "')[-1].split('"\\r\\n}\\r\\n}''')[0]
             print('DeleteRenderJob Clean Data :'+cleandata)
             progressBar.setValue(100)
-            if (RefreshQueueToggleBtn.isChecked()): GetQueueJobs()
-            else: GetRemoteInfo()
+            if (RefreshQueueToggleBtn.isChecked()): GetAllRenderingInfo()
 
         def ServerAnsweredGetRemoteInfo(feedback):
             cleandata = feedback.split('"ReturnValue": "')[-1].split('"\\r\\n}\\r\\n}''')[0]
@@ -929,7 +926,7 @@ class MyWidget(QtWidgets.QWidget):
         self.connect(GetInfoBtn, QtCore.SIGNAL("clicked()"), GetRemoteInfo)
         GroupboxCommand.layout().addWidget(GetInfoBtn)
 
-        GetInfoBtn2 = QtWidgets.QPushButton("Get Info 2")
+        GetInfoBtn2 = QtWidgets.QPushButton("Get All Rendering Info")
         GetInfoBtn2.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
         self.connect(GetInfoBtn2, QtCore.SIGNAL("clicked()"), GetAllRenderingInfo)
         GroupboxCommand.layout().addWidget(GetInfoBtn2)
