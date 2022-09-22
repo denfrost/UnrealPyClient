@@ -214,7 +214,6 @@ Json_RequestDeleteAllRenderJobs = \
         }
     }
 
-#SuperMessage Remote tool
 Json_RequestRemoteInfo = \
     {
         "MessageName": "http",
@@ -224,6 +223,23 @@ Json_RequestRemoteInfo = \
             "Body": {
                 "objectPath": "/Engine/PythonTypes.Default__SamplePythonBlueprintLibrary",
                 "functionName": "unreal_python_get_info_remote",
+                "parameters": {
+                    "result": 'return string'
+                }
+            }
+        }
+    }
+
+#SuperMessage Remote tool
+Json_RequestRemoteAllRenderingInfo = \
+    {
+        "MessageName": "http",
+        "Parameters": {
+            "Url": "/remote/object/call",
+            "Verb": "PUT",
+            "Body": {
+                "objectPath": "/Engine/PythonTypes.Default__SamplePythonBlueprintLibrary",
+                "functionName": "unreal_python_get_all_rendering_info",
                 "parameters": {
                     "result": 'return string'
                 }
@@ -413,6 +429,73 @@ class MyWidget(QtWidgets.QWidget):
             else:
                 Groupbox.setTitle('Server Status : Available for Render ')
             print('Movie Rendering Working 2 : ' + json_remote_data["MoviePipelineRendering2"])
+
+            progressBar.setValue(100)
+
+
+        def UpdatePresets(cleandata):
+            if len(cleandata) == 0:
+                comboBoxQueue.clear()
+                comboBoxQueue.addItem("EMPTY")
+                return
+            tanswer =dt.now().strftime("%H:%M:%S")
+            tabwidget.setCurrentIndex(1)
+            list_presets = cleandata.split(',')
+            work_list_presets = []
+            comboBoxQ.clear()
+            for p in  list_presets:
+                if 'Render' in p:
+                    work_list_presets.append(p)
+                    comboBoxQ.addItem(p)
+
+        def UpdateQueueJobs(cleandata):
+            if len(cleandata) == 0:
+                comboBoxQueue.clear()
+                comboBoxQueue.addItem("EMPTY")
+                return
+            res = cleandata.split(",")
+            res.sort()
+            comboBoxQueue.clear()
+            current_project = settings.get_Current_project()
+            print('Start Sorting for Project :'+current_project)
+            for i, name in enumerate(res):
+                print('Feedback ['+str(i)+']: '+res[i])
+                if (res[i].find(current_project) > -1):
+                    comboBoxQueue.addItem("" + res[i])
+
+        def ServerAnsweredGetAllRenderingInfo(feedback):
+            cleandata = feedback.split('"ReturnValue": "')[-1].split('"\\r\\n}\\r\\n}''')[0]
+            print('Clean Data :'+cleandata)
+            cleandata = cleandata.replace('\\', '')
+            print("Clean feedback :"+cleandata)
+            json_remote_data = json.loads(cleandata)
+
+            print("Got Server Answer : GetAllRenderingInfo")
+            tanswer =dt.now().strftime("%H:%M:%S")
+            ServerAnswerTextEdit.clear()
+            ServerAnswerTextEdit.setText(ServerAnswerTextEdit.toPlainText() + '  ' + tanswer+" : "+feedback)
+            tabwidget.setCurrentIndex(1)
+
+            #Parse super json from server
+            print(type(json_remote_data))
+
+            print('Movie Rendering Working : ' +json_remote_data["MoviePipelineRendering"])
+            if json_remote_data["MoviePipelineRendering"] == 'True':
+                Groupbox.setTitle('Server Status : Rendering Movie ')
+            else:
+                Groupbox.setTitle('Server Status : Available for Render ')
+
+            PresetsRenderingList = json_remote_data["PresetsRenderingList"]
+            print('Presets Rendering Quality List : ' + PresetsRenderingList)
+            UpdatePresets(PresetsRenderingList)
+
+            QueueRenderJobsList = json_remote_data["QueueRenderJobsList"]
+            print('Queue RenderJobs List : ' + QueueRenderJobsList)
+            UpdateQueueJobs(QueueRenderJobsList)
+
+            AllShotsList = json_remote_data["AllShotsList"]
+            print('All Shots List : ' + AllShotsList)
+            FillShots(AllShotsList)
 
             progressBar.setValue(100)
 
@@ -781,6 +864,17 @@ class MyWidget(QtWidgets.QWidget):
             SendSocket(ClearAnswer, HostServer, JsonTextEdit.toPlainText(), ServerAnsweredGetRemoteInfo) #Send Json to Unreal
 
         @QtCore.Slot()
+        def GetAllRenderingInfo():
+            print('GetAllRenderingInfo')
+            JsonTextEdit.setText(json.dumps(Json_RequestRemoteAllRenderingInfo))
+            progressBar.setValue(0)
+            progressBar.setValue(50)
+            print("Send Command To Server :"+JsonTextEdit.toPlainText())
+            HostServer = HostLineEdit.text()
+            SendSocket(ClearAnswer, HostServer, JsonTextEdit.toPlainText(), ServerAnsweredGetAllRenderingInfo) #Send Json to Unreal
+
+
+        @QtCore.Slot()
         def MyQuit():
             app.quit()
 
@@ -834,6 +928,12 @@ class MyWidget(QtWidgets.QWidget):
         GetInfoBtn.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
         self.connect(GetInfoBtn, QtCore.SIGNAL("clicked()"), GetRemoteInfo)
         GroupboxCommand.layout().addWidget(GetInfoBtn)
+
+        GetInfoBtn2 = QtWidgets.QPushButton("Get Info 2")
+        GetInfoBtn2.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
+        self.connect(GetInfoBtn2, QtCore.SIGNAL("clicked()"), GetAllRenderingInfo)
+        GroupboxCommand.layout().addWidget(GetInfoBtn2)
+
 
         CommandBtn = QtWidgets.QPushButton("Send Command")
         CommandBtn.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
@@ -1057,10 +1157,10 @@ class MyWidget(QtWidgets.QWidget):
         RefreshQueueToggleBtn.setChecked(bAutorefresh)
 
         if Check_Server():
-            GetRemoteInfo()
-            Get_Render_Presets()
-            Get_All_Server_Shots()
-            GetQueueJobs()
+            GetAllRenderingInfo()
+            #Get_Render_Presets()
+            #Get_All_Server_Shots()
+            #GetQueueJobs()
 
 def SendSocket(ClearAnswer, HostServer,Json_request, ServerAnswered):
     ws = create_connection(HostServer)

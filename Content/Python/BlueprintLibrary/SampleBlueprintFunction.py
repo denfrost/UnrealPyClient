@@ -7,6 +7,42 @@ from unreal_global import PyClientMovie as PyClientMovie
 
 from datetime import datetime as dt
 
+
+def get_presets_render_list():
+    output = ''
+    presets_rendering_dict = PyClientMovie.get_preload_assets()
+    for pr in presets_rendering_dict:
+        output = output + ',' + str(pr)
+    return output
+
+def make_shots_list():
+    output = ''
+    asset_reg = unreal.AssetRegistryHelpers.get_asset_registry()
+    assets = asset_reg.get_assets_by_class('LevelSequence', search_sub_classes=False)
+    for asset in assets:
+        print(asset)
+        count = 0
+        if '_SEQ' in str(asset.package_name): # _ANIM_SEQ
+            output = output + ',' + str(asset.object_path)
+    #output = output + ','  # delimiter data
+    print('Size output: ' + str(len(output)))
+    return output
+
+def get_queue_list():
+    output = ''
+    CurrentJobs = PyClientMovie.get_render_queue_jobs()
+    for job in CurrentJobs:
+        job_outputSetting = job.get_configuration().find_setting_by_class(unreal.MoviePipelineOutputSetting)
+        # outputSetting.output_resolution = unreal.IntPoint(1920,1080
+        print('Setting config: ' + str(job.get_configuration()))
+        print('SettingObj setting: ' + str(job_outputSetting))
+        # print('Setting name : ' + str(job_outputSetting.file_name_format))
+        print('JobName: ' + job.job_name)
+        print('JobProgress: ' + str(job.get_status_progress()))
+        print('JobStatus: ' + str(job.get_status_message()))
+        output = output + ',' + job.job_name + '-' + str(job.get_status_progress()) + '-' + job.author
+    return output
+
 @unreal.uclass()
 class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
     @unreal.ufunction(
@@ -46,7 +82,7 @@ class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
         assets = asset_reg.get_assets_by_class('LevelSequence', search_sub_classes=False)
         for asset in assets:
             print(asset)
-            count = 0
+            #count = 0
             if '_SEQ' in str(asset.package_name): #_ANIM_SEQ
                 output = output + ',' +str(asset.object_path)
         output = output + ',' #delimiter data
@@ -258,3 +294,20 @@ class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
             output = output + ',' + str(pr)
         return output
 
+
+    @unreal.ufunction(
+        ret=str, static=True, meta=dict(Category="Samples Python BlueprintFunctionLibrary")
+    )
+    def unreal_python_get_all_rendering_info():
+        MovieIsRendering = PyClientMovie.is_rendering_queue()
+        str_presets_rendering_list = get_presets_render_list()
+        str_queue_render_jobs_list = get_queue_list()
+        str_all_shots_list = make_shots_list()
+
+        output_json_str = '{' \
+                          '"MoviePipelineRendering":"' + str(MovieIsRendering) + '",' \
+                          '"PresetsRenderingList":"' + str(str_presets_rendering_list) + '",' \
+                          '"QueueRenderJobsList":"' + str(str_queue_render_jobs_list) + '",' \
+                          '"AllShotsList":"' + str(str_all_shots_list) + '"' \
+                                          '}'
+        return output_json_str
