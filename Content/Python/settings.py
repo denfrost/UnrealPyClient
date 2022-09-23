@@ -18,7 +18,7 @@ settings_client_default = {"HostServer": "ws://localhost:30020", "RefreshQueueBo
 
 settings_m2_project_default = {"DefaultProject": "WHM", "AnotherNewSet": "value"}
 
-settings_perforce_default = {'Name': 'deafault', 'User': 'User', "Pwd": "Pwd", 'Host': 'Host', 'Depot': 'Depot', 'Workspace': 'Workspace'}
+settings_perforce_default = {'Name': 'default', 'User': 'User', "Pwd": "Pwd", 'Host': 'Host', 'Depot': 'Depot', 'Workspace': 'Workspace'}
 
 
 logging.basicConfig(filename=USER_FOLDER + "/M2remote.log",
