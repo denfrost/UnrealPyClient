@@ -798,6 +798,9 @@ class MyWidget(QtWidgets.QWidget):
             ex = input_dialog()
             ex.show()
             ex.exec_()
+        @QtCore.Slot()
+        def OnChangeProject():
+            ShowDialogs()
 
         @QtCore.Slot()
         def ShowDialogs():
@@ -827,6 +830,8 @@ class MyWidget(QtWidgets.QWidget):
         @QtCore.Slot()
         def onAdvancedRenderToggle():
             if AdvancedRenderToggleBtn.isChecked():
+                OpenLogImagesBtn.show()
+                OpenFolderImagesBtn.show()
                 GroupboxBatchMakeJobs.show()
                 GroupboxSendCommands.show()
                 GetQueueBtn.show()
@@ -835,6 +840,8 @@ class MyWidget(QtWidgets.QWidget):
                 GetRenderPresetsBtn.show()
                 RefreshQueueToggleBtn.setEnabled(AdvancedRenderToggleBtn.isChecked())
             else:
+                OpenLogImagesBtn.hide()
+                OpenFolderImagesBtn.hide()
                 GroupboxBatchMakeJobs.hide()
                 GroupboxSendCommands.hide()
                 GetQueueBtn.hide()
@@ -1025,10 +1032,15 @@ class MyWidget(QtWidgets.QWidget):
         self.connect(start_render_jobs_btn, QtCore.SIGNAL("clicked()"), StartRendering)
         GroupboxRenderJobs.layout().addWidget(start_render_jobs_btn)
 
-        GroupboxRenderingSettings = QtWidgets.QGroupBox("Rendering Settings")
+        GroupboxRenderingSettings = QtWidgets.QGroupBox("Project Rendering Settings")
         GroupboxRenderingSettings.setChecked(True)
         vbox4 = QtWidgets.QHBoxLayout()
         GroupboxRenderingSettings.setLayout(vbox4)
+
+        ChangeProjectBtn = QtWidgets.QPushButton("Change Project")
+        ChangeProjectBtn.setFont(QtGui.QFont("Times", 10, QtGui.QFont.Bold))
+        self.connect(Check, QtCore.SIGNAL("clicked()"), OnChangeProject)
+        GroupboxRenderingSettings.layout().addWidget(ChangeProjectBtn)
 
         current_project = QtWidgets.QLabel("Current Project : "+settings.get_Current_project()+'                    ')
         GroupboxRenderingSettings.layout().addWidget(current_project)
@@ -1054,13 +1066,11 @@ class MyWidget(QtWidgets.QWidget):
 
         OpenFolderImagesBtn = QtWidgets.QPushButton("Open Images Folder..")
         OpenFolderImagesBtn.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Bold))
-        OpenFolderImagesBtn.setEnabled(False)
         self.connect(OpenFolderImagesBtn, QtCore.SIGNAL("clicked()"), onOpenFolder)
         GroupboxRenderingSettings.layout().addWidget(OpenFolderImagesBtn)
 
         OpenLogImagesBtn = QtWidgets.QPushButton("Open Log..")
         OpenLogImagesBtn.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Bold))
-        OpenLogImagesBtn.setEnabled(False)
         self.connect(OpenLogImagesBtn, QtCore.SIGNAL("clicked()"), onOpenFolder)
         GroupboxRenderingSettings.layout().addWidget(OpenLogImagesBtn)
 
