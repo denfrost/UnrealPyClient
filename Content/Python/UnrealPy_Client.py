@@ -827,6 +827,7 @@ class MyWidget(QtWidgets.QWidget):
         @QtCore.Slot()
         def onAdvancedRenderToggle():
             if AdvancedRenderToggleBtn.isChecked():
+                GroupboxBatchMakeJobs.show()
                 GroupboxSendCommands.show()
                 GetQueueBtn.show()
                 GetServerShots.show()
@@ -834,6 +835,7 @@ class MyWidget(QtWidgets.QWidget):
                 GetRenderPresetsBtn.show()
                 RefreshQueueToggleBtn.setEnabled(AdvancedRenderToggleBtn.isChecked())
             else:
+                GroupboxBatchMakeJobs.hide()
                 GroupboxSendCommands.hide()
                 GetQueueBtn.hide()
                 GetServerShots.hide()
@@ -972,7 +974,7 @@ class MyWidget(QtWidgets.QWidget):
         tabwidget.addTab(ServerAnswerTextEdit, "Answer Server")
         GroupboxSendCommands.layout().addWidget(tabwidget)
 
-        GroupboxQueue = QtWidgets.QGroupBox("Manager Movie Rendering Queue")
+        GroupboxQueue = QtWidgets.QGroupBox("Rendering Jobs Queue")
         GroupboxQueue.setChecked(True)
         vbox50 = QtWidgets.QHBoxLayout()
         GroupboxQueue.setLayout(vbox50)
@@ -1012,13 +1014,13 @@ class MyWidget(QtWidgets.QWidget):
         self.connect(GetServerShots, QtCore.SIGNAL("clicked()"), Get_All_Server_Shots)
         GroupboxRenderJobs.layout().addWidget(GetServerShots)
 
-        RenderMovieDisabled = QtWidgets.QPushButton("Render Movie Sequence")
+        RenderMovieDisabled = QtWidgets.QPushButton("Render Movie")
         RenderMovieDisabled.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
         RenderMovieDisabled.setEnabled(False)
         self.connect(RenderMovieDisabled, QtCore.SIGNAL("clicked()"), RenderMovie)
         GroupboxRenderJobs.layout().addWidget(RenderMovieDisabled)
 
-        start_render_jobs_btn = QtWidgets.QPushButton("Start Render Jobs")
+        start_render_jobs_btn = QtWidgets.QPushButton("Start Render")
         start_render_jobs_btn.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
         self.connect(start_render_jobs_btn, QtCore.SIGNAL("clicked()"), StartRendering)
         GroupboxRenderJobs.layout().addWidget(start_render_jobs_btn)
@@ -1062,7 +1064,7 @@ class MyWidget(QtWidgets.QWidget):
         self.connect(OpenLogImagesBtn, QtCore.SIGNAL("clicked()"), onOpenFolder)
         GroupboxRenderingSettings.layout().addWidget(OpenLogImagesBtn)
 
-        GroupboxFoundSequences = QtWidgets.QGroupBox("Found Sequences")
+        GroupboxFoundSequences = QtWidgets.QGroupBox("Server Sequences")
         GroupboxFoundSequences.setChecked(True)
         vboxSequences = QtWidgets.QVBoxLayout()
         vbox31 = QtWidgets.QHBoxLayout()
@@ -1092,7 +1094,7 @@ class MyWidget(QtWidgets.QWidget):
         self.connect(make_render_job_btn, QtCore.SIGNAL("clicked()"), MakeRenderJob)
         GroupboxFoundSequences.layout().addWidget(make_render_job_btn)
 
-        GroupboxPerforce = QtWidgets.QGroupBox("Perforce")
+        GroupboxPerforce = QtWidgets.QGroupBox("Perforce Control")
         vbox4 = QtWidgets.QHBoxLayout()
         GroupboxPerforce.setLayout(vbox4)
 
@@ -1118,7 +1120,7 @@ class MyWidget(QtWidgets.QWidget):
         GroupboxPerforce.layout().addWidget(OpenLogPerforceBtn)
 
 
-        GroupboxBatchMakeJobs = QtWidgets.QGroupBox("Batch Mode Rendering [Warning: Will Heavy busy server!]")
+        GroupboxBatchMakeJobs = QtWidgets.QGroupBox("Make Batch Rendering Jobs")
         GroupboxBatchMakeJobs.setChecked(True)
         vbox5 = QtWidgets.QVBoxLayout()
         GroupboxBatchMakeJobs.setLayout(vbox5)
@@ -1143,7 +1145,7 @@ class MyWidget(QtWidgets.QWidget):
         vbox5 = QtWidgets.QVBoxLayout()
         GroupboxMain.setLayout(vbox5)
 
-        GroupboxAdvancedRender = QtWidgets.QGroupBox("Manager Rendering Control")
+        GroupboxAdvancedRender = QtWidgets.QGroupBox("Rendering Control")
         GroupboxAdvancedRender.setChecked(True)
         hboxAd = QtWidgets.QHBoxLayout()
         GroupboxAdvancedRender.setLayout(hboxAd)
@@ -1155,10 +1157,10 @@ class MyWidget(QtWidgets.QWidget):
 
         GroupboxMain.layout().addWidget(GroupboxAdvancedRender)
 
-        GroupboxMain.layout().addWidget(GroupboxQueue)
 
         GroupboxMain.layout().addWidget(GroupboxRenderingSettings)
         GroupboxMain.layout().addWidget(GroupboxFoundSequences)
+        GroupboxMain.layout().addWidget(GroupboxQueue)
         GroupboxMain.layout().addWidget(GroupboxRenderJobs)
 
         GroupboxMain.layout().addWidget(GroupboxBatchMakeJobs)
