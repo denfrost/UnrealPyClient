@@ -1,1 +1,1 @@
-{"HostServer": "ws://localhost:30020", "Test1": "", "Test2": ""}
+{"HostServer": "ws://localhost:30020", "RefreshQueueBool": true, "AdvancedRenderBool": false}
