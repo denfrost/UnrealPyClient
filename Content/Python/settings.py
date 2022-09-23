@@ -16,7 +16,7 @@ Json_settings_perforce = USER_FOLDER + '/M2_RemoteCfg.json'
 
 settings_client_default = {"HostServer": "ws://localhost:30020", "RefreshQueueBool": True, "AdvancedRenderBool": False}
 
-settings_m2_project_default = {"DefaultProject": "WHM", "AnotherNewSet": "value"}
+settings_m2_project_default = {"DefaultProject": "WHM", "AnotherNewSet": "value", "AvailableProjects": ("WHM","WHH","WHK")}
 
 settings_perforce_default = {'Name': 'default', 'User': 'User', "Pwd": "Pwd", 'Host': 'Host', 'Depot': 'Depot', 'Workspace': 'Workspace'}
 
@@ -70,8 +70,8 @@ def rewrite_perforce_settings(list):
 
 def get_Current_project():
     with open(Json_m2_project, 'r') as f:
-        json_perforce_settings = json.load(f)
-        return json_perforce_settings['DefaultProject']
+        json_m2_project_settings = json.load(f)
+        return json_m2_project_settings['DefaultProject']
 
 def print_log(info, num=0):
     logger = logging.getLogger()
@@ -93,6 +93,13 @@ def set_ClientSettingsByName(name, value):
     data_set[name] = value
     if os.path.isfile(Json_settings_client):
         with open(Json_settings_client, 'w') as f:
+            json.dump(data_set, f)
+
+def set_ClientM2ProjectByName(name, value):
+    data_set = settings_m2_project_default
+    data_set[name] = value
+    if os.path.isfile(Json_m2_project):
+        with open(Json_m2_project, 'w') as f:
             json.dump(data_set, f)
 
 def OpenLogPerforce():

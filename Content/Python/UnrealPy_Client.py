@@ -15,7 +15,7 @@ from PySide2.QtWidgets import *
 #pip install websocket-client
 from websocket import create_connection
 
-import settings as settings
+import unreal_worker
 
 Server = "ws://"+"10.66.7.80:30020"
 
@@ -798,19 +798,31 @@ class MyWidget(QtWidgets.QWidget):
             ex = input_dialog()
             ex.show()
             ex.exec_()
-        @QtCore.Slot()
+
         def OnChangeProject():
-            ShowDialogs()
+            ShowProjectsDialog()
 
         @QtCore.Slot()
-        def ShowDialogs():
+        def ShowProjectsDialog():
+            items = unreal_worker.M2_get_projects_dict()
+            print('Items:'+str('items')+' '+str(len(items)))
+            if len(items) == 0:
+                items = settings.settings_m2_project_default['AvailableProjects']
+            item, ok = QInputDialog.getItem(self, "Select Project", "list of Projects", items, 0, False)
+            if (ok):
+                settings.set_ClientM2ProjectByName('DefaultProject', item)
+            print(str(item))
+            current_project.setText("Current Project : "+settings.get_Current_project()+'                    ')
+
+        @QtCore.Slot()
+        def ShowSimpleDialogs():
             items = ("C", "C++", "Java", "Python")
             item, ok = QInputDialog.getItem(self, "select input dialog", "list of languages", items, 0, False)
-
-            dlg = QDialog(self)
-            dlg.resize(400, 400)
-            dlg.setWindowTitle("Settings Perforce")
-            dlg.exec_()
+            print(str(item))
+            #dlg = QDialog(self)
+            #dlg.resize(400, 400)
+            #dlg.setWindowTitle("Settings Perforce")
+            #dlg.exec_()
 
 
         @QtCore.Slot()
@@ -1039,7 +1051,7 @@ class MyWidget(QtWidgets.QWidget):
 
         ChangeProjectBtn = QtWidgets.QPushButton("Change Project")
         ChangeProjectBtn.setFont(QtGui.QFont("Times", 10, QtGui.QFont.Bold))
-        self.connect(Check, QtCore.SIGNAL("clicked()"), OnChangeProject)
+        self.connect(ChangeProjectBtn, QtCore.SIGNAL("clicked()"), OnChangeProject)
         GroupboxRenderingSettings.layout().addWidget(ChangeProjectBtn)
 
         current_project = QtWidgets.QLabel("Current Project : "+settings.get_Current_project()+'                    ')

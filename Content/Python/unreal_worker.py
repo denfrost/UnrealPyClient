@@ -213,3 +213,15 @@ def getrenderingjobs():
     for job in CurrentJobs:
         print(job.job_name)
     return CurrentJobs
+
+def M2_get_projects_dict():
+    import glob
+    # Projects MEME json directory
+    meme_shows_path = 'M:/SHOWS'
+    all_proj = glob.glob(meme_shows_path + '/*.json')
+    print(meme_shows_path + '/*.json')
+    for id, elem in enumerate(all_proj):
+        elem = elem.replace('\\', '/')
+        elem = elem.split('/')[-1].split('.')[0]
+        all_proj[id] = elem
+    return all_proj
