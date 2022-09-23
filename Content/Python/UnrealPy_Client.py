@@ -822,8 +822,26 @@ class MyWidget(QtWidgets.QWidget):
 
         @QtCore.Slot()
         def onRefreshQueueToggle():
-            GetQueueBtn.setEnabled(not RefreshQueueToggleBtn.isChecked())
             settings.set_ClientSettingsByName('RefreshQueueBool', RefreshQueueToggleBtn.isChecked())
+
+        @QtCore.Slot()
+        def onAdvancedRenderToggle():
+            if AdvancedRenderToggleBtn.isChecked():
+                GroupboxSendCommands.show()
+                GetQueueBtn.show()
+                GetServerShots.show()
+                RenderMovieDisabled.show()
+                GetRenderPresetsBtn.show()
+                RefreshQueueToggleBtn.setEnabled(AdvancedRenderToggleBtn.isChecked())
+            else:
+                GroupboxSendCommands.hide()
+                GetQueueBtn.hide()
+                GetServerShots.hide()
+                RenderMovieDisabled.hide()
+                GetRenderPresetsBtn.hide()
+                RefreshQueueToggleBtn.setEnabled(AdvancedRenderToggleBtn.isChecked())
+
+            settings.set_ClientSettingsByName('AdvancedRenderBool', AdvancedRenderToggleBtn.isChecked())
 
         @QtCore.Slot()
         def DeleteRenderJob():
@@ -896,6 +914,10 @@ class MyWidget(QtWidgets.QWidget):
         Groupbox.setLayout(vbox)
         layout.addWidget(Groupbox)
 
+        AdvancedRenderToggleBtn = QtWidgets.QCheckBox("Advanced Render Control")
+        AdvancedRenderToggleBtn.setChecked(True)
+        self.connect(AdvancedRenderToggleBtn, QtCore.SIGNAL("clicked()"), onAdvancedRenderToggle)
+        Groupbox.layout().addWidget(AdvancedRenderToggleBtn)
 
         Check = QtWidgets.QPushButton("Check Server")
         Check.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
@@ -915,27 +937,27 @@ class MyWidget(QtWidgets.QWidget):
         HostLineEdit.setEnabled(ServerToggleBtn.isChecked())
         Groupbox.layout().addWidget(ServerToggleBtn)
 
-        GroupboxCommand = QtWidgets.QGroupBox("Send Custom Commands")
-        GroupboxCommand.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Bold))
+        GroupboxSendCommands = QtWidgets.QGroupBox("Send Custom Commands")
+        GroupboxSendCommands.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Bold))
         vbox2 = QtWidgets.QVBoxLayout()
-        GroupboxCommand.setLayout(vbox2)
-        layout.addWidget(GroupboxCommand)
+        GroupboxSendCommands.setLayout(vbox2)
+        layout.addWidget(GroupboxSendCommands)
 
         GetInfoBtn = QtWidgets.QPushButton("Get Info")
         GetInfoBtn.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
         self.connect(GetInfoBtn, QtCore.SIGNAL("clicked()"), GetRemoteInfo)
-        GroupboxCommand.layout().addWidget(GetInfoBtn)
+        GroupboxSendCommands.layout().addWidget(GetInfoBtn)
 
         GetInfoBtn2 = QtWidgets.QPushButton("Get All Rendering Info")
         GetInfoBtn2.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
         self.connect(GetInfoBtn2, QtCore.SIGNAL("clicked()"), GetAllRenderingInfo)
-        GroupboxCommand.layout().addWidget(GetInfoBtn2)
+        GroupboxSendCommands.layout().addWidget(GetInfoBtn2)
 
 
         CommandBtn = QtWidgets.QPushButton("Send Command")
         CommandBtn.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
         self.connect(CommandBtn, QtCore.SIGNAL("clicked()"), SendCommand)
-        GroupboxCommand.layout().addWidget(CommandBtn)
+        GroupboxSendCommands.layout().addWidget(CommandBtn)
 
         JsonTextEdit = QtWidgets.QTextEdit(json.dumps(Json_RequestRemoteStaticFunction))
         JsonTextEdit.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Medium))
@@ -948,7 +970,7 @@ class MyWidget(QtWidgets.QWidget):
         tabwidget = QtWidgets.QTabWidget()
         tabwidget.addTab(JsonTextEdit, "Command Client")
         tabwidget.addTab(ServerAnswerTextEdit, "Answer Server")
-        GroupboxCommand.layout().addWidget(tabwidget)
+        GroupboxSendCommands.layout().addWidget(tabwidget)
 
         GroupboxQueue = QtWidgets.QGroupBox("Manager Movie Rendering Queue")
         GroupboxQueue.setChecked(True)
@@ -960,12 +982,6 @@ class MyWidget(QtWidgets.QWidget):
         GetQueueBtn.setFixedWidth(150)
         self.connect(GetQueueBtn, QtCore.SIGNAL("clicked()"), GetQueueJobs)
         GroupboxQueue.layout().addWidget(GetQueueBtn)
-
-        RefreshQueueToggleBtn = QtWidgets.QCheckBox("Auto refresh")
-        RefreshQueueToggleBtn.setChecked(True)
-        self.connect(RefreshQueueToggleBtn, QtCore.SIGNAL("clicked()"), onRefreshQueueToggle)
-        GetQueueBtn.setEnabled(not RefreshQueueToggleBtn.isChecked())
-        GroupboxQueue.layout().addWidget(RefreshQueueToggleBtn)
 
         comboBoxQueue = QtWidgets.QComboBox(self)
         comboBoxQueue.setFont(QtGui.QFont("Times", 10, QtGui.QFont.Medium))
@@ -986,75 +1002,72 @@ class MyWidget(QtWidgets.QWidget):
         GroupboxQueue.layout().addWidget(delete_all_queue)
 
 
-        GroupboxAuto = QtWidgets.QGroupBox("Rendering Shots")
-        GroupboxAuto.setChecked(True)
+        GroupboxGetSequences = QtWidgets.QGroupBox("Rendering Shots")
+        GroupboxGetSequences.setChecked(True)
         vbox3 = QtWidgets.QHBoxLayout()
-        GroupboxAuto.setLayout(vbox3)
+        GroupboxGetSequences.setLayout(vbox3)
 
-        getshot = QtWidgets.QPushButton("Get Server Sequences")
-        getshot.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
-        self.connect(getshot, QtCore.SIGNAL("clicked()"), Get_All_Server_Shots)
-        GroupboxAuto.layout().addWidget(getshot)
+        GetServerShots = QtWidgets.QPushButton("Get Server Sequences")
+        GetServerShots.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
+        self.connect(GetServerShots, QtCore.SIGNAL("clicked()"), Get_All_Server_Shots)
+        GroupboxGetSequences.layout().addWidget(GetServerShots)
 
-        render = QtWidgets.QPushButton("Render Movie Sequence")
-        render.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
-        render.setEnabled(False)
-        self.connect(render, QtCore.SIGNAL("clicked()"), RenderMovie)
-        GroupboxAuto.layout().addWidget(render)
-
-        make_render_job_btn = QtWidgets.QPushButton("Make Render Job")
-        make_render_job_btn.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
-        self.connect(make_render_job_btn, QtCore.SIGNAL("clicked()"), MakeRenderJob)
-        GroupboxAuto.layout().addWidget(make_render_job_btn)
+        RenderMovieDisabled = QtWidgets.QPushButton("Render Movie Sequence")
+        RenderMovieDisabled.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
+        RenderMovieDisabled.setEnabled(False)
+        self.connect(RenderMovieDisabled, QtCore.SIGNAL("clicked()"), RenderMovie)
+        GroupboxGetSequences.layout().addWidget(RenderMovieDisabled)
 
         start_render_jobs_btn = QtWidgets.QPushButton("Start Render Jobs")
         start_render_jobs_btn.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
         self.connect(start_render_jobs_btn, QtCore.SIGNAL("clicked()"), StartRendering)
-        GroupboxAuto.layout().addWidget(start_render_jobs_btn)
+        GroupboxGetSequences.layout().addWidget(start_render_jobs_btn)
 
-        GroupboxAuto5 = QtWidgets.QGroupBox("Rendering Settings")
-        GroupboxAuto5.setChecked(True)
+        GroupboxRenderingSettings = QtWidgets.QGroupBox("Rendering Settings")
+        GroupboxRenderingSettings.setChecked(True)
         vbox4 = QtWidgets.QHBoxLayout()
-        GroupboxAuto5.setLayout(vbox4)
+        GroupboxRenderingSettings.setLayout(vbox4)
 
         current_project = QtWidgets.QLabel("Current Project : "+settings.get_Current_project()+'                    ')
-        GroupboxAuto5.layout().addWidget(current_project)
+        GroupboxRenderingSettings.layout().addWidget(current_project)
 
         preset = QtWidgets.QLabel("Quality")
-        GroupboxAuto5.layout().addWidget(preset)
+        GroupboxRenderingSettings.layout().addWidget(preset)
 
         GetRenderPresetsBtn = QtWidgets.QPushButton("GetRenderPresets")
         GetRenderPresetsBtn.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Bold))
         self.connect(GetRenderPresetsBtn, QtCore.SIGNAL("clicked()"), GetRenderPresets)
-        GroupboxAuto5.layout().addWidget(GetRenderPresetsBtn)
+        GroupboxRenderingSettings.layout().addWidget(GetRenderPresetsBtn)
 
         comboBoxQ = QtWidgets.QComboBox(self)
         comboBoxQ.setFont(QtGui.QFont("Times", 10, QtGui.QFont.Medium))
         comboBoxQ.setFixedWidth(200)
         comboBoxQ.addItem("Epmty")
-        GroupboxAuto5.layout().addWidget(comboBoxQ)
+        GroupboxRenderingSettings.layout().addWidget(comboBoxQ)
 
         CheckTransferToggleBtn = QtWidgets.QCheckBox("Transfer")
         CheckTransferToggleBtn.setChecked(False)
         self.connect(CheckTransferToggleBtn, QtCore.SIGNAL("clicked()"), onClickedToggleTransfer)
-        GroupboxAuto5.layout().addWidget(CheckTransferToggleBtn)
+        GroupboxRenderingSettings.layout().addWidget(CheckTransferToggleBtn)
 
         OpenFolderImagesBtn = QtWidgets.QPushButton("Open Images Folder..")
         OpenFolderImagesBtn.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Bold))
         OpenFolderImagesBtn.setEnabled(False)
         self.connect(OpenFolderImagesBtn, QtCore.SIGNAL("clicked()"), onOpenFolder)
-        GroupboxAuto5.layout().addWidget(OpenFolderImagesBtn)
+        GroupboxRenderingSettings.layout().addWidget(OpenFolderImagesBtn)
 
         OpenLogImagesBtn = QtWidgets.QPushButton("Open Log..")
         OpenLogImagesBtn.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Bold))
         OpenLogImagesBtn.setEnabled(False)
         self.connect(OpenLogImagesBtn, QtCore.SIGNAL("clicked()"), onOpenFolder)
-        GroupboxAuto5.layout().addWidget(OpenLogImagesBtn)
+        GroupboxRenderingSettings.layout().addWidget(OpenLogImagesBtn)
 
-        GroupboxAuto0 = QtWidgets.QGroupBox("Found Sequences")
-        GroupboxAuto0.setChecked(True)
+        GroupboxFoundSequences = QtWidgets.QGroupBox("Found Sequences")
+        GroupboxFoundSequences.setChecked(True)
+        vboxSequences = QtWidgets.QVBoxLayout()
         vbox31 = QtWidgets.QHBoxLayout()
-        GroupboxAuto0.setLayout(vbox31)
+        #vboxSequences.addWidget(vbox31)
+        GroupboxFoundSequences.setLayout(vboxSequences)
 
         FilterToggleBtn = QtWidgets.QCheckBox("Filter")
         FilterLineEdit = QtWidgets.QLineEdit('Name')
@@ -1065,45 +1078,50 @@ class MyWidget(QtWidgets.QWidget):
         self.connect(FilterToggleBtn, QtCore.SIGNAL("clicked()"), onClickedFilter)
         self.connect(FilterLineEdit, QtCore.SIGNAL("returnPressed()"), onEnterFilterLine)
 
-        GroupboxAuto0.layout().addWidget(FilterToggleBtn)
-        GroupboxAuto0.layout().addWidget(FilterLineEdit)
+        GroupboxFoundSequences.layout().addWidget(FilterToggleBtn)
+        GroupboxFoundSequences.layout().addWidget(FilterLineEdit)
 
         comboBox = QtWidgets.QComboBox(self)
         comboBox.setFont(QtGui.QFont("Times", 10, QtGui.QFont.Medium))
         comboBox.addItem("EMPTY")
 
-        GroupboxAuto0.layout().addWidget(comboBox)
+        GroupboxFoundSequences.layout().addWidget(comboBox)
 
-        GroupboxAuto2 = QtWidgets.QGroupBox("Perforce")
+        make_render_job_btn = QtWidgets.QPushButton("Make Render Job")
+        make_render_job_btn.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
+        self.connect(make_render_job_btn, QtCore.SIGNAL("clicked()"), MakeRenderJob)
+        GroupboxFoundSequences.layout().addWidget(make_render_job_btn)
+
+        GroupboxPerforce = QtWidgets.QGroupBox("Perforce")
         vbox4 = QtWidgets.QHBoxLayout()
-        GroupboxAuto2.setLayout(vbox4)
+        GroupboxPerforce.setLayout(vbox4)
 
         PerforceLabel = QtWidgets.QLabel("Perforce Time updated :")
         PerforceLabel.setGeometry(10, 50, 160, 20)
         PerforceLabel.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Medium))
-        GroupboxAuto2.layout().addWidget(PerforceLabel)
+        GroupboxPerforce.layout().addWidget(PerforceLabel)
 
         SetPerforceBtn = QtWidgets.QPushButton("Settings")
         SetPerforceBtn.setFont(QtGui.QFont("Times", 16, QtGui.QFont.Bold))
         self.connect(SetPerforceBtn, QtCore.SIGNAL("clicked()"),SetPerforceProfile)
-        GroupboxAuto2.layout().addWidget(SetPerforceBtn)
+        GroupboxPerforce.layout().addWidget(SetPerforceBtn)
 
 
         UpdatePerforceBtn = QtWidgets.QPushButton("Update Perforce")
         UpdatePerforceBtn.setFont(QtGui.QFont("Times", 16, QtGui.QFont.Bold))
         self.connect(UpdatePerforceBtn, QtCore.SIGNAL("clicked()"), UpdatePerforce)
-        GroupboxAuto2.layout().addWidget(UpdatePerforceBtn)
+        GroupboxPerforce.layout().addWidget(UpdatePerforceBtn)
 
         OpenLogPerforceBtn = QtWidgets.QPushButton("Open Log..")
         OpenLogPerforceBtn.setFont(QtGui.QFont("Times", 16, QtGui.QFont.Bold))
         self.connect(OpenLogPerforceBtn, QtCore.SIGNAL("clicked()"), onOpenLogPerforce)
-        GroupboxAuto2.layout().addWidget(OpenLogPerforceBtn)
+        GroupboxPerforce.layout().addWidget(OpenLogPerforceBtn)
 
 
-        GroupboxAuto3 = QtWidgets.QGroupBox("Batch Mode Rendering [Warning: Will Heavy busy server!]")
-        GroupboxAuto3.setChecked(True)
+        GroupboxBatchMakeJobs = QtWidgets.QGroupBox("Batch Mode Rendering [Warning: Will Heavy busy server!]")
+        GroupboxBatchMakeJobs.setChecked(True)
         vbox5 = QtWidgets.QVBoxLayout()
-        GroupboxAuto3.setLayout(vbox5)
+        GroupboxBatchMakeJobs.setLayout(vbox5)
         listing = QtWidgets.QListWidget()
         listing.setFont(QtGui.QFont("Times", 13, QtGui.QFont.Medium))
         listing.setSelectionMode(
@@ -1113,27 +1131,37 @@ class MyWidget(QtWidgets.QWidget):
         listing.addItem(item)
 
         listing.itemClicked.connect(printItemText)
-        GroupboxAuto3.layout().addWidget(listing)
+        GroupboxBatchMakeJobs.layout().addWidget(listing)
         BatchRenderBtn = QtWidgets.QPushButton("Start Batch Rendering")
         BatchRenderBtn.setFont(QtGui.QFont("Times", 13, QtGui.QFont.Bold))
         BatchRenderBtn.setEnabled(False)
         self.connect(BatchRenderBtn, QtCore.SIGNAL("clicked()"), BatchRenderMovie)
-        GroupboxAuto3.layout().addWidget(BatchRenderBtn)
-
-
+        GroupboxBatchMakeJobs.layout().addWidget(BatchRenderBtn)
 
         GroupboxMain = QtWidgets.QGroupBox("SERVER: Automation Pipeline")
         GroupboxMain.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Bold))
         vbox5 = QtWidgets.QVBoxLayout()
         GroupboxMain.setLayout(vbox5)
 
-        GroupboxMain.layout().addWidget(GroupboxQueue)
-        GroupboxMain.layout().addWidget(GroupboxAuto)
-        GroupboxMain.layout().addWidget(GroupboxAuto5)
-        GroupboxMain.layout().addWidget(GroupboxAuto0)
+        GroupboxAdvancedRender = QtWidgets.QGroupBox("Manager Rendering Control")
+        GroupboxAdvancedRender.setChecked(True)
+        hboxAd = QtWidgets.QHBoxLayout()
+        GroupboxAdvancedRender.setLayout(hboxAd)
 
-        GroupboxMain.layout().addWidget(GroupboxAuto2)
-        GroupboxMain.layout().addWidget(GroupboxAuto3)
+        RefreshQueueToggleBtn = QtWidgets.QCheckBox("Auto refresh all rendering info")
+        RefreshQueueToggleBtn.setChecked(True)
+        self.connect(RefreshQueueToggleBtn, QtCore.SIGNAL("clicked()"), onRefreshQueueToggle)
+        GroupboxAdvancedRender.layout().addWidget(RefreshQueueToggleBtn)
+
+        GroupboxMain.layout().addWidget(GroupboxAdvancedRender)
+        GroupboxMain.layout().addWidget(GroupboxQueue)
+        GroupboxMain.layout().addWidget(GroupboxGetSequences)
+        GroupboxMain.layout().addWidget(GroupboxRenderingSettings)
+        GroupboxMain.layout().addWidget(GroupboxFoundSequences)
+
+        GroupboxMain.layout().addWidget(GroupboxBatchMakeJobs)
+
+        GroupboxMain.layout().addWidget(GroupboxPerforce)
         layout.addWidget(GroupboxMain)
 
         progressBar = QtWidgets.QProgressBar(self)
@@ -1150,8 +1178,13 @@ class MyWidget(QtWidgets.QWidget):
         host_text = settings.get_ClientSettingsByName('HostServer')
         if host_text:
             HostLineEdit.setText(host_text)
+
         bAutorefresh = settings.get_ClientSettingsByName('RefreshQueueBool')
         RefreshQueueToggleBtn.setChecked(bAutorefresh)
+
+        bAdvancedRender = settings.get_ClientSettingsByName('AdvancedRenderBool')
+        AdvancedRenderToggleBtn.setChecked(bAdvancedRender)
+        onAdvancedRenderToggle()
 
         if Check_Server():
             GetAllRenderingInfo()
