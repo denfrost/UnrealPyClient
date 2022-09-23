@@ -14,7 +14,7 @@ Json_settings_client = USER_FOLDER + '\M2_Remote.json'
 Json_m2_project = USER_FOLDER + '\M2_Settings.json'
 Json_settings_perforce = USER_FOLDER + '/M2_RemoteCfg.json'
 
-settings_client_default = {"HostServer": "ws://localhost:30020", "RefreshQueueBool": True, "Test2": ""}
+settings_client_default = {"HostServer": "ws://localhost:30020", "RefreshQueueBool": True, "AdvancedRenderBool": False}
 
 settings_m2_project_default = {"DefaultProject": "WHM", "AnotherNewSet": "value"}
 
