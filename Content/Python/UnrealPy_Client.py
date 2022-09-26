@@ -319,7 +319,7 @@ class MyWidget(QtWidgets.QWidget):
             tanswer =dt.now().strftime("%H:%M:%S")
             ServerAnswerTextEdit.clear()
             ServerAnswerTextEdit.setText(tanswer+" : "+feedback) #JsonTextEdit.toPlainText()
-            TabWidgetCommans.setCurrentIndex(1)
+            TabWidgetCommands.setCurrentIndex(1)
             progressBar.setValue(100)
 
         def ServerAnsweredGetAllShots(feedback):
@@ -328,7 +328,7 @@ class MyWidget(QtWidgets.QWidget):
             tanswer =dt.now().strftime("%H:%M:%S")
             ServerAnswerTextEdit.clear()
             ServerAnswerTextEdit.setText(tanswer+" : "+feedback) #JsonTextEdit.toPlainText()
-            TabWidgetCommans.setCurrentIndex(1)
+            TabWidgetCommands.setCurrentIndex(1)
             FillShots(feedback)
             progressBar.setValue(70)
             progressBar.setValue(100)
@@ -342,7 +342,7 @@ class MyWidget(QtWidgets.QWidget):
             tanswer = dt.now().strftime("%H:%M:%S")
             ServerAnswerTextEdit.clear()
             ServerAnswerTextEdit.setText(tanswer + " : " + feedback)  # JsonTextEdit.toPlainText()
-            TabWidgetCommans.setCurrentIndex(1)
+            TabWidgetCommands.setCurrentIndex(1)
             progressBar.setValue(100)
 
         def ServerAnsweredMakeRenderJob(feedback):
@@ -351,7 +351,7 @@ class MyWidget(QtWidgets.QWidget):
             tanswer = dt.now().strftime("%H:%M:%S")
             ServerAnswerTextEdit.clear()
             ServerAnswerTextEdit.setText(tanswer + " : " + feedback)  # JsonTextEdit.toPlainText()
-            TabWidgetCommans.setCurrentIndex(1)
+            TabWidgetCommands.setCurrentIndex(1)
             progressBar.setValue(100)
 
         def ServerAnsweredPerforce(feedback):
@@ -361,7 +361,7 @@ class MyWidget(QtWidgets.QWidget):
             tused = dt.now()-trequest
             ServerAnswerTextEdit.clear()
             ServerAnswerTextEdit.setText(tanswer+" : "+feedback) #JsonTextEdit.toPlainText()
-            TabWidgetCommans.setCurrentIndex(1)
+            TabWidgetCommands.setCurrentIndex(1)
             PerforceLabel.setText("Perforce Updated : "+tanswer + '[' +str(tused) + ']')
             progressBar.setValue(100)
 
@@ -371,7 +371,7 @@ class MyWidget(QtWidgets.QWidget):
             tanswer =dt.now().strftime("%H:%M:%S")
             ServerAnswerTextEdit.clear()
             ServerAnswerTextEdit.setText(tanswer+" : "+feedback)
-            TabWidgetCommans.setCurrentIndex(1)
+            TabWidgetCommands.setCurrentIndex(1)
             #Fill Queue Combobox
             FillQueueJobs(feedback)
             comboBoxQueue.setCurrentIndex(0)
@@ -386,7 +386,7 @@ class MyWidget(QtWidgets.QWidget):
             tanswer =dt.now().strftime("%H:%M:%S")
             ServerAnswerTextEdit.clear()
             ServerAnswerTextEdit.setText(tanswer+" : "+feedback)
-            TabWidgetCommans.setCurrentIndex(1)
+            TabWidgetCommands.setCurrentIndex(1)
             progressBar.setValue(70)
             cleandata = feedback.split('"ReturnValue": "')[-1].split('"\\r\\n}\\r\\n}''')[0]
             print('DeleteRenderJob Clean Data :'+cleandata)
@@ -400,7 +400,7 @@ class MyWidget(QtWidgets.QWidget):
             tanswer =dt.now().strftime("%H:%M:%S")
             ServerAnswerTextEdit.clear()
             ServerAnswerTextEdit.setText(tanswer+" : "+feedback)
-            TabWidgetCommans.setCurrentIndex(1)
+            TabWidgetCommands.setCurrentIndex(1)
             progressBar.setValue(70)
             cleandata = feedback.split('"ReturnValue": "')[-1].split('"\\r\\n}\\r\\n}''')[0]
             print('DeleteRenderJob Clean Data :'+cleandata)
@@ -417,7 +417,7 @@ class MyWidget(QtWidgets.QWidget):
             print("Got Server Answer : GetRemoteInfo")
             tanswer =dt.now().strftime("%H:%M:%S")
             ServerAnswerTextEdit.setText(ServerAnswerTextEdit.toPlainText() + '  ' + tanswer+" : "+feedback)
-            TabWidgetCommans.setCurrentIndex(1)
+            TabWidgetCommands.setCurrentIndex(1)
             #Parse super json from server
             print(type(json_remote_data))
             print('Movie Rendering Working : ' +json_remote_data["MoviePipelineRendering"])
@@ -436,7 +436,7 @@ class MyWidget(QtWidgets.QWidget):
                 comboBoxQueue.addItem("EMPTY")
                 return
             tanswer =dt.now().strftime("%H:%M:%S")
-            TabWidgetCommans.setCurrentIndex(1)
+            TabWidgetCommands.setCurrentIndex(1)
             list_presets = cleandata.split(',')
             work_list_presets = []
             comboBoxQ.clear()
@@ -471,7 +471,7 @@ class MyWidget(QtWidgets.QWidget):
             tanswer =dt.now().strftime("%H:%M:%S")
             ServerAnswerTextEdit.clear()
             ServerAnswerTextEdit.setText(ServerAnswerTextEdit.toPlainText() + '  ' + tanswer+" : "+feedback)
-            TabWidgetCommans.setCurrentIndex(1)
+            TabWidgetCommands.setCurrentIndex(1)
 
             #Parse super json from server
             print(type(json_remote_data))
@@ -510,7 +510,7 @@ class MyWidget(QtWidgets.QWidget):
             tanswer =dt.now().strftime("%H:%M:%S")
             ServerAnswerTextEdit.clear()
             ServerAnswerTextEdit.setText(tanswer+" : "+feedback)
-            TabWidgetCommans.setCurrentIndex(1)
+            TabWidgetCommands.setCurrentIndex(1)
             list_presets = cleandata.split(',')
             work_list_presets = []
             comboBoxQ.clear()
@@ -558,7 +558,7 @@ class MyWidget(QtWidgets.QWidget):
 
         def Get_All_Server_Shots():
             FilterToggleBtn.setChecked(False)
-            TabWidgetCommans.setCurrentIndex(0)
+            TabWidgetCommands.setCurrentIndex(0)
             JsonTextEdit.setText(json.dumps(Json_RequestGetAllShots))
             progressBar.setValue(0)
             progressBar.setValue(50)
@@ -644,7 +644,7 @@ class MyWidget(QtWidgets.QWidget):
 
             progressBar.setValue(0)
             JsonTextEdit.setText(json.dumps(Json_RequestSetShotRender))
-            TabWidgetCommans.setCurrentIndex(0)
+            TabWidgetCommands.setCurrentIndex(0)
             print("SetShotRender ")
             progressBar.setValue(50)
             HostServer = HostLineEdit.text()
@@ -660,7 +660,7 @@ class MyWidget(QtWidgets.QWidget):
             Json_RequestMakeRenderJob["Parameters"]["Body"]["parameters"]["bFtp_transfer"] = bFtp_transfer
             progressBar.setValue(0)
             JsonTextEdit.setText(json.dumps(Json_RequestMakeRenderJob))
-            TabWidgetCommans.setCurrentIndex(0)
+            TabWidgetCommands.setCurrentIndex(0)
             print("Sending....")
             progressBar.setValue(50)
             HostServer = HostLineEdit.text()
@@ -669,13 +669,13 @@ class MyWidget(QtWidgets.QWidget):
         def StartRenderJobs(job_name):
             Json_RequestStartRenderJob["Parameters"]["Body"]["parameters"]["sJobName"] = job_name
             JsonTextEdit.setText(json.dumps(Json_RequestStartRenderJob))
-            TabWidgetCommans.setCurrentIndex(0)
+            TabWidgetCommands.setCurrentIndex(0)
             HostServer = HostLineEdit.text()
             SendSocket(ClearAnswer, HostServer, json.dumps(Json_RequestStartRenderJob), ServerAnsweredStartRenderJobs)
 
         def Get_Render_Presets():
             JsonTextEdit.setText(json.dumps(Json_RequestGetRenderPresets))
-            TabWidgetCommans.setCurrentIndex(0)
+            TabWidgetCommands.setCurrentIndex(0)
             HostServer = HostLineEdit.text()
             SendSocket(ClearAnswer, HostServer, json.dumps(Json_RequestGetRenderPresets), ServerAnsweredGetRenderPresets)
 
@@ -783,7 +783,7 @@ class MyWidget(QtWidgets.QWidget):
             print("Perforce ")
             progressBar.setValue(0)
             JsonTextEdit.setText(json.dumps(Json_UpdatePerforce))
-            TabWidgetCommans.setCurrentIndex(0)
+            TabWidgetCommands.setCurrentIndex(0)
             progressBar.setValue(50)
             HostServer = HostLineEdit.text()
             SendSocket(ClearAnswer, HostServer, json.dumps(Json_UpdatePerforce), ServerAnsweredPerforce)
@@ -876,7 +876,7 @@ class MyWidget(QtWidgets.QWidget):
         def Delete_Render_Job(job_name):
             Json_RequestDeleteRenderJob["Parameters"]["Body"]["parameters"]["sJobName"] = job_name
             JsonTextEdit.setText(json.dumps(Json_RequestDeleteRenderJob))
-            TabWidgetCommans.setCurrentIndex(0)
+            TabWidgetCommands.setCurrentIndex(0)
             HostServer = HostLineEdit.text()
             progressBar.setValue(0)
             progressBar.setValue(50)
@@ -885,7 +885,7 @@ class MyWidget(QtWidgets.QWidget):
         @QtCore.Slot()
         def DeleteAllRenderJobs():
             JsonTextEdit.setText(json.dumps(Json_RequestDeleteAllRenderJobs))
-            TabWidgetCommans.setCurrentIndex(0)
+            TabWidgetCommands.setCurrentIndex(0)
             HostServer = HostLineEdit.text()
             progressBar.setValue(0)
             progressBar.setValue(50)
@@ -917,10 +917,12 @@ class MyWidget(QtWidgets.QWidget):
             app.quit()
 
         QtWidgets.QWidget.__init__(self, parent)
-        self.setWindowTitle("Unreal Websocket Client")
+        versiondate = settings.get_ClientSettingsByName('ClientRevisionDate')
+        self.setWindowTitle("Unreal Websocket Client version:"+versiondate)
 
-        layoutWindow = QtWidgets.QVBoxLayout()
-        self.setLayout(layoutWindow)
+        layoutVerticalWindow = QtWidgets.QVBoxLayout()
+        self.setLayout(layoutVerticalWindow)
+
 
         GroupboxLabel = QtWidgets.QGroupBox("")
         hboxLabel = QtWidgets.QHBoxLayout()
@@ -932,7 +934,7 @@ class MyWidget(QtWidgets.QWidget):
         GroupboxLabel.setLayout(hboxLabel)
 
         GroupboxLabel.layout().addWidget(StatusLabel)
-        layoutWindow.addWidget(GroupboxLabel)
+        layoutVerticalWindow.addWidget(GroupboxLabel)
 
         GroupboxStatus = QtWidgets.QGroupBox("Server Status")
         GroupboxStatus.setAlignment(100)
@@ -941,7 +943,7 @@ class MyWidget(QtWidgets.QWidget):
         GroupboxStatus.setFixedHeight(80)
 
         GroupboxStatus.setLayout(hboxStatus)
-        layoutWindow.addWidget(GroupboxStatus)
+        layoutVerticalWindow.addWidget(GroupboxStatus)
 
         AdvancedRenderToggleBtn = QtWidgets.QCheckBox("Advanced Render Control")
         AdvancedRenderToggleBtn.setChecked(True)
@@ -970,7 +972,7 @@ class MyWidget(QtWidgets.QWidget):
         GroupboxSendCommands.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Bold))
         vbox2 = QtWidgets.QVBoxLayout()
         GroupboxSendCommands.setLayout(vbox2)
-        layoutWindow.addWidget(GroupboxSendCommands)
+        layoutVerticalWindow.addWidget(GroupboxSendCommands)
 
         GetInfoBtn = QtWidgets.QPushButton("Get Info")
         GetInfoBtn.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
@@ -990,16 +992,16 @@ class MyWidget(QtWidgets.QWidget):
 
         JsonTextEdit = QtWidgets.QTextEdit(json.dumps(Json_RequestRemoteStaticFunction))
         JsonTextEdit.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Medium))
-        layoutWindow.addWidget(JsonTextEdit)
+        layoutVerticalWindow.addWidget(JsonTextEdit)
 
         ServerAnswerTextEdit = QtWidgets.QTextEdit('Feedback from server')
         ServerAnswerTextEdit.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Medium))
-        layoutWindow.addWidget(ServerAnswerTextEdit)
+        layoutVerticalWindow.addWidget(ServerAnswerTextEdit)
 
-        TabWidgetCommans = QtWidgets.QTabWidget()
-        TabWidgetCommans.addTab(JsonTextEdit, "Command Client")
-        TabWidgetCommans.addTab(ServerAnswerTextEdit, "Answer Server")
-        GroupboxSendCommands.layout().addWidget(TabWidgetCommans)
+        TabWidgetCommands = QtWidgets.QTabWidget()
+        TabWidgetCommands.addTab(JsonTextEdit, "Command Client")
+        TabWidgetCommands.addTab(ServerAnswerTextEdit, "Answer Server")
+        GroupboxSendCommands.layout().addWidget(TabWidgetCommands)
 
         GroupboxQueue = QtWidgets.QGroupBox("Rendering Jobs Queue")
         GroupboxQueue.setChecked(True)
@@ -1056,9 +1058,10 @@ class MyWidget(QtWidgets.QWidget):
 
         GroupboxRenderingSettings = QtWidgets.QGroupBox("Project Rendering Settings")
         GroupboxRenderingSettings.setChecked(True)
-        vboxRenderingSettings = QtWidgets.QHBoxLayout()
+        hboxRenderingSettings = QtWidgets.QHBoxLayout()
+        hboxRenderingSettings.setAlignment(QtCore.Qt.AlignLeft)
         GroupboxRenderingSettings.setFixedHeight(80)
-        GroupboxRenderingSettings.setLayout(vboxRenderingSettings)
+        GroupboxRenderingSettings.setLayout(hboxRenderingSettings)
 
         ChangeProjectBtn = QtWidgets.QPushButton("Change Project")
         ChangeProjectBtn.setFont(QtGui.QFont("Times", 10, QtGui.QFont.Bold))
@@ -1099,7 +1102,7 @@ class MyWidget(QtWidgets.QWidget):
 
         GroupboxFilterSequences  = QtWidgets.QGroupBox("")
         hboxFilterSequences = QtWidgets.QHBoxLayout()
-        hboxFilterSequences.addStretch()
+        hboxFilterSequences.setAlignment(QtCore.Qt.AlignLeft)
         GroupboxFilterSequences.setLayout(hboxFilterSequences)
 
         GroupboxFoundSequences = QtWidgets.QGroupBox("Server Sequences")
@@ -1110,6 +1113,7 @@ class MyWidget(QtWidgets.QWidget):
 
 
         FilterToggleBtn = QtWidgets.QCheckBox("Filter")
+        #FilterToggleBtn.setStyleSheet("QCheckBox{spacing: 5px;}")
         FilterLineEdit = QtWidgets.QLineEdit('Name')
         FilterLineEdit.setFont(QtGui.QFont("Times", 10, QtGui.QFont.Medium))
         FilterToggleBtn.setChecked(False)
@@ -1136,9 +1140,9 @@ class MyWidget(QtWidgets.QWidget):
         GroupboxFoundSequences.layout().addWidget(make_render_job_btn)
 
         GroupboxPerforce = QtWidgets.QGroupBox("Perforce Control")
-        vboxRenderingSettings = QtWidgets.QHBoxLayout()
+        hboxRenderingSettings = QtWidgets.QHBoxLayout()
         GroupboxPerforce.setFixedHeight(80)
-        GroupboxPerforce.setLayout(vboxRenderingSettings)
+        GroupboxPerforce.setLayout(hboxRenderingSettings)
 
         PerforceLabel = QtWidgets.QLabel("Perforce Time updated :")
         PerforceLabel.setGeometry(10, 50, 160, 20)
@@ -1210,7 +1214,24 @@ class MyWidget(QtWidgets.QWidget):
         GroupboxMain.layout().addWidget(GroupboxBatchMakeJobs)
 
         GroupboxMain.layout().addWidget(GroupboxPerforce)
-        layoutWindow.addWidget(GroupboxMain)
+
+        def generalTabUI(self):
+            generalTab = QWidget()
+            genlayout = QVBoxLayout()
+            genlayout.addWidget(GroupboxMain)
+            generalTab.setLayout(genlayout)
+            return generalTab
+        def secondTabUI(self):
+            secondTab = QWidget()
+            return secondTab
+        TabsMain = QTabWidget()
+        TabsMain.addTab(generalTabUI(self), "Rendering pipeline")
+        TabsMain.addTab(secondTabUI(self), "Another")
+        TabsMain.setCurrentIndex(0)
+
+        layoutVerticalWindow.addWidget(TabsMain)
+
+        #layoutVerticalWindow.addWidget(GroupboxMain)
 
         GroupboxTech = QtWidgets.QGroupBox("")
         vboxTech = QtWidgets.QVBoxLayout()
@@ -1228,7 +1249,7 @@ class MyWidget(QtWidgets.QWidget):
 
         GroupboxTech.layout().addWidget(quit)
 
-        layoutWindow.addWidget(GroupboxTech)
+        layoutVerticalWindow.addWidget(GroupboxTech)
 
         #get last server save cfg
         host_text = settings.get_ClientSettingsByName('HostServer')
@@ -1275,9 +1296,22 @@ def unreal_working_dirs():
     print('Video Capture Directory: ' + video_capture_dir)
     print('Project Download Directory: ' + project_persistent_download_dir)
 
+def Checkgitversion():
+    import subprocess
+    #process = subprocess.Popen(['git', 'rev-parse', 'HEAD'], shell=False, stdout=subprocess.PIPE)
+    output = subprocess.check_output(["git", "log", '-n 1'])
+    #git_head = process.communicate()
+    #print(output.strip().decode())
+    strOut = output.strip().decode()
+    version_date = strOut.split('Date:')[-1].split('\n\n')[0]
+    return version_date
 
 if __name__ == "__main__":
     print("Start Py App")
+    RevisionDate = Checkgitversion()
+    if len(RevisionDate) > 0:
+        print(RevisionDate)
+        settings.set_ClientSettingsByName('ClientRevisionDate', RevisionDate)
     settings.print_log("Start Py App")
     settings.setup_all_configs_if_need()
     print('Current Project : '+settings.get_Current_project())
