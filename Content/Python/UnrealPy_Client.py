@@ -1108,7 +1108,7 @@ class MyWidget(QtWidgets.QWidget):
         GroupboxFoundSequences = QtWidgets.QGroupBox("Server Sequences")
         GroupboxFoundSequences.setChecked(True)
         vboxSequences = QtWidgets.QVBoxLayout()
-        GroupboxFoundSequences.setFixedHeight(160)
+        GroupboxFoundSequences.setFixedHeight(180)
         GroupboxFoundSequences.setLayout(vboxSequences)
 
 
@@ -1196,7 +1196,7 @@ class MyWidget(QtWidgets.QWidget):
         GroupboxAdvancedRender.setChecked(True)
         hboxAd = QtWidgets.QHBoxLayout()
         GroupboxAdvancedRender.setLayout(hboxAd)
-        GroupboxAdvancedRender.setFixedHeight(60)
+        GroupboxAdvancedRender.setFixedHeight(80)
 
         RefreshQueueToggleBtn = QtWidgets.QCheckBox("Auto refresh all rendering info")
         RefreshQueueToggleBtn.setChecked(True)
@@ -1310,7 +1310,7 @@ if __name__ == "__main__":
     print("Start Py App")
     RevisionDate = Checkgitversion()
     if len(RevisionDate) > 0:
-        print(RevisionDate)
+        print('Revision version:'+RevisionDate)
         settings.set_ClientSettingsByName('ClientRevisionDate', RevisionDate)
     settings.print_log("Start Py App")
     settings.setup_all_configs_if_need()
