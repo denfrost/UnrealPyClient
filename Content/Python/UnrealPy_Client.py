@@ -9,7 +9,7 @@ import settings as settings
 
 #pip install PySide2
 from PySide2 import *
-from PySide2.QtWidgets import QApplication, QDialog, QMainWindow, QPushButton, QInputDialog
+from PySide2.QtWidgets import QApplication, QDialog, QMainWindow, QPushButton, QInputDialog, QVBoxLayout
 from PySide2.QtWidgets import *
 
 #pip install websocket-client
@@ -319,7 +319,7 @@ class MyWidget(QtWidgets.QWidget):
             tanswer =dt.now().strftime("%H:%M:%S")
             ServerAnswerTextEdit.clear()
             ServerAnswerTextEdit.setText(tanswer+" : "+feedback) #JsonTextEdit.toPlainText()
-            tabwidget.setCurrentIndex(1)
+            TabWidgetCommans.setCurrentIndex(1)
             progressBar.setValue(100)
 
         def ServerAnsweredGetAllShots(feedback):
@@ -328,7 +328,7 @@ class MyWidget(QtWidgets.QWidget):
             tanswer =dt.now().strftime("%H:%M:%S")
             ServerAnswerTextEdit.clear()
             ServerAnswerTextEdit.setText(tanswer+" : "+feedback) #JsonTextEdit.toPlainText()
-            tabwidget.setCurrentIndex(1)
+            TabWidgetCommans.setCurrentIndex(1)
             FillShots(feedback)
             progressBar.setValue(70)
             progressBar.setValue(100)
@@ -342,7 +342,7 @@ class MyWidget(QtWidgets.QWidget):
             tanswer = dt.now().strftime("%H:%M:%S")
             ServerAnswerTextEdit.clear()
             ServerAnswerTextEdit.setText(tanswer + " : " + feedback)  # JsonTextEdit.toPlainText()
-            tabwidget.setCurrentIndex(1)
+            TabWidgetCommans.setCurrentIndex(1)
             progressBar.setValue(100)
 
         def ServerAnsweredMakeRenderJob(feedback):
@@ -351,7 +351,7 @@ class MyWidget(QtWidgets.QWidget):
             tanswer = dt.now().strftime("%H:%M:%S")
             ServerAnswerTextEdit.clear()
             ServerAnswerTextEdit.setText(tanswer + " : " + feedback)  # JsonTextEdit.toPlainText()
-            tabwidget.setCurrentIndex(1)
+            TabWidgetCommans.setCurrentIndex(1)
             progressBar.setValue(100)
 
         def ServerAnsweredPerforce(feedback):
@@ -361,7 +361,7 @@ class MyWidget(QtWidgets.QWidget):
             tused = dt.now()-trequest
             ServerAnswerTextEdit.clear()
             ServerAnswerTextEdit.setText(tanswer+" : "+feedback) #JsonTextEdit.toPlainText()
-            tabwidget.setCurrentIndex(1)
+            TabWidgetCommans.setCurrentIndex(1)
             PerforceLabel.setText("Perforce Updated : "+tanswer + '[' +str(tused) + ']')
             progressBar.setValue(100)
 
@@ -371,7 +371,7 @@ class MyWidget(QtWidgets.QWidget):
             tanswer =dt.now().strftime("%H:%M:%S")
             ServerAnswerTextEdit.clear()
             ServerAnswerTextEdit.setText(tanswer+" : "+feedback)
-            tabwidget.setCurrentIndex(1)
+            TabWidgetCommans.setCurrentIndex(1)
             #Fill Queue Combobox
             FillQueueJobs(feedback)
             comboBoxQueue.setCurrentIndex(0)
@@ -386,7 +386,7 @@ class MyWidget(QtWidgets.QWidget):
             tanswer =dt.now().strftime("%H:%M:%S")
             ServerAnswerTextEdit.clear()
             ServerAnswerTextEdit.setText(tanswer+" : "+feedback)
-            tabwidget.setCurrentIndex(1)
+            TabWidgetCommans.setCurrentIndex(1)
             progressBar.setValue(70)
             cleandata = feedback.split('"ReturnValue": "')[-1].split('"\\r\\n}\\r\\n}''')[0]
             print('DeleteRenderJob Clean Data :'+cleandata)
@@ -400,7 +400,7 @@ class MyWidget(QtWidgets.QWidget):
             tanswer =dt.now().strftime("%H:%M:%S")
             ServerAnswerTextEdit.clear()
             ServerAnswerTextEdit.setText(tanswer+" : "+feedback)
-            tabwidget.setCurrentIndex(1)
+            TabWidgetCommans.setCurrentIndex(1)
             progressBar.setValue(70)
             cleandata = feedback.split('"ReturnValue": "')[-1].split('"\\r\\n}\\r\\n}''')[0]
             print('DeleteRenderJob Clean Data :'+cleandata)
@@ -417,14 +417,14 @@ class MyWidget(QtWidgets.QWidget):
             print("Got Server Answer : GetRemoteInfo")
             tanswer =dt.now().strftime("%H:%M:%S")
             ServerAnswerTextEdit.setText(ServerAnswerTextEdit.toPlainText() + '  ' + tanswer+" : "+feedback)
-            tabwidget.setCurrentIndex(1)
+            TabWidgetCommans.setCurrentIndex(1)
             #Parse super json from server
             print(type(json_remote_data))
             print('Movie Rendering Working : ' +json_remote_data["MoviePipelineRendering"])
             if json_remote_data["MoviePipelineRendering"] == 'True':
-                Groupbox.setTitle('Server Status : Rendering Movie ')
+                GroupboxStatus.setTitle('Server Status : Rendering Movie ')
             else:
-                Groupbox.setTitle('Server Status : Available for Render ')
+                GroupboxStatus.setTitle('Server Status : Available for Render ')
             print('Movie Rendering Working 2 : ' + json_remote_data["MoviePipelineRendering2"])
 
             progressBar.setValue(100)
@@ -436,7 +436,7 @@ class MyWidget(QtWidgets.QWidget):
                 comboBoxQueue.addItem("EMPTY")
                 return
             tanswer =dt.now().strftime("%H:%M:%S")
-            tabwidget.setCurrentIndex(1)
+            TabWidgetCommans.setCurrentIndex(1)
             list_presets = cleandata.split(',')
             work_list_presets = []
             comboBoxQ.clear()
@@ -471,16 +471,16 @@ class MyWidget(QtWidgets.QWidget):
             tanswer =dt.now().strftime("%H:%M:%S")
             ServerAnswerTextEdit.clear()
             ServerAnswerTextEdit.setText(ServerAnswerTextEdit.toPlainText() + '  ' + tanswer+" : "+feedback)
-            tabwidget.setCurrentIndex(1)
+            TabWidgetCommans.setCurrentIndex(1)
 
             #Parse super json from server
             print(type(json_remote_data))
 
             print('Movie Rendering Working : ' +json_remote_data["MoviePipelineRendering"])
             if json_remote_data["MoviePipelineRendering"] == 'True':
-                Groupbox.setTitle('Server Status : Rendering Movie ')
+                GroupboxStatus.setTitle('Server Status : Rendering Movie ')
             else:
-                Groupbox.setTitle('Server Status : Available for Render ')
+                GroupboxStatus.setTitle('Server Status : Available for Render ')
 
             PresetsRenderingList = json_remote_data["PresetsRenderingList"]
             print('Presets Rendering Quality List : ' + PresetsRenderingList)
@@ -510,7 +510,7 @@ class MyWidget(QtWidgets.QWidget):
             tanswer =dt.now().strftime("%H:%M:%S")
             ServerAnswerTextEdit.clear()
             ServerAnswerTextEdit.setText(tanswer+" : "+feedback)
-            tabwidget.setCurrentIndex(1)
+            TabWidgetCommans.setCurrentIndex(1)
             list_presets = cleandata.split(',')
             work_list_presets = []
             comboBoxQ.clear()
@@ -558,7 +558,7 @@ class MyWidget(QtWidgets.QWidget):
 
         def Get_All_Server_Shots():
             FilterToggleBtn.setChecked(False)
-            tabwidget.setCurrentIndex(0)
+            TabWidgetCommans.setCurrentIndex(0)
             JsonTextEdit.setText(json.dumps(Json_RequestGetAllShots))
             progressBar.setValue(0)
             progressBar.setValue(50)
@@ -644,7 +644,7 @@ class MyWidget(QtWidgets.QWidget):
 
             progressBar.setValue(0)
             JsonTextEdit.setText(json.dumps(Json_RequestSetShotRender))
-            tabwidget.setCurrentIndex(0)
+            TabWidgetCommans.setCurrentIndex(0)
             print("SetShotRender ")
             progressBar.setValue(50)
             HostServer = HostLineEdit.text()
@@ -660,7 +660,7 @@ class MyWidget(QtWidgets.QWidget):
             Json_RequestMakeRenderJob["Parameters"]["Body"]["parameters"]["bFtp_transfer"] = bFtp_transfer
             progressBar.setValue(0)
             JsonTextEdit.setText(json.dumps(Json_RequestMakeRenderJob))
-            tabwidget.setCurrentIndex(0)
+            TabWidgetCommans.setCurrentIndex(0)
             print("Sending....")
             progressBar.setValue(50)
             HostServer = HostLineEdit.text()
@@ -669,13 +669,13 @@ class MyWidget(QtWidgets.QWidget):
         def StartRenderJobs(job_name):
             Json_RequestStartRenderJob["Parameters"]["Body"]["parameters"]["sJobName"] = job_name
             JsonTextEdit.setText(json.dumps(Json_RequestStartRenderJob))
-            tabwidget.setCurrentIndex(0)
+            TabWidgetCommans.setCurrentIndex(0)
             HostServer = HostLineEdit.text()
             SendSocket(ClearAnswer, HostServer, json.dumps(Json_RequestStartRenderJob), ServerAnsweredStartRenderJobs)
 
         def Get_Render_Presets():
             JsonTextEdit.setText(json.dumps(Json_RequestGetRenderPresets))
-            tabwidget.setCurrentIndex(0)
+            TabWidgetCommans.setCurrentIndex(0)
             HostServer = HostLineEdit.text()
             SendSocket(ClearAnswer, HostServer, json.dumps(Json_RequestGetRenderPresets), ServerAnsweredGetRenderPresets)
 
@@ -783,7 +783,7 @@ class MyWidget(QtWidgets.QWidget):
             print("Perforce ")
             progressBar.setValue(0)
             JsonTextEdit.setText(json.dumps(Json_UpdatePerforce))
-            tabwidget.setCurrentIndex(0)
+            TabWidgetCommans.setCurrentIndex(0)
             progressBar.setValue(50)
             HostServer = HostLineEdit.text()
             SendSocket(ClearAnswer, HostServer, json.dumps(Json_UpdatePerforce), ServerAnsweredPerforce)
@@ -842,6 +842,7 @@ class MyWidget(QtWidgets.QWidget):
         @QtCore.Slot()
         def onAdvancedRenderToggle():
             if AdvancedRenderToggleBtn.isChecked():
+                GroupboxMain.setFixedHeight(770)
                 OpenLogImagesBtn.show()
                 OpenFolderImagesBtn.show()
                 GroupboxBatchMakeJobs.show()
@@ -852,6 +853,7 @@ class MyWidget(QtWidgets.QWidget):
                 GetRenderPresetsBtn.show()
                 RefreshQueueToggleBtn.setEnabled(AdvancedRenderToggleBtn.isChecked())
             else:
+                GroupboxMain.setFixedHeight(660)
                 OpenLogImagesBtn.hide()
                 OpenFolderImagesBtn.hide()
                 GroupboxBatchMakeJobs.hide()
@@ -874,7 +876,7 @@ class MyWidget(QtWidgets.QWidget):
         def Delete_Render_Job(job_name):
             Json_RequestDeleteRenderJob["Parameters"]["Body"]["parameters"]["sJobName"] = job_name
             JsonTextEdit.setText(json.dumps(Json_RequestDeleteRenderJob))
-            tabwidget.setCurrentIndex(0)
+            TabWidgetCommans.setCurrentIndex(0)
             HostServer = HostLineEdit.text()
             progressBar.setValue(0)
             progressBar.setValue(50)
@@ -883,7 +885,7 @@ class MyWidget(QtWidgets.QWidget):
         @QtCore.Slot()
         def DeleteAllRenderJobs():
             JsonTextEdit.setText(json.dumps(Json_RequestDeleteAllRenderJobs))
-            tabwidget.setCurrentIndex(0)
+            TabWidgetCommans.setCurrentIndex(0)
             HostServer = HostLineEdit.text()
             progressBar.setValue(0)
             progressBar.setValue(50)
@@ -915,54 +917,60 @@ class MyWidget(QtWidgets.QWidget):
             app.quit()
 
         QtWidgets.QWidget.__init__(self, parent)
-        self.resize(800, 800)
         self.setWindowTitle("Unreal Websocket Client")
 
-        layout = QtWidgets.QVBoxLayout()
-        self.setLayout(layout)
+        layoutWindow = QtWidgets.QVBoxLayout()
+        self.setLayout(layoutWindow)
 
+        GroupboxLabel = QtWidgets.QGroupBox("")
+        hboxLabel = QtWidgets.QHBoxLayout()
         StatusLabel = QtWidgets.QLabel("Unreal Server Status:")
-        StatusLabel.setGeometry(10, 50, 160, 20)
         StatusLabel.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Medium))
         StatusLabel.setStyleSheet("QLabel { background-color : red; color : blue; }")
-        layout.addWidget(StatusLabel)
+        StatusLabel.setFixedHeight(40)
+        GroupboxLabel.setFixedHeight(60)
+        GroupboxLabel.setLayout(hboxLabel)
 
+        GroupboxLabel.layout().addWidget(StatusLabel)
+        layoutWindow.addWidget(GroupboxLabel)
 
-        Groupbox = QtWidgets.QGroupBox("Server Status")
-        Groupbox.setAlignment(100)
-        Groupbox.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Bold))
-        vbox = QtWidgets.QHBoxLayout()
-        Groupbox.setLayout(vbox)
-        layout.addWidget(Groupbox)
+        GroupboxStatus = QtWidgets.QGroupBox("Server Status")
+        GroupboxStatus.setAlignment(100)
+        GroupboxStatus.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Bold))
+        hboxStatus = QtWidgets.QHBoxLayout()
+        GroupboxStatus.setFixedHeight(80)
+
+        GroupboxStatus.setLayout(hboxStatus)
+        layoutWindow.addWidget(GroupboxStatus)
 
         AdvancedRenderToggleBtn = QtWidgets.QCheckBox("Advanced Render Control")
         AdvancedRenderToggleBtn.setChecked(True)
         self.connect(AdvancedRenderToggleBtn, QtCore.SIGNAL("clicked()"), onAdvancedRenderToggle)
-        Groupbox.layout().addWidget(AdvancedRenderToggleBtn)
+        GroupboxStatus.layout().addWidget(AdvancedRenderToggleBtn)
 
         Check = QtWidgets.QPushButton("Check Server")
         Check.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
         self.connect(Check, QtCore.SIGNAL("clicked()"), CheckServer)
-        Groupbox.layout().addWidget(Check)
+        GroupboxStatus.layout().addWidget(Check)
 
         HostLineEdit = QtWidgets.QLineEdit(Server)
         HostLineEdit.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Medium))
         HostServer = "ws://" + HostLineEdit.text()+":30020"
         HostLineEdit = QtWidgets.QLineEdit(Server)
-        Groupbox.layout().addWidget(HostLineEdit)
+        GroupboxStatus.layout().addWidget(HostLineEdit)
 
         ServerToggleBtn = QtWidgets.QCheckBox("Change Server")
         ServerToggleBtn.setChecked(False)
         self.connect(ServerToggleBtn, QtCore.SIGNAL("clicked()"), onClickedToggle)
         Check.setEnabled(ServerToggleBtn.isChecked())
         HostLineEdit.setEnabled(ServerToggleBtn.isChecked())
-        Groupbox.layout().addWidget(ServerToggleBtn)
+        GroupboxStatus.layout().addWidget(ServerToggleBtn)
 
         GroupboxSendCommands = QtWidgets.QGroupBox("Send Custom Commands")
         GroupboxSendCommands.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Bold))
         vbox2 = QtWidgets.QVBoxLayout()
         GroupboxSendCommands.setLayout(vbox2)
-        layout.addWidget(GroupboxSendCommands)
+        layoutWindow.addWidget(GroupboxSendCommands)
 
         GetInfoBtn = QtWidgets.QPushButton("Get Info")
         GetInfoBtn.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
@@ -982,20 +990,21 @@ class MyWidget(QtWidgets.QWidget):
 
         JsonTextEdit = QtWidgets.QTextEdit(json.dumps(Json_RequestRemoteStaticFunction))
         JsonTextEdit.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Medium))
-        layout.addWidget(JsonTextEdit)
+        layoutWindow.addWidget(JsonTextEdit)
 
         ServerAnswerTextEdit = QtWidgets.QTextEdit('Feedback from server')
         ServerAnswerTextEdit.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Medium))
-        layout.addWidget(ServerAnswerTextEdit)
+        layoutWindow.addWidget(ServerAnswerTextEdit)
 
-        tabwidget = QtWidgets.QTabWidget()
-        tabwidget.addTab(JsonTextEdit, "Command Client")
-        tabwidget.addTab(ServerAnswerTextEdit, "Answer Server")
-        GroupboxSendCommands.layout().addWidget(tabwidget)
+        TabWidgetCommans = QtWidgets.QTabWidget()
+        TabWidgetCommans.addTab(JsonTextEdit, "Command Client")
+        TabWidgetCommans.addTab(ServerAnswerTextEdit, "Answer Server")
+        GroupboxSendCommands.layout().addWidget(TabWidgetCommans)
 
         GroupboxQueue = QtWidgets.QGroupBox("Rendering Jobs Queue")
         GroupboxQueue.setChecked(True)
         vbox50 = QtWidgets.QHBoxLayout()
+        GroupboxQueue.setFixedHeight(80)
         GroupboxQueue.setLayout(vbox50)
 
         GetQueueBtn = QtWidgets.QPushButton("Get Queue Jobs")
@@ -1026,6 +1035,7 @@ class MyWidget(QtWidgets.QWidget):
         GroupboxRenderJobs = QtWidgets.QGroupBox("Rendering Shots")
         GroupboxRenderJobs.setChecked(True)
         vbox3 = QtWidgets.QHBoxLayout()
+        GroupboxRenderJobs.setFixedHeight(80)
         GroupboxRenderJobs.setLayout(vbox3)
 
         GetServerShots = QtWidgets.QPushButton("Get Server Sequences")
@@ -1046,8 +1056,9 @@ class MyWidget(QtWidgets.QWidget):
 
         GroupboxRenderingSettings = QtWidgets.QGroupBox("Project Rendering Settings")
         GroupboxRenderingSettings.setChecked(True)
-        vbox4 = QtWidgets.QHBoxLayout()
-        GroupboxRenderingSettings.setLayout(vbox4)
+        vboxRenderingSettings = QtWidgets.QHBoxLayout()
+        GroupboxRenderingSettings.setFixedHeight(80)
+        GroupboxRenderingSettings.setLayout(vboxRenderingSettings)
 
         ChangeProjectBtn = QtWidgets.QPushButton("Change Project")
         ChangeProjectBtn.setFont(QtGui.QFont("Times", 10, QtGui.QFont.Bold))
@@ -1086,12 +1097,17 @@ class MyWidget(QtWidgets.QWidget):
         self.connect(OpenLogImagesBtn, QtCore.SIGNAL("clicked()"), onOpenFolder)
         GroupboxRenderingSettings.layout().addWidget(OpenLogImagesBtn)
 
+        GroupboxFilterSequences  = QtWidgets.QGroupBox("")
+        hboxFilterSequences = QtWidgets.QHBoxLayout()
+        hboxFilterSequences.addStretch()
+        GroupboxFilterSequences.setLayout(hboxFilterSequences)
+
         GroupboxFoundSequences = QtWidgets.QGroupBox("Server Sequences")
         GroupboxFoundSequences.setChecked(True)
         vboxSequences = QtWidgets.QVBoxLayout()
-        vbox31 = QtWidgets.QHBoxLayout()
-        #vboxSequences.addWidget(vbox31)
+        GroupboxFoundSequences.setFixedHeight(160)
         GroupboxFoundSequences.setLayout(vboxSequences)
+
 
         FilterToggleBtn = QtWidgets.QCheckBox("Filter")
         FilterLineEdit = QtWidgets.QLineEdit('Name')
@@ -1102,8 +1118,11 @@ class MyWidget(QtWidgets.QWidget):
         self.connect(FilterToggleBtn, QtCore.SIGNAL("clicked()"), onClickedFilter)
         self.connect(FilterLineEdit, QtCore.SIGNAL("returnPressed()"), onEnterFilterLine)
 
-        GroupboxFoundSequences.layout().addWidget(FilterToggleBtn)
-        GroupboxFoundSequences.layout().addWidget(FilterLineEdit)
+        GroupboxFoundSequences.layout().addWidget(GroupboxFilterSequences)
+
+
+        GroupboxFilterSequences.layout().addWidget(FilterToggleBtn)
+        GroupboxFilterSequences.layout().addWidget(FilterLineEdit)
 
         comboBox = QtWidgets.QComboBox(self)
         comboBox.setFont(QtGui.QFont("Times", 10, QtGui.QFont.Medium))
@@ -1117,8 +1136,9 @@ class MyWidget(QtWidgets.QWidget):
         GroupboxFoundSequences.layout().addWidget(make_render_job_btn)
 
         GroupboxPerforce = QtWidgets.QGroupBox("Perforce Control")
-        vbox4 = QtWidgets.QHBoxLayout()
-        GroupboxPerforce.setLayout(vbox4)
+        vboxRenderingSettings = QtWidgets.QHBoxLayout()
+        GroupboxPerforce.setFixedHeight(80)
+        GroupboxPerforce.setLayout(vboxRenderingSettings)
 
         PerforceLabel = QtWidgets.QLabel("Perforce Time updated :")
         PerforceLabel.setGeometry(10, 50, 160, 20)
@@ -1144,8 +1164,8 @@ class MyWidget(QtWidgets.QWidget):
 
         GroupboxBatchMakeJobs = QtWidgets.QGroupBox("Make Batch Rendering Jobs")
         GroupboxBatchMakeJobs.setChecked(True)
-        vbox5 = QtWidgets.QVBoxLayout()
-        GroupboxBatchMakeJobs.setLayout(vbox5)
+        vboxMain = QtWidgets.QVBoxLayout()
+        GroupboxBatchMakeJobs.setLayout(vboxMain)
         listing = QtWidgets.QListWidget()
         listing.setFont(QtGui.QFont("Times", 13, QtGui.QFont.Medium))
         listing.setSelectionMode(
@@ -1164,13 +1184,15 @@ class MyWidget(QtWidgets.QWidget):
 
         GroupboxMain = QtWidgets.QGroupBox("SERVER: Automation Pipeline")
         GroupboxMain.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Bold))
-        vbox5 = QtWidgets.QVBoxLayout()
-        GroupboxMain.setLayout(vbox5)
+        vboxMain = QtWidgets.QVBoxLayout()
+        GroupboxMain.setFixedHeight(770)
+        GroupboxMain.setLayout(vboxMain)
 
         GroupboxAdvancedRender = QtWidgets.QGroupBox("Rendering Control")
         GroupboxAdvancedRender.setChecked(True)
         hboxAd = QtWidgets.QHBoxLayout()
         GroupboxAdvancedRender.setLayout(hboxAd)
+        GroupboxAdvancedRender.setFixedHeight(60)
 
         RefreshQueueToggleBtn = QtWidgets.QCheckBox("Auto refresh all rendering info")
         RefreshQueueToggleBtn.setChecked(True)
@@ -1188,17 +1210,25 @@ class MyWidget(QtWidgets.QWidget):
         GroupboxMain.layout().addWidget(GroupboxBatchMakeJobs)
 
         GroupboxMain.layout().addWidget(GroupboxPerforce)
-        layout.addWidget(GroupboxMain)
+        layoutWindow.addWidget(GroupboxMain)
+
+        GroupboxTech = QtWidgets.QGroupBox("")
+        vboxTech = QtWidgets.QVBoxLayout()
+        GroupboxTech.setFixedHeight(80)
+        GroupboxTech.setLayout(vboxTech)
 
         progressBar = QtWidgets.QProgressBar(self)
         progressBar.minimum = 0
         progressBar.maximum = 100
-        layout.addWidget(progressBar)
+        GroupboxTech.layout().addWidget(progressBar)
 
         quit = QtWidgets.QPushButton("Quit")
         quit.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
         self.connect(quit, QtCore.SIGNAL("clicked()"), MyQuit)
-        layout.addWidget(quit)
+
+        GroupboxTech.layout().addWidget(quit)
+
+        layoutWindow.addWidget(GroupboxTech)
 
         #get last server save cfg
         host_text = settings.get_ClientSettingsByName('HostServer')
