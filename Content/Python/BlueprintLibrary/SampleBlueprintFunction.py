@@ -247,13 +247,15 @@ class SamplePythonBlueprintLibrary(unreal.BlueprintFunctionLibrary):
     @unreal.ufunction(
         params=[str], ret=str, static=True)
     def unreal_python_start_render_job(sJobName):
+        output = 'Error. No Render Jobs: ' + sJobName
         render_queue_system = unreal.get_editor_subsystem(unreal.MoviePipelineQueueSubsystem)
         if render_queue_system.is_rendering():
             output = 'Rendering executed before and also will render your Job: ' + sJobName
             return output
-        print('Start Render Job: '+sJobName)
-        PyClientMovie.render_selected_job(sJobName)
-        output = 'Start Render Job: '+sJobName
+        if PyClientMovie.check_renderjob_inqueue(sJobName):
+            print('Start Render Job: '+sJobName)
+            PyClientMovie.render_selected_job(sJobName)
+            output = 'Start Render Job: '+sJobName
         return output
 
     @unreal.ufunction(

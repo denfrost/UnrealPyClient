@@ -274,6 +274,14 @@ def render_jobs(image_dirs, transfer=False):
     #Check abort and erors during proccess
     NewExecutor.on_executor_errored_delegate.add_callable_unique(errored_MoviePipelineJob)
 
+def check_renderjob_inqueue(JobName):
+    subsystem = unreal.get_editor_subsystem(unreal.MoviePipelineQueueSubsystem)
+    pipelineQueue = subsystem.get_queue()
+    existed_jobs = pipelineQueue.get_jobs()
+    for job in existed_jobs:
+        if JobName == job.job_name:
+            return True
+    return False
 
 def render_selected_job(JobName):
     settings.print_log('start_render_selected_job : ' + JobName)
