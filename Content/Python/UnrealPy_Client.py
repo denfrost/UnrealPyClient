@@ -20,18 +20,7 @@ import unreal_worker
 
 #Repeater on Threading
 import threading
-global timeInterval
-timeInterval = 2
-count = 0
-def start_printit():
-  threading.Timer(timeInterval, start_printit).start()
-  print("Hello, World!")
-  global count
-  count = count+1
-  print(count)
-
-def printstop():
-    print(str(threading.is_alive()))
+stopFlag = threading.Event()
 
 Server = "ws://"+"10.66.7.80:30020"
 
@@ -322,6 +311,18 @@ class input_dialog(QWidget):
 class MyWidget(QtWidgets.QWidget):
     def __init__(self, parent=None):
 
+        def SendSocket(HostServer, Json_request, ServerAnswered):
+            ws = create_connection(HostServer)
+            print("Sending Command to Server : " + HostServer)
+            ws.send(Json_request)
+            print("Sent")
+            print("Receiving...")
+            result = ws.recv()
+            print("Received from Server '%s'" % result)
+            server_str = "'%s'" % result
+            ServerAnswered(server_str)
+            ws.close()
+
         @QtCore.Slot()
         def SendCommand():
             progressBar.setValue(0)
@@ -524,6 +525,28 @@ class MyWidget(QtWidgets.QWidget):
             FillShots(AllShotsList)
 
             progressBar.setValue(100)
+
+        def ServerAnsweredGetMyRenderingInfo(feedback):
+            print('ServerAnsweredGetMyRenderingInfo')
+            cleandata = feedback.split('"ReturnValue": "')[-1].split('"\\r\\n}\\r\\n}''')[0]
+            print('Clean Data :'+cleandata)
+            cleandata = cleandata.replace('\\', '')
+            print("Clean feedback :"+cleandata)
+            json_remote_data = json.loads(cleandata)
+            print("Got Server Answer : GetAllRenderingInfo")
+            tanswer =dt.now().strftime("%H:%M:%S")
+            ServerAnswerTextEdit.clear()
+            ServerAnswerTextEdit.setText(ServerAnswerTextEdit.toPlainText() + '  ' + tanswer+" : "+feedback)
+            TabWidgetCommands.setCurrentIndex(1)
+
+            #Parse super json from server
+            print(type(json_remote_data))
+
+            print('Movie Rendering Working : ' +json_remote_data["MoviePipelineRendering"])
+            if json_remote_data["MoviePipelineRendering"] == 'True':
+                GroupboxStatus.setTitle('Server Status : Rendering Movie ')
+            else:
+                GroupboxStatus.setTitle('Server Status : Available for Render ')
 
         def ServerAnsweredStartRenderJobs(feedback):
             cleandata = feedback.split('"ReturnValue": "')[-1].split('"\\r\\n}\\r\\n}''')[0]
@@ -989,17 +1012,37 @@ class MyWidget(QtWidgets.QWidget):
             JsonTextEdit.setText(json.dumps(Json_RequestRemoteAllRenderingInfo))
             print("Send Command To Server :"+JsonTextEdit.toPlainText())
             HostServer = HostLineEdit.text()
-            SendJsonSocket(HostServer, Json_RequestRemoteAllRenderingInfo)
-            #SendSocket(HostServer, JsonTextEdit.toPlainText(), ServerAnsweredGetAllRenderingInfo) #Send Json to Unreal
+            #SendJsonSocket(HostServer, Json_RequestRemoteAllRenderingInfo)
+            SendSocket(HostServer, JsonTextEdit.toPlainText(), ServerAnsweredGetAllRenderingInfo) #Send Json to Unreal
 
         def BeforeSendClearUI():
             progressBar.setValue(0)
             progressBar.setValue(50)
 
+        def GetMyRenderingInfo():
+            print('GetMyRenderingInfo')
+            AnswerServerLabel.setText("Answer Server : waiting...")
+            JsonTextEdit.setText(json.dumps(Json_RequestRemoteAllRenderingInfo))
+            print("Send Command To Server :"+JsonTextEdit.toPlainText())
+            HostServer = HostLineEdit.text()
+            #SendJsonSocket(HostServer, Json_RequestRemoteAllRenderingInfo)
+            SendSocket(HostServer, JsonTextEdit.toPlainText(), ServerAnsweredGetMyRenderingInfo) #Send Json to Unreal
+
         @QtCore.Slot()
         def MyQuit():
-            printstop()
+            stopFlag.set()
             app.quit()
+
+        time_interval_Thread = 5
+        class MyThread(threading.Thread):
+            def __init__(self, event):
+                threading.Thread.__init__(self)
+                self.stopped = event
+            def run(self):
+                while not self.stopped.wait(time_interval_Thread):
+                    print("my thread work: " + str(dt.now()))
+                    # call a function
+                    #GetMyRenderingInfo()
 
         QtWidgets.QWidget.__init__(self, parent)
         versiondate = settings.get_ClientSettingsByName('ClientRevisionDate')
@@ -1308,6 +1351,11 @@ class MyWidget(QtWidgets.QWidget):
         def generalTabUI(self):
             generalTab = QWidget()
             genlayout = QVBoxLayout()
+            GetInfoBtn3 = QtWidgets.QPushButton("Get All Rendering Info")
+            GetInfoBtn3.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
+            self.connect(GetInfoBtn3, QtCore.SIGNAL("clicked()"), GetAllRenderingInfo)
+            #GroupboxSendCommands.layout().addWidget(GetInfoBtn2)
+            genlayout.addWidget(GetInfoBtn2)
             genlayout.addWidget(GroupboxMain)
             generalTab.setLayout(genlayout)
             return generalTab
@@ -1373,18 +1421,9 @@ class MyWidget(QtWidgets.QWidget):
             #GetQueueJobs()
 
         print('First StartUp Py App Done!')
-
-def SendSocket(HostServer, Json_request, ServerAnswered):
-    ws = create_connection(HostServer)
-    print("Sending Command to Server : "+HostServer)
-    ws.send(Json_request)
-    print("Sent")
-    print("Receiving...")
-    result = ws.recv()
-    print("Received from Server '%s'" % result)
-    server_str = "'%s'" % result
-    ServerAnswered(server_str)
-    ws.close()
+        print('Make Thread Timer for HeartBeat App')
+        thread = MyThread(stopFlag)
+        thread.start()
 
 def unreal_working_dirs():
     import unreal
@@ -1411,6 +1450,9 @@ def Checkgitversion():
     version_date = strOut.split('Date:')[-1].split('\n\n')[0]
     return version_date
 
+def stop_MyThread():
+    stopFlag.set()
+
 if __name__ == "__main__":
     print("Start Py App")
     RevisionDate = Checkgitversion()
@@ -1434,11 +1476,12 @@ if not QtWidgets.QApplication.instance():
     app = QtWidgets.QApplication(sys.argv)
 else:
     app = QtWidgets.QApplication.instance()
+
+app.aboutToQuit.connect(stop_MyThread) #for force quit app by user stop Thread
+
 widget = MyWidget()
 widget.show()
 print("Py App done...")
-
-start_printit()
 
 if app:
     sys.exit(app.exec_())  # for Windows external launch
