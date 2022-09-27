@@ -88,15 +88,25 @@ def get_ClientSettingsByName(name):
             client_settings = json.load(f)
             return client_settings[name]
 
+def get_ProjectSettings():
+    with open(Json_m2_project, 'r') as f:
+        json_m2_project_settings = json.load(f)
+        return json_m2_project_settings
+
+def get_ClientSettings():
+    with open(Json_settings_client, 'r') as f:
+        json_client_settings = json.load(f)
+        return json_client_settings
+
 def set_ClientSettingsByName(name, value):
-    data_set = settings_client_default
+    data_set = get_ClientSettings() #settings_client_default
     data_set[name] = value
     if os.path.isfile(Json_settings_client):
         with open(Json_settings_client, 'w') as f:
             json.dump(data_set, f)
 
 def set_ClientM2ProjectByName(name, value):
-    data_set = settings_m2_project_default
+    data_set = get_ProjectSettings() #settings_m2_project_default
     data_set[name] = value
     if os.path.isfile(Json_m2_project):
         with open(Json_m2_project, 'w') as f:

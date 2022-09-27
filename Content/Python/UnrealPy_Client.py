@@ -1346,7 +1346,6 @@ class MyWidget(QtWidgets.QWidget):
         RefreshQueueToggleBtn.setChecked(bAutorefresh)
 
         bAdvancedRender = settings.get_ClientSettingsByName('AdvancedRenderBool')
-        print('SHIT '+str(bAdvancedRender))
         AdvancedRenderToggleBtn.setChecked(bAdvancedRender)
         onAdvancedRenderToggle()
 
