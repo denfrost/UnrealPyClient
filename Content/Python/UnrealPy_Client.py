@@ -719,18 +719,32 @@ class MyWidget(QtWidgets.QWidget):
         @QtCore.Slot()
         def CheckServer():
             print("Connect to Unreal websocket : " + HostLineEdit.text())
-            Check_Server()
+            #Check_Server()
+            RawCheck_Server()
 
         def Check_Server():
             try:
                 progressBar.setValue(0)
-                create_connection(HostLineEdit.text(), 5)
+                conn = create_connection(HostLineEdit.text(), 5)
+                print(str(conn))
+                name = conn.recv()
+                print(str(name))
                 ChangeStatus(True)
                 settings.set_ClientSettingsByName('HostServer', HostLineEdit.text())
                 return True
             except:
                 ChangeStatus(False)
             return False
+
+        def RawCheck_Server():
+            progressBar.setValue(0)
+            conn = create_connection(HostLineEdit.text(), 5)
+            print('WS connected : '+str(conn))
+            greetings = 'Client Check Server!'
+            conn.send(greetings)
+            print('WS send : ' + str(greetings))
+            name = conn.recv()
+            print(str(name))
 
         @QtCore.Slot()
         def ChangeStatus(check):
@@ -1006,7 +1020,7 @@ class MyWidget(QtWidgets.QWidget):
         GroupboxQueue = QtWidgets.QGroupBox("Rendering Jobs Queue")
         GroupboxQueue.setChecked(True)
         vbox50 = QtWidgets.QHBoxLayout()
-        GroupboxQueue.setFixedHeight(80)
+        GroupboxQueue.setFixedHeight(60)
         GroupboxQueue.setLayout(vbox50)
 
         GetQueueBtn = QtWidgets.QPushButton("Get Queue Jobs")
@@ -1108,7 +1122,7 @@ class MyWidget(QtWidgets.QWidget):
         GroupboxFoundSequences = QtWidgets.QGroupBox("Server Sequences")
         GroupboxFoundSequences.setChecked(True)
         vboxSequences = QtWidgets.QVBoxLayout()
-        GroupboxFoundSequences.setFixedHeight(180)
+        GroupboxFoundSequences.setFixedHeight(160)
         GroupboxFoundSequences.setLayout(vboxSequences)
 
 
