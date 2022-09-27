@@ -20,14 +20,15 @@ import unreal_worker
 Server = "ws://"+"10.66.7.80:30020"
 
 #describe calls checking umap, uasset.
-Json_RequestCheckMap =\
+Json_RequestServerRemoteFunctions =\
     {
     "MessageName": "http",
     "Parameters": {
         "Url": "/remote/object/describe",
         "Verb": "PUT",
         "Body": {
-            "ObjectPath": "/Game/Remote/Test1.Test1",
+            "ObjectPath": "/Engine/PythonTypes.Default__SamplePythonBlueprintLibrary",
+            "functionName": "python_test_bp_action_return",
         }
     }
     }
@@ -311,10 +312,11 @@ class MyWidget(QtWidgets.QWidget):
             progressBar.setValue(50)
             print("Send Command To Server :"+JsonTextEdit.toPlainText())
             HostServer = HostLineEdit.text()
-            SendSocket(ClearAnswer, HostServer, JsonTextEdit.toPlainText(), ServerAnswered) #Send Json to Unreal
+            SendSocket(HostServer, JsonTextEdit.toPlainText(), ServerAnswered) #Send Json to Unreal
 
         def ServerAnswered(feedback):
-            UpdateStatusOnline(HostLineEdit.text())
+            r_code = feedback.split('"ResponseCode":')[-1].split(',')[0]
+            UpdateStatusOnline(HostLineEdit.text(), r_code, 'ServerAnswered')
             print("Got Server Answer")
             tanswer =dt.now().strftime("%H:%M:%S")
             ServerAnswerTextEdit.clear()
@@ -323,7 +325,8 @@ class MyWidget(QtWidgets.QWidget):
             progressBar.setValue(100)
 
         def ServerAnsweredGetAllShots(feedback):
-            UpdateStatusOnline(HostLineEdit.text())
+            r_code = feedback.split('"ResponseCode":')[-1].split(',')[0]
+            UpdateStatusOnline(HostLineEdit.text(), r_code, 'GetAllShots')
             print("Got Server Answer : Getallshots")
             tanswer =dt.now().strftime("%H:%M:%S")
             ServerAnswerTextEdit.clear()
@@ -337,7 +340,8 @@ class MyWidget(QtWidgets.QWidget):
 
 
         def ServerAnsweredSetShotRender(feedback):
-            UpdateStatusOnline(HostLineEdit.text())
+            r_code = feedback.split('"ResponseCode":')[-1].split(',')[0]
+            UpdateStatusOnline(HostLineEdit.text(), r_code, 'SetShotRender')
             print("Got Server Answer : SetShotRender")
             tanswer = dt.now().strftime("%H:%M:%S")
             ServerAnswerTextEdit.clear()
@@ -346,7 +350,8 @@ class MyWidget(QtWidgets.QWidget):
             progressBar.setValue(100)
 
         def ServerAnsweredMakeRenderJob(feedback):
-            UpdateStatusOnline(HostLineEdit.text())
+            r_code = feedback.split('"ResponseCode":')[-1].split(',')[0]
+            UpdateStatusOnline(HostLineEdit.text(), r_code, 'MakeRenderJob')
             print("Got Server Answer : MakeRenderJob")
             tanswer = dt.now().strftime("%H:%M:%S")
             ServerAnswerTextEdit.clear()
@@ -355,7 +360,8 @@ class MyWidget(QtWidgets.QWidget):
             progressBar.setValue(100)
 
         def ServerAnsweredPerforce(feedback):
-            UpdateStatusOnline(HostLineEdit.text())
+            r_code = feedback.split('"ResponseCode":')[-1].split(',')[0]
+            UpdateStatusOnline(HostLineEdit.text(), r_code, 'AnsweredPerforce')
             print("Got Server Answer : Try Update server")
             tanswer =dt.now().strftime("%H:%M:%S")
             tused = dt.now()-trequest
@@ -366,7 +372,8 @@ class MyWidget(QtWidgets.QWidget):
             progressBar.setValue(100)
 
         def ServerAnsweredGetAllQueueJobs(feedback):
-            UpdateStatusOnline(HostLineEdit.text())
+            r_code = feedback.split('"ResponseCode":')[-1].split(',')[0]
+            UpdateStatusOnline(HostLineEdit.text(), r_code, 'GetAllQueueJobs')
             print("Got Server Answer : GetAllQueueJobs")
             tanswer =dt.now().strftime("%H:%M:%S")
             ServerAnswerTextEdit.clear()
@@ -381,7 +388,8 @@ class MyWidget(QtWidgets.QWidget):
             if (RefreshQueueToggleBtn.isChecked()): GetAllRenderingInfo()
 
         def ServerAnsweredDeleteRenderJob(feedback):
-            UpdateStatusOnline(HostLineEdit.text())
+            r_code = feedback.split('"ResponseCode":')[-1].split(',')[0]
+            UpdateStatusOnline(HostLineEdit.text(), r_code, 'DeleteRenderJob')
             print("Got Server Answer : DeleteRenderJob")
             tanswer =dt.now().strftime("%H:%M:%S")
             ServerAnswerTextEdit.clear()
@@ -395,7 +403,8 @@ class MyWidget(QtWidgets.QWidget):
 
 
         def ServerAnsweredDeleteAllRenderJobs(feedback):
-            UpdateStatusOnline(HostLineEdit.text())
+            r_code = feedback.split('"ResponseCode":')[-1].split(',')[0]
+            UpdateStatusOnline(HostLineEdit.text(), r_code, 'DeleteAllRenderJobs')
             print("Got Server Answer : DeleteAllRenderJobs")
             tanswer =dt.now().strftime("%H:%M:%S")
             ServerAnswerTextEdit.clear()
@@ -408,6 +417,8 @@ class MyWidget(QtWidgets.QWidget):
             if (RefreshQueueToggleBtn.isChecked()): GetAllRenderingInfo()
 
         def ServerAnsweredGetRemoteInfo(feedback):
+            r_code = feedback.split('"ResponseCode":')[-1].split(',')[0]
+            UpdateStatusOnline(HostLineEdit.text(), r_code, 'GetRemoteInfo')
             cleandata = feedback.split('"ReturnValue": "')[-1].split('"\\r\\n}\\r\\n}''')[0]
             print('Clean Data :'+cleandata)
             cleandata = cleandata.replace('\\', '')
@@ -461,6 +472,8 @@ class MyWidget(QtWidgets.QWidget):
                     comboBoxQueue.addItem("" + res[i])
 
         def ServerAnsweredGetAllRenderingInfo(feedback):
+            r_code = feedback.split('"ResponseCode": ')[-1].split(',')[0]
+            UpdateStatusOnline(HostLineEdit.text(), r_code, 'GetAllRenderingInfo')
             cleandata = feedback.split('"ReturnValue": "')[-1].split('"\\r\\n}\\r\\n}''')[0]
             print('Clean Data :'+cleandata)
             cleandata = cleandata.replace('\\', '')
@@ -497,10 +510,14 @@ class MyWidget(QtWidgets.QWidget):
             progressBar.setValue(100)
 
         def ServerAnsweredStartRenderJobs(feedback):
+            r_code = feedback.split('"ResponseCode": ')[-1].split(',')[0]
+            UpdateStatusOnline(HostLineEdit.text(), r_code, 'StartRenderJobs')
             cleandata = feedback.split('"ReturnValue": "')[-1].split('"\\r\\n}\\r\\n}''')[0]
             print('RenderJobs Clean Data :' + cleandata)
 
         def ServerAnsweredGetRenderPresets(feedback):
+            r_code = feedback.split('"ResponseCode": ')[-1].split(',')[0]
+            UpdateStatusOnline(HostLineEdit.text(), r_code, 'GetRenderPresets')
             cleandata = feedback.split('"ReturnValue": "')[-1].split('"\\r\\n}\\r\\n}''')[0]
             print('GetRenderPresets Clean Data :' + cleandata)
             if len(cleandata) == 0:
@@ -520,13 +537,23 @@ class MyWidget(QtWidgets.QWidget):
                     comboBoxQ.addItem(p)
 
 
-        def UpdateStatusOnline(server_str):
+        def UpdateStatusOnline(server_str, response_code, func_name):
             StatusLabel.setStyleSheet("QLabel { color : green; }")
             StatusLabel.setText("Unreal Server Status Online : " + server_str)
+            if '200' in response_code:
+                AnswerServerLabel.setText("Answer Server : "+func_name+" - Succes[" + response_code+"]")
+                print("Answer Server : "+func_name+" - Succes[" + response_code+"]")
+                AnswerServerLabel.setStyleSheet("QLabel { color : green; }")
+            else:
+                AnswerServerLabel.setText("Answer Server : "+func_name+" - Failed[" + response_code+"]")
+                print("Answer Server : "+func_name+" - Failed[" + response_code+"]")
+                AnswerServerLabel.setStyleSheet("QLabel { background-color : red; color : blue; }")
 
-        def UpdateStatusOffline(server_str):
+        def UpdateStatusOffline(server_str, response_code):
             StatusLabel.setStyleSheet("QLabel { background-color : yellow; color : red; }")
             StatusLabel.setText("Unreal Server Status Offline : " + server_str)
+            AnswerServerLabel.setText("Answer Server : Failed[" + response_code + "]")
+            AnswerServerLabel.setStyleSheet("QLabel { background-color : red; color : blue; }")
 
         @QtCore.Slot()
         def StatusUpdate(status):
@@ -564,7 +591,7 @@ class MyWidget(QtWidgets.QWidget):
             progressBar.setValue(50)
             print("Send Command To Server :"+JsonTextEdit.toPlainText())
             HostServer = HostLineEdit.text()
-            SendSocket(ClearAnswer, HostServer, JsonTextEdit.toPlainText(), ServerAnsweredGetAllShots) #Send Json to Unreal
+            SendSocket(HostServer, JsonTextEdit.toPlainText(), ServerAnsweredGetAllShots) #Send Json to Unreal
 
 
         def FillShots(feedback):
@@ -648,7 +675,7 @@ class MyWidget(QtWidgets.QWidget):
             print("SetShotRender ")
             progressBar.setValue(50)
             HostServer = HostLineEdit.text()
-            SendSocket(ClearAnswer, HostServer, json.dumps(Json_RequestSetShotRender), ServerAnsweredSetShotRender)
+            SendSocket(HostServer, json.dumps(Json_RequestSetShotRender), ServerAnsweredSetShotRender)
 
         def MakeImagesTool(sequence, sQualityPreset='', bFtp_transfer=True):
             if sequence == 'EMPTY':
@@ -664,38 +691,32 @@ class MyWidget(QtWidgets.QWidget):
             print("Sending....")
             progressBar.setValue(50)
             HostServer = HostLineEdit.text()
-            SendSocket(ClearAnswer, HostServer, json.dumps(Json_RequestMakeRenderJob), ServerAnsweredMakeRenderJob)
+            SendSocket(HostServer, json.dumps(Json_RequestMakeRenderJob), ServerAnsweredMakeRenderJob)
 
         def StartRenderJobs(job_name):
             Json_RequestStartRenderJob["Parameters"]["Body"]["parameters"]["sJobName"] = job_name
             JsonTextEdit.setText(json.dumps(Json_RequestStartRenderJob))
             TabWidgetCommands.setCurrentIndex(0)
             HostServer = HostLineEdit.text()
-            SendSocket(ClearAnswer, HostServer, json.dumps(Json_RequestStartRenderJob), ServerAnsweredStartRenderJobs)
+            SendSocket(HostServer, json.dumps(Json_RequestStartRenderJob), ServerAnsweredStartRenderJobs)
 
         def Get_Render_Presets():
             JsonTextEdit.setText(json.dumps(Json_RequestGetRenderPresets))
             TabWidgetCommands.setCurrentIndex(0)
             HostServer = HostLineEdit.text()
-            SendSocket(ClearAnswer, HostServer, json.dumps(Json_RequestGetRenderPresets), ServerAnsweredGetRenderPresets)
+            SendSocket(HostServer, json.dumps(Json_RequestGetRenderPresets), ServerAnsweredGetRenderPresets)
 
         @QtCore.Slot()
         def MakeRenderJob():
             MakeImagesTool(comboBox.currentText(), comboBoxQ.currentText(), CheckTransferToggleBtn.isChecked())
-            if (RefreshQueueToggleBtn.isChecked()):
-                GetQueueJobs()
-            else:
-                GetRemoteInfo()
+            if (RefreshQueueToggleBtn.isChecked()): GetAllRenderingInfo()
 
         @QtCore.Slot()
         def StartRendering():
             job_name = comboBoxQueue.currentText().split('-')[0]
-            print('split - '+job_name)
+            print('Try Start Rednering : '+job_name)
             StartRenderJobs(job_name)
-            if (RefreshQueueToggleBtn.isChecked()):
-                GetQueueJobs()
-            else:
-                GetRemoteInfo()
+            if (RefreshQueueToggleBtn.isChecked()): GetAllRenderingInfo()
 
         @QtCore.Slot()
         def GetRenderPresets():
@@ -719,41 +740,72 @@ class MyWidget(QtWidgets.QWidget):
         @QtCore.Slot()
         def CheckServer():
             print("Connect to Unreal websocket : " + HostLineEdit.text())
-            #Check_Server()
-            RawCheck_Server()
+            Check_Server()
+            #SendJsonSocket(Json_RequestServerRemoteFunctions)
+            #SendJsonSocket(Json_RequestRemoteInfo)
 
         def Check_Server():
             try:
                 progressBar.setValue(0)
                 conn = create_connection(HostLineEdit.text(), 5)
-                print(str(conn))
-                name = conn.recv()
-                print(str(name))
-                ChangeStatus(True)
+                ChangeStatus(bool(conn))
                 settings.set_ClientSettingsByName('HostServer', HostLineEdit.text())
                 return True
             except:
                 ChangeStatus(False)
             return False
 
-        def RawCheck_Server():
+        def SendJsonSocket(hostServer, json_string):
             progressBar.setValue(0)
+            print("Sending Command to Server : " + hostServer)
             conn = create_connection(HostLineEdit.text(), 5)
-            print('WS connected : '+str(conn))
-            greetings = 'Client Check Server!'
-            conn.send(greetings)
-            print('WS send : ' + str(greetings))
-            name = conn.recv()
-            print(str(name))
+            print('WS Connected : '+str(conn))
+            conn.send(json.dumps(json_string))
+            print('WS Send : ' + str(json.dumps(json_string)))
+            print("Receiving...")
+            answer = str(conn.recv())
+            print("Received from Server '%s'" % answer)
+            UrlType = json_string['Parameters']['Url']
+            match UrlType:
+                case "/remote/object/describe":
+                    RawJsonDescribeAnswer(answer)
+                case "/remote/object/call":
+                     TypeFunction =  json_string['Parameters']['Body']['functionName']
+                     match TypeFunction:
+                         case 'unreal_python_get_info_remote':
+                             ServerAnsweredGetRemoteInfo(answer)
+                         case 'unreal_python_get_all_rendering_info':
+                             ServerAnsweredGetAllRenderingInfo(answer)
+
+
+        def RawJsonDescribeAnswer(feedback):
+            clean1 = feedback.replace('\\r\\n\\t', '')
+            clean2 = clean1.replace('\\t', '')
+            clean2 = clean2.replace('\\r\\n', '')
+            clean2data = clean2.replace("b'{", '{')
+            clean2data = clean2data[:-1:]
+            print('Json_data_ready :' +clean2data)
+            json_remote_data = json.loads(clean2data)
+            print('ResponseCode : '+str(json_remote_data['ResponseCode']))
+            ClassName = json_remote_data['ResponseBody']['Class']
+            BodyData = json_remote_data['ResponseBody']
+            FuncList = json_remote_data['ResponseBody']['Functions']
+            print('ResponseBody : %s ' % BodyData)
+            settings.print_log('Available Unreal Python Function for Remote :')
+            print('Available Unreal Python Function for Remote :')
+            for d in FuncList:
+                print(d)
+                settings.print_log(d['Name'])
+
 
         @QtCore.Slot()
         def ChangeStatus(check):
             tm = dt.now().strftime("%H:%M:%S")
             if check:
-                UpdateStatusOnline(HostLineEdit.text() + ' ' + tm)
+                UpdateStatusOnline(HostLineEdit.text() + ' ' + tm, 'Succes Connected', 'CheckServer')
                 progressBar.setValue(100)
             else:
-                UpdateStatusOffline(HostLineEdit.text() + ' ' + tm)
+                UpdateStatusOffline(HostLineEdit.text() + ' ' + tm, 'Unsucces Connected', 'CheckServer')
 
         @QtCore.Slot()
         def onClickedToggle():
@@ -800,7 +852,7 @@ class MyWidget(QtWidgets.QWidget):
             TabWidgetCommands.setCurrentIndex(0)
             progressBar.setValue(50)
             HostServer = HostLineEdit.text()
-            SendSocket(ClearAnswer, HostServer, json.dumps(Json_UpdatePerforce), ServerAnsweredPerforce)
+            SendSocket(HostServer, json.dumps(Json_UpdatePerforce), ServerAnsweredPerforce)
 
         @QtCore.Slot()
         def onOpenLogPerforce():
@@ -847,7 +899,7 @@ class MyWidget(QtWidgets.QWidget):
             progressBar.setValue(50)
             print("Send Command To Server :"+JsonTextEdit.toPlainText())
             HostServer = HostLineEdit.text()
-            SendSocket(ClearAnswer, HostServer, JsonTextEdit.toPlainText(), ServerAnsweredGetAllQueueJobs) #Send Json to Unreal
+            SendSocket(HostServer, JsonTextEdit.toPlainText(), ServerAnsweredGetAllQueueJobs) #Send Json to Unreal
 
         @QtCore.Slot()
         def onRefreshQueueToggle():
@@ -894,7 +946,7 @@ class MyWidget(QtWidgets.QWidget):
             HostServer = HostLineEdit.text()
             progressBar.setValue(0)
             progressBar.setValue(50)
-            SendSocket(ClearAnswer, HostServer, json.dumps(Json_RequestDeleteRenderJob), ServerAnsweredDeleteRenderJob)
+            SendSocket(HostServer, json.dumps(Json_RequestDeleteRenderJob), ServerAnsweredDeleteRenderJob)
 
         @QtCore.Slot()
         def DeleteAllRenderJobs():
@@ -903,7 +955,7 @@ class MyWidget(QtWidgets.QWidget):
             HostServer = HostLineEdit.text()
             progressBar.setValue(0)
             progressBar.setValue(50)
-            SendSocket(ClearAnswer, HostServer, json.dumps(Json_RequestDeleteAllRenderJobs), ServerAnsweredDeleteAllRenderJobs)
+            SendSocket(HostServer, json.dumps(Json_RequestDeleteAllRenderJobs), ServerAnsweredDeleteAllRenderJobs)
 
         @QtCore.Slot()
         def GetRemoteInfo():
@@ -913,18 +965,22 @@ class MyWidget(QtWidgets.QWidget):
             progressBar.setValue(50)
             print("Send Command To Server :"+JsonTextEdit.toPlainText())
             HostServer = HostLineEdit.text()
-            SendSocket(ClearAnswer, HostServer, JsonTextEdit.toPlainText(), ServerAnsweredGetRemoteInfo) #Send Json to Unreal
+            SendSocket(HostServer, JsonTextEdit.toPlainText(), ServerAnsweredGetRemoteInfo) #Send Json to Unreal
 
         @QtCore.Slot()
         def GetAllRenderingInfo():
             print('GetAllRenderingInfo')
+            BeforeSendClearUI()
             JsonTextEdit.setText(json.dumps(Json_RequestRemoteAllRenderingInfo))
-            progressBar.setValue(0)
-            progressBar.setValue(50)
             print("Send Command To Server :"+JsonTextEdit.toPlainText())
             HostServer = HostLineEdit.text()
-            SendSocket(ClearAnswer, HostServer, JsonTextEdit.toPlainText(), ServerAnsweredGetAllRenderingInfo) #Send Json to Unreal
+            SendJsonSocket(HostServer, Json_RequestRemoteAllRenderingInfo)
+            #SendSocket(HostServer, JsonTextEdit.toPlainText(), ServerAnsweredGetAllRenderingInfo) #Send Json to Unreal
 
+        def BeforeSendClearUI():
+            progressBar.setValue(0)
+            progressBar.setValue(50)
+            AnswerServerLabel.setText("Answer Server : waiting...")
 
         @QtCore.Slot()
         def MyQuit():
@@ -947,7 +1003,12 @@ class MyWidget(QtWidgets.QWidget):
         GroupboxLabel.setFixedHeight(60)
         GroupboxLabel.setLayout(hboxLabel)
 
+        AnswerServerLabel = QtWidgets.QLabel("AnswerServer: Failed")
+        AnswerServerLabel.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Medium))
+        AnswerServerLabel.setStyleSheet("QLabel { background-color : red; color : blue; }")
+
         GroupboxLabel.layout().addWidget(StatusLabel)
+        GroupboxLabel.layout().addWidget(AnswerServerLabel)
         layoutVerticalWindow.addWidget(GroupboxLabel)
 
         GroupboxStatus = QtWidgets.QGroupBox("Server Status")
@@ -1238,9 +1299,21 @@ class MyWidget(QtWidgets.QWidget):
         def secondTabUI(self):
             secondTab = QWidget()
             return secondTab
+        def experimentTabUI(self):
+            experimentTab = QWidget()
+            return experimentTab
+        def clientTabUI(self):
+            clientTab = QWidget()
+            return clientTab
+
         TabsMain = QTabWidget()
-        TabsMain.addTab(generalTabUI(self), "Rendering pipeline")
-        TabsMain.addTab(secondTabUI(self), "Another")
+        TabsMain.setFont(QtGui.QFont("Times", 14, QtGui.QFont.Bold))
+        renderTab = TabsMain.addTab(generalTabUI(self), "Rendering pipeline")
+        importTab = TabsMain.addTab(secondTabUI(self), "Importing pipeline")
+        experimentTab = TabsMain.addTab(experimentTabUI(self), "Experimental pipeline")
+        clientTab = TabsMain.addTab(clientTabUI(self), "Client")
+        TabsMain.setTabEnabled(1, False)
+        TabsMain.setTabEnabled(2, False)
         TabsMain.setCurrentIndex(0)
 
         layoutVerticalWindow.addWidget(TabsMain)
@@ -1283,7 +1356,7 @@ class MyWidget(QtWidgets.QWidget):
             #Get_All_Server_Shots()
             #GetQueueJobs()
 
-def SendSocket(ClearAnswer, HostServer,Json_request, ServerAnswered):
+def SendSocket(HostServer, Json_request, ServerAnswered):
     ws = create_connection(HostServer)
     print("Sending Command to Server : "+HostServer)
     ws.send(Json_request)
