@@ -929,7 +929,6 @@ class MyWidget(QtWidgets.QWidget):
                 RenderMovieDisabled.hide()
                 GetRenderPresetsBtn.hide()
                 RefreshQueueToggleBtn.setEnabled(AdvancedRenderToggleBtn.isChecked())
-
             settings.set_ClientSettingsByName('AdvancedRenderBool', AdvancedRenderToggleBtn.isChecked())
 
         @QtCore.Slot()
@@ -1081,7 +1080,7 @@ class MyWidget(QtWidgets.QWidget):
         GroupboxQueue = QtWidgets.QGroupBox("Rendering Jobs Queue")
         GroupboxQueue.setChecked(True)
         vbox50 = QtWidgets.QHBoxLayout()
-        GroupboxQueue.setFixedHeight(60)
+        GroupboxQueue.setFixedHeight(80)
         GroupboxQueue.setLayout(vbox50)
 
         GetQueueBtn = QtWidgets.QPushButton("Get Queue Jobs")
@@ -1183,7 +1182,7 @@ class MyWidget(QtWidgets.QWidget):
         GroupboxFoundSequences = QtWidgets.QGroupBox("Server Sequences")
         GroupboxFoundSequences.setChecked(True)
         vboxSequences = QtWidgets.QVBoxLayout()
-        GroupboxFoundSequences.setFixedHeight(160)
+        GroupboxFoundSequences.setFixedHeight(180)
         GroupboxFoundSequences.setLayout(vboxSequences)
 
 
@@ -1347,6 +1346,7 @@ class MyWidget(QtWidgets.QWidget):
         RefreshQueueToggleBtn.setChecked(bAutorefresh)
 
         bAdvancedRender = settings.get_ClientSettingsByName('AdvancedRenderBool')
+        print('SHIT '+str(bAdvancedRender))
         AdvancedRenderToggleBtn.setChecked(bAdvancedRender)
         onAdvancedRenderToggle()
 
