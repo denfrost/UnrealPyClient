@@ -463,6 +463,7 @@ class MyWidget(QtWidgets.QWidget):
                 comboBoxQueue.clear()
                 comboBoxQueue.addItem("EMPTY")
                 return
+            currentIndex = comboBoxQ.currentIndex()
             tanswer =dt.now().strftime("%H:%M:%S")
             TabWidgetCommands.setCurrentIndex(1)
             list_presets = cleandata.split(',')
@@ -472,12 +473,14 @@ class MyWidget(QtWidgets.QWidget):
                 if 'Render' in p:
                     work_list_presets.append(p)
                     comboBoxQ.addItem(p)
+            comboBoxQ.setCurrentIndex(currentIndex)
 
         def UpdateQueueJobs(cleandata):
             if len(cleandata) == 0:
                 comboBoxQueue.clear()
                 comboBoxQueue.addItem("EMPTY")
                 return
+            currentIndex = comboBoxQueue.currentIndex()
             res = cleandata.split(",")
             res.sort()
             comboBoxQueue.clear()
@@ -487,10 +490,14 @@ class MyWidget(QtWidgets.QWidget):
                 print('Feedback ['+str(i)+']: '+res[i])
                 if (res[i].find(current_project) > -1):
                     comboBoxQueue.addItem("" + res[i])
+            if currentIndex < 0:
+                comboBoxQueue.setCurrentIndex(0)
+            else:
+                comboBoxQueue.setCurrentIndex(currentIndex)
 
         def ServerAnsweredGetAllRenderingInfo(feedback):
-            #r_code = feedback.split('"ResponseCode": ')[-1].split(',')[0]
-            #UpdateStatusOnline(HostLineEdit.text(), r_code, 'GetAllRenderingInfo')
+            r_code = feedback.split('"ResponseCode": ')[-1].split(',')[0]
+            UpdateStatusOnline(HostLineEdit.text(), r_code, 'GetAllRenderingInfo')
             cleandata = feedback.split('"ReturnValue": "')[-1].split('"\\r\\n}\\r\\n}''')[0]
             print('Clean Data :'+cleandata)
             cleandata = cleandata.replace('\\', '')
@@ -523,7 +530,6 @@ class MyWidget(QtWidgets.QWidget):
             AllShotsList = json_remote_data["AllShotsList"]
             print('All Shots List : ' + AllShotsList)
             FillShots(AllShotsList)
-
             progressBar.setValue(100)
 
         def ServerAnsweredGetMyRenderingInfo(feedback):
@@ -548,6 +554,20 @@ class MyWidget(QtWidgets.QWidget):
             else:
                 GroupboxStatus.setTitle('Server Status : Available for Render ')
 
+            PresetsRenderingList = json_remote_data["PresetsRenderingList"]
+            print('Presets Rendering Quality List : ' + PresetsRenderingList)
+            UpdatePresets(PresetsRenderingList)
+
+            QueueRenderJobsList = json_remote_data["QueueRenderJobsList"]
+            print('Queue RenderJobs List : ' + QueueRenderJobsList)
+            UpdateQueueJobs(QueueRenderJobsList)
+
+            AllShotsList = json_remote_data["AllShotsList"]
+            print('All Shots List : ' + AllShotsList)
+            FillShots(AllShotsList)
+            #progressBar.setValue(100)
+
+
         def ServerAnsweredStartRenderJobs(feedback):
             cleandata = feedback.split('"ReturnValue": "')[-1].split('"\\r\\n}\\r\\n}''')[0]
             r_code = feedback.split('"ResponseCode": ')[-1].split(',')[0]
@@ -560,6 +580,7 @@ class MyWidget(QtWidgets.QWidget):
             UpdateStatusOnline(HostLineEdit.text(), r_code, 'GetRenderPresets')
             cleandata = feedback.split('"ReturnValue": "')[-1].split('"\\r\\n}\\r\\n}''')[0]
             print('GetRenderPresets Clean Data :' + cleandata)
+            currentIndex = comboBoxQ.currentIndex()
             if len(cleandata) == 0:
                 comboBoxQueue.clear()
                 comboBoxQueue.addItem("EMPTY")
@@ -575,6 +596,7 @@ class MyWidget(QtWidgets.QWidget):
                 if 'Render' in p:
                     work_list_presets.append(p)
                     comboBoxQ.addItem(p)
+            comboBoxQ.setCurrentIndex(currentIndex)
 
 
         def UpdateStatusOnline(server_str, response_code, func_name):
@@ -643,9 +665,10 @@ class MyWidget(QtWidgets.QWidget):
             res = feedback.split(",")
             res.sort()
             print(res[1])
+            currentIndex = comboBox.currentIndex()
+            print('FillShots: Filtered and Sorted.')
             comboBox.clear()
             listing.clear()
-            print('FillShots: Filtered and Sorted.')
             for i, name in enumerate(res):
                 #print('Feedback ['+str(i)+']: '+res[i])
                 if (res[i].find('_SEQ') > 0) & (res[i].find('Game/SHOTS') > 0):
@@ -654,6 +677,7 @@ class MyWidget(QtWidgets.QWidget):
                         #if 'ANIM_SEQ' not in res[i]: #_Anim_SEQ ignore
                         comboBox.addItem("" + res[i])
                         listing.addItem("" + res[i])
+            comboBox.setCurrentIndex(currentIndex)
             listing.setMaximumHeight(200)
 
         def FillQueueJobs(feedback):
@@ -664,6 +688,7 @@ class MyWidget(QtWidgets.QWidget):
                 comboBoxQueue.clear()
                 comboBoxQueue.addItem("EMPTY")
                 return
+            currentIndex = comboBoxQueue.currentIndex()
             res = cleandata.split(",")
             res.sort()
             comboBoxQueue.clear()
@@ -673,6 +698,10 @@ class MyWidget(QtWidgets.QWidget):
                 print('Feedback ['+str(i)+']: '+res[i])
                 if (res[i].find(current_project) > -1):
                     comboBoxQueue.addItem("" + res[i])
+            if currentIndex < 0:
+                comboBoxQueue.setCurrentIndex(0)
+            else:
+                comboBoxQueue.setCurrentIndex(currentIndex)
 
         def printItemText(self):
             items = listing.selectedItems()
@@ -1021,7 +1050,6 @@ class MyWidget(QtWidgets.QWidget):
 
         def GetMyRenderingInfo():
             print('GetMyRenderingInfo')
-            AnswerServerLabel.setText("Answer Server : waiting...")
             JsonTextEdit.setText(json.dumps(Json_RequestRemoteAllRenderingInfo))
             print("Send Command To Server :"+JsonTextEdit.toPlainText())
             HostServer = HostLineEdit.text()
@@ -1029,23 +1057,19 @@ class MyWidget(QtWidgets.QWidget):
             SendSocket(HostServer, JsonTextEdit.toPlainText(), ServerAnsweredGetMyRenderingInfo) #Send Json to Unreal
 
         @QtCore.Slot()
+        def StartThread():
+            stopFlag_MyThread.clear()
+            thread = MyThread(stopFlag_MyThread)
+            thread.start()
+
+        def StopThread():
+            print('Thread Stop work')
+            stopFlag_MyThread.set()
+
+        @QtCore.Slot()
         def MyQuit():
             stopFlag_MyThread.set()
             app.quit()
-
-        time_interval_Thread = 5
-        class MyThread(threading.Thread):
-            global startuptime
-            startuptime = dt.now()
-            def __init__(self, event):
-                threading.Thread.__init__(self)
-                self.stopped = event
-                print("my thread work: " + str(dt.now()))
-            def run(self):
-                while not self.stopped.wait(time_interval_Thread):
-                    print("Unreal Py App working: " + str(dt.now()-startuptime))
-                    # call a function
-                    #GetMyRenderingInfo()
 
         QtWidgets.QWidget.__init__(self, parent)
         versiondate = settings.get_ClientSettingsByName('ClientRevisionDate')
@@ -1351,35 +1375,50 @@ class MyWidget(QtWidgets.QWidget):
 
         GroupboxMain.layout().addWidget(GroupboxPerforce)
 
-        def generalTabUI(self):
-            generalTab = QWidget()
+        def renderTabUI(self):
+            renderTab = QWidget()
             genlayout = QVBoxLayout()
             GetInfoBtn3 = QtWidgets.QPushButton("Get All Rendering Info")
             GetInfoBtn3.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
             self.connect(GetInfoBtn3, QtCore.SIGNAL("clicked()"), GetAllRenderingInfo)
-            #GroupboxSendCommands.layout().addWidget(GetInfoBtn2)
-            genlayout.addWidget(GetInfoBtn2)
+            genlayout.addWidget(GetInfoBtn3)
             genlayout.addWidget(GroupboxMain)
-            generalTab.setLayout(genlayout)
-            return generalTab
-        def secondTabUI(self):
-            secondTab = QWidget()
-            return secondTab
-        def experimentTabUI(self):
-            experimentTab = QWidget()
-            return experimentTab
+            renderTab.setLayout(genlayout)
+            return renderTab
+        def importTabUI(self):
+            importTab = QWidget()
+            return importTab
         def clientTabUI(self):
             clientTab = QWidget()
             return clientTab
 
         TabsMain = QTabWidget()
         TabsMain.setFont(QtGui.QFont("Times", 14, QtGui.QFont.Bold))
-        renderTab = TabsMain.addTab(generalTabUI(self), "Rendering pipeline")
-        importTab = TabsMain.addTab(secondTabUI(self), "Importing pipeline")
-        experimentTab = TabsMain.addTab(experimentTabUI(self), "Experimental pipeline")
+        renderTab = TabsMain.addTab(renderTabUI(self), "Rendering pipeline")
+        importTab = TabsMain.addTab(importTabUI(self), "Importing pipeline")
+
+        #experimentTabUI
+        experimentTab = QWidget()
+        ThreadHlayout = QHBoxLayout()
+        StartThreadBtn = QtWidgets.QPushButton("Start Thread timer")
+        StartThreadBtn.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
+        self.connect(StartThreadBtn, QtCore.SIGNAL("clicked()"), StartThread)
+        IntervalTimeLabel = QtWidgets.QLabel('IntervalTime')
+        IntervalTimeLineEdit = QtWidgets.QLineEdit('15')
+        StopThreadBtn = QtWidgets.QPushButton("Stop Thread")
+        StopThreadBtn.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
+        self.connect(StopThreadBtn, QtCore.SIGNAL("clicked()"), StopThread)
+        ThreadHlayout.addWidget(StartThreadBtn)
+        ThreadHlayout.addWidget(IntervalTimeLabel)
+        ThreadHlayout.addWidget(IntervalTimeLineEdit)
+        ThreadHlayout.addWidget(StopThreadBtn)
+        experimentTab.setLayout(ThreadHlayout)
+
+        TabsMain.addTab(experimentTab, "Experimental pipeline")
+
         clientTab = TabsMain.addTab(clientTabUI(self), "Client")
         TabsMain.setTabEnabled(1, False)
-        TabsMain.setTabEnabled(2, False)
+        #TabsMain.setTabEnabled(2, False)
         TabsMain.setCurrentIndex(0)
 
         layoutVerticalWindow.addWidget(TabsMain)
@@ -1425,8 +1464,20 @@ class MyWidget(QtWidgets.QWidget):
 
         print('First StartUp Py App Done!')
         print('Make Thread Timer for HeartBeat App')
-        thread = MyThread(stopFlag_MyThread)
-        thread.start()
+
+        class MyThread(threading.Thread):
+            global startuptime
+            startuptime = dt.now()
+            def __init__(self, event):
+                threading.Thread.__init__(self)
+                self.stopped = event
+                print("my thread work ["+IntervalTimeLineEdit.text()+"]: " + str(dt.now()))
+            def run(self):
+                while not self.stopped.wait(int(IntervalTimeLineEdit.text())):
+                    print("Unreal Py App working : " + str(dt.now()-startuptime))
+                    # call a function
+                    #GetAllRenderingInfo()
+                    GetMyRenderingInfo()
 
 def unreal_working_dirs():
     import unreal
