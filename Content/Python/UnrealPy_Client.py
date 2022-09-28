@@ -20,7 +20,7 @@ import unreal_worker
 
 #Repeater on Threading
 import threading
-stopFlag = threading.Event()
+stopFlag_MyThread = threading.Event()
 
 Server = "ws://"+"10.66.7.80:30020"
 
@@ -1030,17 +1030,20 @@ class MyWidget(QtWidgets.QWidget):
 
         @QtCore.Slot()
         def MyQuit():
-            stopFlag.set()
+            stopFlag_MyThread.set()
             app.quit()
 
         time_interval_Thread = 5
         class MyThread(threading.Thread):
+            global startuptime
+            startuptime = dt.now()
             def __init__(self, event):
                 threading.Thread.__init__(self)
                 self.stopped = event
+                print("my thread work: " + str(dt.now()))
             def run(self):
                 while not self.stopped.wait(time_interval_Thread):
-                    print("my thread work: " + str(dt.now()))
+                    print("Unreal Py App working: " + str(dt.now()-startuptime))
                     # call a function
                     #GetMyRenderingInfo()
 
@@ -1422,7 +1425,7 @@ class MyWidget(QtWidgets.QWidget):
 
         print('First StartUp Py App Done!')
         print('Make Thread Timer for HeartBeat App')
-        thread = MyThread(stopFlag)
+        thread = MyThread(stopFlag_MyThread)
         thread.start()
 
 def unreal_working_dirs():
@@ -1451,7 +1454,7 @@ def Checkgitversion():
     return version_date
 
 def stop_MyThread():
-    stopFlag.set()
+    stopFlag_MyThread.set()
 
 if __name__ == "__main__":
     print("Start Py App")
