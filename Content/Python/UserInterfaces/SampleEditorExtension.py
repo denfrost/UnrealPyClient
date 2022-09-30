@@ -7,6 +7,12 @@ import unreal
 
 
 def extend_editor():
+    me_setversion = unreal_uiutils.create_menu_button(
+        name="UpdateVersionBtn",
+        label="Update Plugin Version",
+        command_string="import importlib; import unreal_startup; import unreal_worker; unreal_worker.set_PluginVersion()",
+    )
+
     me_techtests = unreal_uiutils.create_menu_button(
         name="TechTestsBtn",
         label="Tech Tests Jobs",
@@ -34,31 +40,31 @@ def extend_editor():
     #UnrealPyClient
     me_startunrealclient = unreal_uiutils.create_menu_button(
         name="StartClientBtn",
-        label="Open Unreal Remote Tool",
+        label="Start Unreal Remote tool",
         command_string="import importlib; import unreal_startup; import unreal_worker; unreal_worker.Start_UnrealPy_Client()",
     )
     #Perforce
     me_updateperforce = unreal_uiutils.create_menu_button(
         name="UpdatePerforceBtn",
-        label="Update Perforce",
+        label="Update Local Perforce",
         command_string="import importlib; import unreal_startup; import unreal_worker; unreal_worker.UpdatePerforce()",
     )
     #UnrealPyClient
     me_showworkingdirs = unreal_uiutils.create_menu_button(
         name="ShowWorkingDirsBtn",
-        label="Show Working Directories",
+        label="Show Working directories",
         command_string="import importlib; import unreal_startup; import unreal_worker; unreal_worker.ShowWorkingDirs()",
     )
     #Mod
     me_startbutton = unreal_uiutils.create_menu_button(
         name="StartBtn",
-        label="Start test",
-        command_string="import importlib; import unreal_startup; import unreal_worker; unreal_worker.start()",
+        label="Start Unreal Remote tool",
+        command_string="import importlib; import unreal_startup; import unreal_worker; unreal_worker.Start_UnrealPy_Client()",
     )
     #Mod
     me_showbutton = unreal_uiutils.create_menu_button(
         name="ShowBtn",
-        label="Show API Python Functions",
+        label="Show API Python functions",
         command_string="import importlib; import unreal_startup; import unreal_worker; unreal_worker.show_funcs_unreal()",
     )
 
@@ -91,7 +97,7 @@ def extend_editor():
 
     # create submenu in 'File' Menu and register menu entry created above
     pythonsubmenu = unreal_uiutils.extend_mainmenu_item(
-        "File", "PythonTools", "PythonTools", "Python Tools"
+        "File", "M2remote", "M2remote", "M2remote"
     )
     pythonsubmenu.add_section("python.file.menu", "Python Tools")
     pythonsubmenu.add_menu_entry("python.file.menu", me_startbutton)
@@ -101,11 +107,13 @@ def extend_editor():
     # Create Standalone Menu and register menu entry created above
     new_mainmenu = unreal_uiutils.extend_mainmenu("M2remote", "M2remote")
     section = new_mainmenu.add_section("python.menu", "Python Tools")
-    new_mainmenu.add_menu_entry("python.menu", me_checkmemory)
-    new_mainmenu.add_menu_entry("python.menu", me_techtests)
-    new_mainmenu.add_menu_entry("python.menu", me_getqueuejobs)
-    new_mainmenu.add_menu_entry("python.menu", me_renderimagessequence)
     new_mainmenu.add_menu_entry("python.menu", me_startunrealclient)
+    #section_dev = new_mainmenu.add_section("python.menu", "Python Development")
+    #new_mainmenu.add_menu_entry("python.menu", me_setversion)
+    new_mainmenu.add_menu_entry("python.menu", me_checkmemory)
+    #new_mainmenu.add_menu_entry("python.menu", me_techtests)
+    #new_mainmenu.add_menu_entry("python.menu", me_getqueuejobs)
+    #new_mainmenu.add_menu_entry("python.menu", me_renderimagessequence)
     new_mainmenu.add_menu_entry("python.menu", me_updateperforce)
     new_mainmenu.add_menu_entry("python.menu", me_showworkingdirs)
     new_mainmenu.add_menu_entry("python.menu", me_showbutton)

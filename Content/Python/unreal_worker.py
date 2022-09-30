@@ -1,5 +1,5 @@
 import os
-
+import settings
 print("""@
 
 ####################
@@ -225,3 +225,22 @@ def M2_get_projects_dict():
         elem = elem.split('/')[-1].split('.')[0]
         all_proj[id] = elem
     return all_proj
+
+def set_PluginVersion():
+    version_date = settings.get_ClientSettingsByName('ClientRevisionDate')
+    if len(version_date) == 0:
+        return
+    import unreal
+    import json
+    python_Uplugin_file = unreal.Paths.project_plugins_dir() +'UnrealPyClient/M2UnrealEngineRemote.uplugin'
+    if os.path.isfile(python_Uplugin_file):
+        with open(python_Uplugin_file, 'r') as f:
+            json_Uplugin_file = json.load(f)
+            unreal.log_warning('Json '+str(json_Uplugin_file))
+            json_Uplugin_file["VersionName"] = version_date
+            if len(json_Uplugin_file)>0:
+                with open(python_Uplugin_file, 'w') as f:
+                    #json_Uplugin_file = json.dump(python_Uplugin_file, f)
+                    json.dump(json_Uplugin_file, f)
+                    unreal.log_warning('Json ' + str(json_Uplugin_file))
+    else:    unreal.log_warning('Json file Plugin not found')

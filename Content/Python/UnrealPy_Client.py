@@ -1498,8 +1498,12 @@ def Checkgitversion():
     import subprocess
     Major_version = 'cl 1.0.0'
     #process = subprocess.Popen(['git', 'rev-parse', 'HEAD'], shell=False, stdout=subprocess.PIPE)
-    output = subprocess.check_output(["git", "log", '-n 1'])
-    outputall = subprocess.check_output(["git", "log"])
+    try:
+        output = subprocess.check_output(["git", "log", '-n 1'])
+        outputall = subprocess.check_output(["git", "log"])
+    except Exception as e:
+        print('Failed. Reason: %s' % e)
+        return ''
     cl_rev = len(str(outputall).split('commit'))
     #git_head = process.communicate()
     #print(output.strip().decode())
