@@ -109,7 +109,7 @@ def extend_editor():
     section = new_mainmenu.add_section("python.menu", "Python Tools")
     new_mainmenu.add_menu_entry("python.menu", me_startunrealclient)
     #section_dev = new_mainmenu.add_section("python.menu", "Python Development")
-    #new_mainmenu.add_menu_entry("python.menu", me_setversion)
+    new_mainmenu.add_menu_entry("python.menu", me_setversion)
     new_mainmenu.add_menu_entry("python.menu", me_checkmemory)
     #new_mainmenu.add_menu_entry("python.menu", me_techtests)
     #new_mainmenu.add_menu_entry("python.menu", me_getqueuejobs)
