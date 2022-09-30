@@ -1496,12 +1496,15 @@ def unreal_working_dirs():
 
 def Checkgitversion():
     import subprocess
+    Major_version = 'cl 1.0.0'
     #process = subprocess.Popen(['git', 'rev-parse', 'HEAD'], shell=False, stdout=subprocess.PIPE)
     output = subprocess.check_output(["git", "log", '-n 1'])
+    outputall = subprocess.check_output(["git", "log"])
+    cl_rev = len(str(outputall).split('commit'))
     #git_head = process.communicate()
     #print(output.strip().decode())
     strOut = output.strip().decode()
-    version_date = strOut.split('Date:')[-1].split('\n\n')[0]
+    version_date = ' Revision [' + Major_version +str(cl_rev)+']'+strOut.split('Date:')[-1].split('\n\n')[0]
     return version_date
 
 def stop_MyThread():
@@ -1513,6 +1516,8 @@ if __name__ == "__main__":
     if len(RevisionDate) > 0:
         print('Revision version:'+RevisionDate)
         settings.set_ClientSettingsByName('ClientRevisionDate', RevisionDate)
+    else:
+        RevisionDate = settings.get_ClientSettingsByName('ClientRevisionDate')
     settings.print_log("Start Py App")
     settings.setup_all_configs_if_need()
     print('Current Project : '+settings.get_Current_project())
