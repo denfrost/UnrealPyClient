@@ -312,7 +312,12 @@ class MyWidget(QtWidgets.QWidget):
     def __init__(self, parent=None):
 
         def SendSocket(HostServer, Json_request, ServerAnswered):
-            ws = create_connection(HostServer)
+            try:
+                ws = create_connection(HostServer)
+            except:
+                print('')
+                print('WS Server offline : ' + HostLineEdit.text())
+                return
             print("Sending Command to Server : " + HostServer)
             ws.send(Json_request)
             print("Sent")
@@ -820,13 +825,22 @@ class MyWidget(QtWidgets.QWidget):
 
         def Check_Server():
             progressBar.setValue(0)
-            conn = create_connection(HostLineEdit.text(), 5)
+            try:
+                conn = create_connection(HostLineEdit.text(), 5)
+            except:
+                conn = False
+            if not conn:
+                    print('WS Server offline : ' + HostLineEdit.text())
             ChangeStatus(bool(conn))
+            return conn
 
         def SendJsonSocket(hostServer, json_string):
             progressBar.setValue(0)
             print("Sending Command to Server : " + hostServer)
             conn = create_connection(HostLineEdit.text(), 5)
+            if not conn:
+                print('WS Server offline : '+HostLineEdit.text())
+                return
             print('WS Connected : '+str(conn))
             conn.send(json.dumps(json_string))
             print('WS Send : ' + str(json.dumps(json_string)))
@@ -1447,6 +1461,7 @@ class MyWidget(QtWidgets.QWidget):
         host_text = settings.get_ClientSettingsByName('HostServer')
         if host_text:
             HostLineEdit.setText(host_text)
+        print('Set IP from config: '+host_text)
 
         bAutorefresh = settings.get_ClientSettingsByName('RefreshQueueBool')
         RefreshQueueToggleBtn.setChecked(bAutorefresh)
@@ -1533,7 +1548,7 @@ else:
     unreal.log("Unreal modules Loaded & Ready!")
     unreal_working_dirs()
 
-print("Connect to Unreal websocket : "+Server)
+print("Connect to Unreal websocket : "+settings.get_ClientSettingsByName('HostServer'))
 app = None
 if not QtWidgets.QApplication.instance():
     app = QtWidgets.QApplication(sys.argv)
