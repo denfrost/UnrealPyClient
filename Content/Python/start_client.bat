@@ -1,3 +1,3 @@
-echo start websoclet client
+echo start websocket client
 py %~1
-rem pause
+pause

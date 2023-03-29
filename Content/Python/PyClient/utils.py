@@ -208,6 +208,16 @@ def get_moviequeue_jobs_list():
     pipelineQueue = subsystem.get_queue()
     return pipelineQueue.get_jobs()
 
+def list_presets_rendering():
+    #Create list of presets rendering
+    asset_reg = unreal.AssetRegistryHelpers.get_asset_registry()
+    assets = asset_reg.get_assets_by_path('/Game/Cinematics/MoviePipeline/Presets', recursive=True)
+    list_presets = []
+    for asset in assets:
+        print(asset.asset_class)
+        if (asset.asset_class == 'MoviePipelineMasterConfig'):
+            list_presets.append(asset)
+    return list_presets
 
 def list_skel_meshes():
     #Create list of skeletal meshes

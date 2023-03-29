@@ -2,6 +2,7 @@
 import sys
 import json
 import os
+
 from datetime import datetime as dt
 #My Library
 import UtilObserver as uo
@@ -9,25 +10,30 @@ import settings as settings
 
 #pip install PySide2
 from PySide2 import *
-from PySide2.QtWidgets import QApplication, QDialog, QMainWindow, QPushButton, QInputDialog
+from PySide2.QtWidgets import QApplication, QDialog, QMainWindow, QPushButton, QInputDialog, QVBoxLayout
 from PySide2.QtWidgets import *
 
 #pip install websocket-client
 from websocket import create_connection
 
-import settings as settings
+import unreal_worker
+
+#Repeater on Threading
+import threading
+stopFlag_MyThread = threading.Event()
 
 Server = "ws://"+"10.66.7.80:30020"
 
 #describe calls checking umap, uasset.
-Json_RequestCheckMap =\
+Json_RequestServerRemoteFunctions =\
     {
     "MessageName": "http",
     "Parameters": {
         "Url": "/remote/object/describe",
         "Verb": "PUT",
         "Body": {
-            "ObjectPath": "/Game/Remote/Test1.Test1",
+            "ObjectPath": "/Engine/PythonTypes.Default__SamplePythonBlueprintLibrary",
+            "functionName": "python_test_bp_action_return",
         }
     }
     }
@@ -84,7 +90,7 @@ Json_RequestSetShotRender = \
         }
     }
 
-Json_RequestRenderImages = \
+Json_RequestMakeRenderJob = \
     {
         "MessageName": "http",
         "Parameters": {
@@ -92,10 +98,11 @@ Json_RequestRenderImages = \
             "Verb": "PUT",
             "Body": {
                 "objectPath": "/Engine/PythonTypes.Default__SamplePythonBlueprintLibrary",
-                "functionName": "unreal_python_render_images",
+                "functionName": "unreal_python_make_render_job",
                 "parameters": {
-                "sSeqName" : 'SH0005',
-                "iQualityPreset" : 3,
+                    "sSeqName" : 'SH0005',
+                    "sQualityPreset" : '',
+                    "result" : 'return string'
                 }
             }
         }
@@ -135,6 +142,56 @@ Json_RequestRemoteQueueJobs = \
         }
     }
 
+Json_RequestStartRenderJob = \
+    {
+        "MessageName": "http",
+        "Parameters": {
+            "Url": "/remote/object/call",
+            "Verb": "PUT",
+            "Body": {
+                "objectPath": "/Engine/PythonTypes.Default__SamplePythonBlueprintLibrary",
+                "functionName": "unreal_python_start_render_job",
+                "parameters": {
+                    "sJobName": 'SH0005',
+                    "result": 'return string'
+                }
+            }
+        }
+    }
+
+Json_RequestDeleteRenderJob = \
+    {
+        "MessageName": "http",
+        "Parameters": {
+            "Url": "/remote/object/call",
+            "Verb": "PUT",
+            "Body": {
+                "objectPath": "/Engine/PythonTypes.Default__SamplePythonBlueprintLibrary",
+                "functionName": "unreal_python_delete_render_job",
+                "parameters": {
+                    "sJobName": 'SH0005',
+                    "result": 'return string'
+                }
+            }
+        }
+    }
+
+Json_RequestGetRenderPresets = \
+    {
+        "MessageName": "http",
+        "Parameters": {
+            "Url": "/remote/object/call",
+            "Verb": "PUT",
+            "Body": {
+                "objectPath": "/Engine/PythonTypes.Default__SamplePythonBlueprintLibrary",
+                "functionName": "unreal_python_get_render_presets",
+                "parameters": {
+                    "result": 'return string'
+                }
+            }
+        }
+    }
+
 Json_RequestDescribe =\
     {
     "MessageName": "http",
@@ -147,7 +204,22 @@ Json_RequestDescribe =\
     }
     }
 
-#SuperMessage Remote tool
+Json_RequestDeleteAllRenderJobs = \
+    {
+        "MessageName": "http",
+        "Parameters": {
+            "Url": "/remote/object/call",
+            "Verb": "PUT",
+            "Body": {
+                "objectPath": "/Engine/PythonTypes.Default__SamplePythonBlueprintLibrary",
+                "functionName": "unreal_python_delete_all_render_jobs",
+                "parameters": {
+                    "result": 'return string'
+                }
+            }
+        }
+    }
+
 Json_RequestRemoteInfo = \
     {
         "MessageName": "http",
@@ -164,38 +236,55 @@ Json_RequestRemoteInfo = \
         }
     }
 
+#SuperMessage Remote tool
+Json_RequestRemoteAllRenderingInfo = \
+    {
+        "MessageName": "http",
+        "Parameters": {
+            "Url": "/remote/object/call",
+            "Verb": "PUT",
+            "Body": {
+                "objectPath": "/Engine/PythonTypes.Default__SamplePythonBlueprintLibrary",
+                "functionName": "unreal_python_get_all_rendering_info",
+                "parameters": {
+                    "result": 'return string'
+                }
+            }
+        }
+    }
+
 class input_dialog(QWidget):
     def __init__(self, parent=None):
         super(input_dialog, self).__init__(parent)
 
         layout = QFormLayout()
         self.lbl = QLabel("Profile Name")
-        Name = settings.get_Settings_field('Name')
+        Name = settings.get_PerforceSettingsByName('Name')
         self.le = QLineEdit(Name)
         layout.addRow(self.lbl, self.le)
 
         self.lbl1 = QLabel("User")
-        User = settings.get_Settings_field('User')
+        User = settings.get_PerforceSettingsByName('User')
         self.le1 = QLineEdit(User)
         layout.addRow(self.lbl1, self.le1)
 
         self.lbl2 = QLabel("Password")
-        Pwd = settings.get_Settings_field('Pwd')
+        Pwd = settings.get_PerforceSettingsByName('Pwd')
         self.le2 = QLineEdit(Pwd)
         layout.addRow(self.lbl2, self.le2)
 
         self.lbl3 = QLabel("Host")
-        Host = settings.get_Settings_field('Host')
+        Host = settings.get_PerforceSettingsByName('Host')
         self.le3 = QLineEdit(Host)
         layout.addRow(self.lbl3, self.le3)
 
         self.lbl4 = QLabel("Depot")
-        Depot = settings.get_Settings_field('Depot')
+        Depot = settings.get_PerforceSettingsByName('Depot')
         self.le4 = QLineEdit(Depot)
         layout.addRow(self.lbl4, self.le4)
 
         self.lbl5 = QLabel("Workspace")
-        Workspace = settings.get_Settings_field('Workspace')
+        Workspace = settings.get_PerforceSettingsByName('Workspace')
         self.le5 = QLineEdit(Workspace)
         layout.addRow(self.lbl5, self.le5)
 
@@ -213,7 +302,7 @@ class input_dialog(QWidget):
         list = {'Name': self.le.text(), 'User': self.le1.text(), "Pwd": self.le2.text(), 'Host': self.le3.text(), 'Depot': self.le4.text(), 'Workspace': self.le5.text()}
         print(type(list))
         print(list)
-        settings.rewrite_exist_profile(list)
+        settings.rewrite_perforce_settings(list)
         self.close()
 
     def dlg_quit(self):
@@ -222,81 +311,136 @@ class input_dialog(QWidget):
 class MyWidget(QtWidgets.QWidget):
     def __init__(self, parent=None):
 
+        def SendSocket(HostServer, Json_request, ServerAnswered):
+            try:
+                ws = create_connection(HostServer)
+            except:
+                print('')
+                print('WS Server offline : ' + HostLineEdit.text())
+                return
+            print("Sending Command to Server : " + HostServer)
+            ws.send(Json_request)
+            print("Sent")
+            print("Receiving...")
+            result = ws.recv()
+            print("Received from Server '%s'" % result)
+            server_str = "'%s'" % result
+            ServerAnswered(server_str)
+            ws.close()
+
         @QtCore.Slot()
         def SendCommand():
             progressBar.setValue(0)
             progressBar.setValue(50)
             print("Send Command To Server :"+JsonTextEdit.toPlainText())
             HostServer = HostLineEdit.text()
-            SendSocket(ClearAnswer, HostServer, JsonTextEdit.toPlainText(), ServerAnswered) #Send Json to Unreal
+            SendSocket(HostServer, JsonTextEdit.toPlainText(), ServerAnswered) #Send Json to Unreal
 
         def ServerAnswered(feedback):
-            UpdateStatusOnline(HostLineEdit.text())
+            r_code = feedback.split('"ResponseCode":')[-1].split(',')[0]
+            UpdateStatusOnline(HostLineEdit.text(), r_code, 'ServerAnswered')
             print("Got Server Answer")
             tanswer =dt.now().strftime("%H:%M:%S")
             ServerAnswerTextEdit.clear()
             ServerAnswerTextEdit.setText(tanswer+" : "+feedback) #JsonTextEdit.toPlainText()
-            tabwidget.setCurrentIndex(1)
+            TabWidgetCommands.setCurrentIndex(1)
             progressBar.setValue(100)
 
         def ServerAnsweredGetAllShots(feedback):
-            UpdateStatusOnline(HostLineEdit.text())
+            r_code = feedback.split('"ResponseCode":')[-1].split(',')[0]
+            UpdateStatusOnline(HostLineEdit.text(), r_code, 'GetAllShots')
             print("Got Server Answer : Getallshots")
             tanswer =dt.now().strftime("%H:%M:%S")
             ServerAnswerTextEdit.clear()
             ServerAnswerTextEdit.setText(tanswer+" : "+feedback) #JsonTextEdit.toPlainText()
-            tabwidget.setCurrentIndex(1)
+            TabWidgetCommands.setCurrentIndex(1)
             FillShots(feedback)
             progressBar.setValue(70)
-            #Ask about Rendering Movie  status
-            Get_Remote_Info()
             progressBar.setValue(100)
+            # Ask about Rendering Movie  status
+            if (RefreshQueueToggleBtn.isChecked()): GetAllRenderingInfo()
+
 
         def ServerAnsweredSetShotRender(feedback):
-            UpdateStatusOnline(HostLineEdit.text())
+            r_code = feedback.split('"ResponseCode":')[-1].split(',')[0]
+            UpdateStatusOnline(HostLineEdit.text(), r_code, 'SetShotRender')
             print("Got Server Answer : SetShotRender")
             tanswer = dt.now().strftime("%H:%M:%S")
             ServerAnswerTextEdit.clear()
             ServerAnswerTextEdit.setText(tanswer + " : " + feedback)  # JsonTextEdit.toPlainText()
-            tabwidget.setCurrentIndex(1)
+            TabWidgetCommands.setCurrentIndex(1)
             progressBar.setValue(100)
 
-        def ServerAnsweredImagesRender(feedback):
-            UpdateStatusOnline(HostLineEdit.text())
-            print("Got Server Answer : ImagesRenderTool")
+        def ServerAnsweredMakeRenderJob(feedback):
+            r_code = feedback.split('"ResponseCode":')[-1].split(',')[0]
+            UpdateStatusOnline(HostLineEdit.text(), r_code, 'MakeRenderJob')
+            print("Got Server Answer : MakeRenderJob")
             tanswer = dt.now().strftime("%H:%M:%S")
             ServerAnswerTextEdit.clear()
             ServerAnswerTextEdit.setText(tanswer + " : " + feedback)  # JsonTextEdit.toPlainText()
-            tabwidget.setCurrentIndex(1)
+            TabWidgetCommands.setCurrentIndex(1)
             progressBar.setValue(100)
 
         def ServerAnsweredPerforce(feedback):
-            UpdateStatusOnline(HostLineEdit.text())
+            r_code = feedback.split('"ResponseCode":')[-1].split(',')[0]
+            UpdateStatusOnline(HostLineEdit.text(), r_code, 'AnsweredPerforce')
             print("Got Server Answer : Try Update server")
             tanswer =dt.now().strftime("%H:%M:%S")
             tused = dt.now()-trequest
             ServerAnswerTextEdit.clear()
             ServerAnswerTextEdit.setText(tanswer+" : "+feedback) #JsonTextEdit.toPlainText()
-            tabwidget.setCurrentIndex(1)
+            TabWidgetCommands.setCurrentIndex(1)
             PerforceLabel.setText("Perforce Updated : "+tanswer + '[' +str(tused) + ']')
             progressBar.setValue(100)
 
         def ServerAnsweredGetAllQueueJobs(feedback):
-            UpdateStatusOnline(HostLineEdit.text())
+            r_code = feedback.split('"ResponseCode":')[-1].split(',')[0]
+            UpdateStatusOnline(HostLineEdit.text(), r_code, 'GetAllQueueJobs')
             print("Got Server Answer : GetAllQueueJobs")
             tanswer =dt.now().strftime("%H:%M:%S")
             ServerAnswerTextEdit.clear()
             ServerAnswerTextEdit.setText(tanswer+" : "+feedback)
-            tabwidget.setCurrentIndex(1)
+            TabWidgetCommands.setCurrentIndex(1)
             #Fill Queue Combobox
             FillQueueJobs(feedback)
             comboBoxQueue.setCurrentIndex(0)
             progressBar.setValue(70)
-            #Ask about Rendering Movie  status
-            Get_Remote_Info()
             progressBar.setValue(100)
+            #Ask about Rendering Movie  status
+            if (RefreshQueueToggleBtn.isChecked()): GetAllRenderingInfo()
+
+        def ServerAnsweredDeleteRenderJob(feedback):
+            r_code = feedback.split('"ResponseCode":')[-1].split(',')[0]
+            UpdateStatusOnline(HostLineEdit.text(), r_code, 'DeleteRenderJob')
+            print("Got Server Answer : DeleteRenderJob")
+            tanswer =dt.now().strftime("%H:%M:%S")
+            ServerAnswerTextEdit.clear()
+            ServerAnswerTextEdit.setText(tanswer+" : "+feedback)
+            TabWidgetCommands.setCurrentIndex(1)
+            progressBar.setValue(70)
+            cleandata = feedback.split('"ReturnValue": "')[-1].split('"\\r\\n}\\r\\n}''')[0]
+            print('DeleteRenderJob Clean Data :'+cleandata)
+            progressBar.setValue(100)
+            if (RefreshQueueToggleBtn.isChecked()): GetAllRenderingInfo()
+
+
+        def ServerAnsweredDeleteAllRenderJobs(feedback):
+            r_code = feedback.split('"ResponseCode":')[-1].split(',')[0]
+            UpdateStatusOnline(HostLineEdit.text(), r_code, 'DeleteAllRenderJobs')
+            print("Got Server Answer : DeleteAllRenderJobs")
+            tanswer =dt.now().strftime("%H:%M:%S")
+            ServerAnswerTextEdit.clear()
+            ServerAnswerTextEdit.setText(tanswer+" : "+feedback)
+            TabWidgetCommands.setCurrentIndex(1)
+            progressBar.setValue(70)
+            cleandata = feedback.split('"ReturnValue": "')[-1].split('"\\r\\n}\\r\\n}''')[0]
+            print('DeleteRenderJob Clean Data :'+cleandata)
+            progressBar.setValue(100)
+            if (RefreshQueueToggleBtn.isChecked()): GetAllRenderingInfo()
 
         def ServerAnsweredGetRemoteInfo(feedback):
+            r_code = feedback.split('"ResponseCode":')[-1].split(',')[0]
+            UpdateStatusOnline(HostLineEdit.text(), r_code, 'GetRemoteInfo')
             cleandata = feedback.split('"ReturnValue": "')[-1].split('"\\r\\n}\\r\\n}''')[0]
             print('Clean Data :'+cleandata)
             cleandata = cleandata.replace('\\', '')
@@ -305,27 +449,183 @@ class MyWidget(QtWidgets.QWidget):
 
             print("Got Server Answer : GetRemoteInfo")
             tanswer =dt.now().strftime("%H:%M:%S")
-            ServerAnswerTextEdit.clear()
-            ServerAnswerTextEdit.setText(tanswer+" : "+feedback)
-            tabwidget.setCurrentIndex(1)
+            ServerAnswerTextEdit.setText(ServerAnswerTextEdit.toPlainText() + '  ' + tanswer+" : "+feedback)
+            TabWidgetCommands.setCurrentIndex(1)
             #Parse super json from server
             print(type(json_remote_data))
             print('Movie Rendering Working : ' +json_remote_data["MoviePipelineRendering"])
             if json_remote_data["MoviePipelineRendering"] == 'True':
-                Groupbox.setTitle('Server Status : Rendering Movie ')
+                GroupboxStatus.setTitle('Server Status : Rendering Movie ')
             else:
-                Groupbox.setTitle('Server Status : Available for Render ')
+                GroupboxStatus.setTitle('Server Status : Available for Render ')
             print('Movie Rendering Working 2 : ' + json_remote_data["MoviePipelineRendering2"])
 
             progressBar.setValue(100)
 
-        def UpdateStatusOnline(server_str):
+
+        def UpdatePresets(cleandata):
+            if len(cleandata) == 0:
+                comboBoxQueue.clear()
+                comboBoxQueue.addItem("EMPTY")
+                return
+            currentIndex = comboBoxQ.currentIndex()
+            tanswer =dt.now().strftime("%H:%M:%S")
+            TabWidgetCommands.setCurrentIndex(1)
+            list_presets = cleandata.split(',')
+            work_list_presets = []
+            comboBoxQ.clear()
+            for p in  list_presets:
+                if 'Render' in p:
+                    work_list_presets.append(p)
+                    comboBoxQ.addItem(p)
+            comboBoxQ.setCurrentIndex(currentIndex)
+
+        def UpdateQueueJobs(cleandata):
+            if len(cleandata) == 0:
+                comboBoxQueue.clear()
+                comboBoxQueue.addItem("EMPTY")
+                return
+            currentIndex = comboBoxQueue.currentIndex()
+            res = cleandata.split(",")
+            res.sort()
+            comboBoxQueue.clear()
+            current_project = settings.get_Current_project()
+            print('Start Sorting for Project :'+current_project)
+            for i, name in enumerate(res):
+                print('Feedback ['+str(i)+']: '+res[i])
+                if (res[i].find(current_project) > -1):
+                    comboBoxQueue.addItem("" + res[i])
+            if currentIndex < 0:
+                comboBoxQueue.setCurrentIndex(0)
+            else:
+                comboBoxQueue.setCurrentIndex(currentIndex)
+
+        def ServerAnsweredGetAllRenderingInfo(feedback):
+            r_code = feedback.split('"ResponseCode": ')[-1].split(',')[0]
+            UpdateStatusOnline(HostLineEdit.text(), r_code, 'GetAllRenderingInfo')
+            cleandata = feedback.split('"ReturnValue": "')[-1].split('"\\r\\n}\\r\\n}''')[0]
+            print('Clean Data :'+cleandata)
+            cleandata = cleandata.replace('\\', '')
+            print("Clean feedback :"+cleandata)
+            json_remote_data = json.loads(cleandata)
+
+            print("Got Server Answer : GetAllRenderingInfo")
+            tanswer =dt.now().strftime("%H:%M:%S")
+            ServerAnswerTextEdit.clear()
+            ServerAnswerTextEdit.setText(ServerAnswerTextEdit.toPlainText() + '  ' + tanswer+" : "+feedback)
+            TabWidgetCommands.setCurrentIndex(1)
+
+            #Parse super json from server
+            print(type(json_remote_data))
+
+            print('Movie Rendering Working : ' +json_remote_data["MoviePipelineRendering"])
+            if json_remote_data["MoviePipelineRendering"] == 'True':
+                GroupboxStatus.setTitle('Server Status : Rendering Movie ')
+            else:
+                GroupboxStatus.setTitle('Server Status : Available for Render ')
+
+            PresetsRenderingList = json_remote_data["PresetsRenderingList"]
+            print('Presets Rendering Quality List : ' + PresetsRenderingList)
+            UpdatePresets(PresetsRenderingList)
+
+            QueueRenderJobsList = json_remote_data["QueueRenderJobsList"]
+            print('Queue RenderJobs List : ' + QueueRenderJobsList)
+            UpdateQueueJobs(QueueRenderJobsList)
+
+            AllShotsList = json_remote_data["AllShotsList"]
+            print('All Shots List : ' + AllShotsList)
+            FillShots(AllShotsList)
+            progressBar.setValue(100)
+
+        def ServerAnsweredGetMyRenderingInfo(feedback):
+            print('ServerAnsweredGetMyRenderingInfo')
+            cleandata = feedback.split('"ReturnValue": "')[-1].split('"\\r\\n}\\r\\n}''')[0]
+            print('Clean Data :'+cleandata)
+            cleandata = cleandata.replace('\\', '')
+            print("Clean feedback :"+cleandata)
+            json_remote_data = json.loads(cleandata)
+            print("Got Server Answer : GetAllRenderingInfo")
+            tanswer =dt.now().strftime("%H:%M:%S")
+            ServerAnswerTextEdit.clear()
+            ServerAnswerTextEdit.setText(ServerAnswerTextEdit.toPlainText() + '  ' + tanswer+" : "+feedback)
+            TabWidgetCommands.setCurrentIndex(1)
+
+            #Parse super json from server
+            print(type(json_remote_data))
+
+            print('Movie Rendering Working : ' +json_remote_data["MoviePipelineRendering"])
+            if json_remote_data["MoviePipelineRendering"] == 'True':
+                GroupboxStatus.setTitle('Server Status : Rendering Movie ')
+            else:
+                GroupboxStatus.setTitle('Server Status : Available for Render ')
+
+            PresetsRenderingList = json_remote_data["PresetsRenderingList"]
+            print('Presets Rendering Quality List : ' + PresetsRenderingList)
+            UpdatePresets(PresetsRenderingList)
+
+            QueueRenderJobsList = json_remote_data["QueueRenderJobsList"]
+            print('Queue RenderJobs List : ' + QueueRenderJobsList)
+            UpdateQueueJobs(QueueRenderJobsList)
+
+            AllShotsList = json_remote_data["AllShotsList"]
+            print('All Shots List : ' + AllShotsList)
+            FillShots(AllShotsList)
+            #progressBar.setValue(100)
+
+
+        def ServerAnsweredStartRenderJobs(feedback):
+            cleandata = feedback.split('"ReturnValue": "')[-1].split('"\\r\\n}\\r\\n}''')[0]
+            r_code = feedback.split('"ResponseCode": ')[-1].split(',')[0]
+            UpdateStatusOnline(HostLineEdit.text(), r_code+':'+cleandata, 'StartRenderJobs')
+            print('RenderJobs Clean Data :' + cleandata)
+            GetAllRenderingInfo()
+
+        def ServerAnsweredGetRenderPresets(feedback):
+            r_code = feedback.split('"ResponseCode": ')[-1].split(',')[0]
+            UpdateStatusOnline(HostLineEdit.text(), r_code, 'GetRenderPresets')
+            cleandata = feedback.split('"ReturnValue": "')[-1].split('"\\r\\n}\\r\\n}''')[0]
+            print('GetRenderPresets Clean Data :' + cleandata)
+            currentIndex = comboBoxQ.currentIndex()
+            if len(cleandata) == 0:
+                comboBoxQueue.clear()
+                comboBoxQueue.addItem("EMPTY")
+                return
+            tanswer =dt.now().strftime("%H:%M:%S")
+            ServerAnswerTextEdit.clear()
+            ServerAnswerTextEdit.setText(tanswer+" : "+feedback)
+            TabWidgetCommands.setCurrentIndex(1)
+            list_presets = cleandata.split(',')
+            work_list_presets = []
+            comboBoxQ.clear()
+            for p in  list_presets:
+                if 'Render' in p:
+                    work_list_presets.append(p)
+                    comboBoxQ.addItem(p)
+            comboBoxQ.setCurrentIndex(currentIndex)
+
+
+        def UpdateStatusOnline(server_str, response_code, func_name):
             StatusLabel.setStyleSheet("QLabel { color : green; }")
             StatusLabel.setText("Unreal Server Status Online : " + server_str)
+            if '200' in response_code:
+                if 'Error.' not in response_code:
+                    Result = func_name+" - Succes[" + response_code+"]"
+                    AnswerServerLabel.setText("Answer Server : " + Result)
+                    print("Answer Server : "+Result)
+                    AnswerServerLabel.setStyleSheet("QLabel { color : green; }")
+                    settings.set_ClientSettingsByName('HostServer', HostLineEdit.text())
+                else:
+                    AnswerServerLabel.setText("Answer Server : "+func_name+" - Failed[" + response_code+"]")
+                    print("Answer Server : "+func_name+" - Failed[" + response_code+"]")
+                    AnswerServerLabel.setStyleSheet("QLabel { background-color : red; color : blue; }")
+            else:
+                StatusLabel.setText("Unreal Server Status Online : " + server_str+" Failed communicated")
 
-        def UpdateStatusOffline(server_str):
+        def UpdateStatusOffline(server_str, response_code, func_name):
             StatusLabel.setStyleSheet("QLabel { background-color : yellow; color : red; }")
             StatusLabel.setText("Unreal Server Status Offline : " + server_str)
+            AnswerServerLabel.setText("Answer Server : Failed[" + response_code + "]")
+            AnswerServerLabel.setStyleSheet("QLabel { background-color : red; color : blue; }")
 
         @QtCore.Slot()
         def StatusUpdate(status):
@@ -338,14 +638,6 @@ class MyWidget(QtWidgets.QWidget):
             comboBox.clear()
             for i, name in enumerate(names):
                 comboBox.addItem(""+names[i])
-
-        @QtCore.Slot()
-        def GetShots():
-            names = "Make sequences list only test!"
-            print(len(names))
-            comboBox.clear()
-            for i, name in enumerate(names):
-                comboBox.addItem("" + names[i])
 
         def ParsedShots(feedback):
             print('Json string : '+feedback)
@@ -363,24 +655,25 @@ class MyWidget(QtWidgets.QWidget):
             ServerAnswerTextEdit.setText(tanswer + " : " +s1)
             ServerAnswerTextEdit.append(json.dumps(dict['ResponseBody']))
 
-        def GetAllServerShots():
+        def Get_All_Server_Shots():
             FilterToggleBtn.setChecked(False)
-            tabwidget.setCurrentIndex(0)
+            TabWidgetCommands.setCurrentIndex(0)
             JsonTextEdit.setText(json.dumps(Json_RequestGetAllShots))
             progressBar.setValue(0)
             progressBar.setValue(50)
             print("Send Command To Server :"+JsonTextEdit.toPlainText())
             HostServer = HostLineEdit.text()
-            SendSocket(ClearAnswer, HostServer, JsonTextEdit.toPlainText(), ServerAnsweredGetAllShots) #Send Json to Unreal
+            SendSocket(HostServer, JsonTextEdit.toPlainText(), ServerAnsweredGetAllShots) #Send Json to Unreal
 
 
         def FillShots(feedback):
             res = feedback.split(",")
             res.sort()
             print(res[1])
+            currentIndex = comboBox.currentIndex()
+            print('FillShots: Filtered and Sorted.')
             comboBox.clear()
             listing.clear()
-            print('Start Sorting:')
             for i, name in enumerate(res):
                 #print('Feedback ['+str(i)+']: '+res[i])
                 if (res[i].find('_SEQ') > 0) & (res[i].find('Game/SHOTS') > 0):
@@ -389,6 +682,7 @@ class MyWidget(QtWidgets.QWidget):
                         #if 'ANIM_SEQ' not in res[i]: #_Anim_SEQ ignore
                         comboBox.addItem("" + res[i])
                         listing.addItem("" + res[i])
+            comboBox.setCurrentIndex(currentIndex)
             listing.setMaximumHeight(200)
 
         def FillQueueJobs(feedback):
@@ -399,15 +693,20 @@ class MyWidget(QtWidgets.QWidget):
                 comboBoxQueue.clear()
                 comboBoxQueue.addItem("EMPTY")
                 return
+            currentIndex = comboBoxQueue.currentIndex()
             res = cleandata.split(",")
             res.sort()
             comboBoxQueue.clear()
-            print('Start Sorting:')
+            current_project = settings.get_Current_project()
+            print('Start Sorting for Project :'+current_project)
             for i, name in enumerate(res):
                 print('Feedback ['+str(i)+']: '+res[i])
-                if (res[i].find('_SEQ') > 0):
-                    mlist = res[i].split('.')[-1].split('_')
+                if (res[i].find(current_project) > -1):
                     comboBoxQueue.addItem("" + res[i])
+            if currentIndex < 0:
+                comboBoxQueue.setCurrentIndex(0)
+            else:
+                comboBoxQueue.setCurrentIndex(currentIndex)
 
         def printItemText(self):
             items = listing.selectedItems()
@@ -451,28 +750,58 @@ class MyWidget(QtWidgets.QWidget):
 
             progressBar.setValue(0)
             JsonTextEdit.setText(json.dumps(Json_RequestSetShotRender))
-            tabwidget.setCurrentIndex(0)
+            TabWidgetCommands.setCurrentIndex(0)
             print("SetShotRender ")
             progressBar.setValue(50)
             HostServer = HostLineEdit.text()
-            SendSocket(ClearAnswer, HostServer, json.dumps(Json_RequestSetShotRender), ServerAnsweredSetShotRender)
+            SendSocket(HostServer, json.dumps(Json_RequestSetShotRender), ServerAnsweredSetShotRender)
 
-        def MakeImagesTool(sequence, iQualityPreset=3, bFtp_transfer=True):
-            print('Send Render for ImagesTool Render : '+sequence + ' Quality - '+str(iQualityPreset)+' Ftp transfer - '+str(bFtp_transfer))
-            Json_RequestRenderImages["Parameters"]["Body"]["parameters"]["sSeqName"] = sequence
-            Json_RequestRenderImages["Parameters"]["Body"]["parameters"]["iQuality"] = iQualityPreset
-            Json_RequestRenderImages["Parameters"]["Body"]["parameters"]["bFtp_transfer"] = bFtp_transfer
+        def MakeImagesTool(sequence, sQualityPreset='', bFtp_transfer=True):
+            if sequence == 'EMPTY':
+                print("Wrong sequence name!")
+                return
+            print('Send Render for ImagesTool Render : '+sequence + ' Quality - '+str(sQualityPreset)+' Ftp transfer - '+str(bFtp_transfer))
+            Json_RequestMakeRenderJob["Parameters"]["Body"]["parameters"]["sSeqName"] = sequence
+            Json_RequestMakeRenderJob["Parameters"]["Body"]["parameters"]["sQuality"] = sQualityPreset
+            Json_RequestMakeRenderJob["Parameters"]["Body"]["parameters"]["bFtp_transfer"] = bFtp_transfer
             progressBar.setValue(0)
-            JsonTextEdit.setText(json.dumps(Json_RequestRenderImages))
-            tabwidget.setCurrentIndex(0)
+            JsonTextEdit.setText(json.dumps(Json_RequestMakeRenderJob))
+            TabWidgetCommands.setCurrentIndex(0)
             print("Sending....")
             progressBar.setValue(50)
             HostServer = HostLineEdit.text()
-            SendSocket(ClearAnswer, HostServer, json.dumps(Json_RequestRenderImages), ServerAnsweredImagesRender)
+            SendSocket(HostServer, json.dumps(Json_RequestMakeRenderJob), ServerAnsweredMakeRenderJob)
+
+        def StartRenderJobs(job_name):
+            Json_RequestStartRenderJob["Parameters"]["Body"]["parameters"]["sJobName"] = job_name
+            JsonTextEdit.setText(json.dumps(Json_RequestStartRenderJob))
+            TabWidgetCommands.setCurrentIndex(0)
+            HostServer = HostLineEdit.text()
+            SendSocket(HostServer, json.dumps(Json_RequestStartRenderJob), ServerAnsweredStartRenderJobs)
+
+        def Get_Render_Presets():
+            JsonTextEdit.setText(json.dumps(Json_RequestGetRenderPresets))
+            TabWidgetCommands.setCurrentIndex(0)
+            HostServer = HostLineEdit.text()
+            SendSocket(HostServer, json.dumps(Json_RequestGetRenderPresets), ServerAnsweredGetRenderPresets)
 
         @QtCore.Slot()
-        def RenderImages():
-            MakeImagesTool(comboBox.currentText(), comboBoxQ.currentIndex(), CheckTransferToggleBtn.isChecked())
+        def MakeRenderJob():
+            MakeImagesTool(comboBox.currentText(), comboBoxQ.currentText(), CheckTransferToggleBtn.isChecked())
+            if (RefreshQueueToggleBtn.isChecked()): GetAllRenderingInfo()
+
+        @QtCore.Slot()
+        def StartRendering():
+            job_name = comboBoxQueue.currentText().split('-')[0]
+            print('Try Start Rednering : '+job_name)
+            StartRenderJobs(job_name)
+            if (RefreshQueueToggleBtn.isChecked()): GetAllRenderingInfo()
+
+        @QtCore.Slot()
+        def GetRenderPresets():
+            print('GetRenderPresets')
+            Get_Render_Presets()
+
         @QtCore.Slot()
         def RenderMovie(): #arguments
             MakeRenderTool(comboBox.currentText())
@@ -490,22 +819,74 @@ class MyWidget(QtWidgets.QWidget):
         @QtCore.Slot()
         def CheckServer():
             print("Connect to Unreal websocket : " + HostLineEdit.text())
+            Check_Server()
+            #SendJsonSocket(Json_RequestServerRemoteFunctions)
+            #SendJsonSocket(Json_RequestRemoteInfo)
+
+        def Check_Server():
+            progressBar.setValue(0)
             try:
-                progressBar.setValue(0)
-                create_connection(HostLineEdit.text(), 5)
-                ChangeStatus(True)
-                settings.set_HostServer(HostLineEdit.text())
+                conn = create_connection(HostLineEdit.text(), 5)
             except:
-                ChangeStatus(False)
+                conn = False
+            if not conn:
+                    print('WS Server offline : ' + HostLineEdit.text())
+            ChangeStatus(bool(conn))
+            return conn
+
+        def SendJsonSocket(hostServer, json_string):
+            progressBar.setValue(0)
+            print("Sending Command to Server : " + hostServer)
+            conn = create_connection(HostLineEdit.text(), 5)
+            if not conn:
+                print('WS Server offline : '+HostLineEdit.text())
+                return
+            print('WS Connected : '+str(conn))
+            conn.send(json.dumps(json_string))
+            print('WS Send : ' + str(json.dumps(json_string)))
+            print("Receiving...")
+            answer = str(conn.recv())
+            print("Received from Server '%s'" % answer)
+            UrlType = json_string['Parameters']['Url']
+            if UrlType == "/remote/object/describe":
+                RawJsonDescribeAnswer(answer)
+            elif UrlType == "/remote/object/call":
+                TypeFunction =  json_string['Parameters']['Body']['functionName']
+                if TypeFunction == 'unreal_python_get_info_remote':
+                    ServerAnsweredGetRemoteInfo(answer)
+                elif TypeFunction == 'unreal_python_get_all_rendering_info':
+                    ServerAnsweredGetAllRenderingInfo(answer)
+
+
+        def RawJsonDescribeAnswer(feedback):
+            clean1 = feedback.replace('\\r\\n\\t', '')
+            clean2 = clean1.replace('\\t', '')
+            clean2 = clean2.replace('\\r\\n', '')
+            clean2data = clean2.replace("b'{", '{')
+            clean2data = clean2data[:-1:]
+            print('Json_data_ready :' +clean2data)
+            json_remote_data = json.loads(clean2data)
+            print('ResponseCode : '+str(json_remote_data['ResponseCode']))
+            ClassName = json_remote_data['ResponseBody']['Class']
+            BodyData = json_remote_data['ResponseBody']
+            FuncList = json_remote_data['ResponseBody']['Functions']
+            print('ResponseBody : %s ' % BodyData)
+            settings.print_log('Available Unreal Python Function for Remote :')
+            print('Available Unreal Python Function for Remote :')
+            for d in FuncList:
+                print(d)
+                settings.print_log(d['Name'])
+
 
         @QtCore.Slot()
         def ChangeStatus(check):
             tm = dt.now().strftime("%H:%M:%S")
+            print('Change Status : '+str(check))
             if check:
-                UpdateStatusOnline(HostLineEdit.text() + ' ' + tm)
+                UpdateStatusOnline(HostLineEdit.text() + ' ' + tm, '200', 'CheckServer')
                 progressBar.setValue(100)
             else:
-                UpdateStatusOffline(HostLineEdit.text() + ' ' + tm)
+                UpdateStatusOffline(HostLineEdit.text() + ' ' + tm, '-1', 'CheckServer')
 
         @QtCore.Slot()
         def onClickedToggle():
@@ -549,10 +930,10 @@ class MyWidget(QtWidgets.QWidget):
             print("Perforce ")
             progressBar.setValue(0)
             JsonTextEdit.setText(json.dumps(Json_UpdatePerforce))
-            tabwidget.setCurrentIndex(0)
+            TabWidgetCommands.setCurrentIndex(0)
             progressBar.setValue(50)
             HostServer = HostLineEdit.text()
-            SendSocket(ClearAnswer, HostServer, json.dumps(Json_UpdatePerforce), ServerAnsweredPerforce)
+            SendSocket(HostServer, json.dumps(Json_UpdatePerforce), ServerAnsweredPerforce)
 
         @QtCore.Slot()
         def onOpenLogPerforce():
@@ -565,190 +946,348 @@ class MyWidget(QtWidgets.QWidget):
             ex.show()
             ex.exec_()
 
+        def OnChangeProject():
+            ShowProjectsDialog()
+
         @QtCore.Slot()
-        def ShowDialogs():
+        def ShowProjectsDialog():
+            items = unreal_worker.M2_get_projects_dict()
+            print('Items:'+str('items')+' '+str(len(items)))
+            if len(items) == 0:
+                items = settings.settings_m2_project_default['AvailableProjects']
+            item, ok = QInputDialog.getItem(self, "Select Project", "list of Projects", items, 0, False)
+            if (ok):
+                settings.set_ClientM2ProjectByName('DefaultProject', item)
+            print(str(item))
+            current_project.setText("Current Project : "+settings.get_Current_project()+'                    ')
+
+        @QtCore.Slot()
+        def ShowSimpleDialogs():
             items = ("C", "C++", "Java", "Python")
             item, ok = QInputDialog.getItem(self, "select input dialog", "list of languages", items, 0, False)
-
-            dlg = QDialog(self)
-            dlg.resize(400, 400)
-            dlg.setWindowTitle("Settings Perforce")
-            dlg.exec_()
+            print(str(item))
+            #dlg = QDialog(self)
+            #dlg.resize(400, 400)
+            #dlg.setWindowTitle("Settings Perforce")
+            #dlg.exec_()
 
 
         @QtCore.Slot()
-        def Get_Queue_Jobs():
-            print('Get_Queue_Jobs')
+        def GetQueueJobs():
+            print('GetQueueJobs')
             JsonTextEdit.setText(json.dumps(Json_RequestRemoteQueueJobs))
             progressBar.setValue(0)
             progressBar.setValue(50)
             print("Send Command To Server :"+JsonTextEdit.toPlainText())
             HostServer = HostLineEdit.text()
-            SendSocket(ClearAnswer, HostServer, JsonTextEdit.toPlainText(), ServerAnsweredGetAllQueueJobs) #Send Json to Unreal
+            SendSocket(HostServer, JsonTextEdit.toPlainText(), ServerAnsweredGetAllQueueJobs) #Send Json to Unreal
 
         @QtCore.Slot()
-        def Get_Remote_Info():
-            print('Get_Remote_Info')
+        def onRefreshQueueToggle():
+            settings.set_ClientSettingsByName('RefreshQueueBool', RefreshQueueToggleBtn.isChecked())
+
+        @QtCore.Slot()
+        def onAdvancedRenderToggle():
+            if AdvancedRenderToggleBtn.isChecked():
+                GroupboxMain.setFixedHeight(770)
+                OpenLogImagesBtn.show()
+                OpenFolderImagesBtn.show()
+                GroupboxBatchMakeJobs.show()
+                GroupboxSendCommands.show()
+                GetQueueBtn.show()
+                GetServerShots.show()
+                RenderMovieDisabled.show()
+                GetRenderPresetsBtn.show()
+                RefreshQueueToggleBtn.setEnabled(AdvancedRenderToggleBtn.isChecked())
+            else:
+                GroupboxMain.setFixedHeight(660)
+                OpenLogImagesBtn.hide()
+                OpenFolderImagesBtn.hide()
+                GroupboxBatchMakeJobs.hide()
+                GroupboxSendCommands.hide()
+                GetQueueBtn.hide()
+                GetServerShots.hide()
+                RenderMovieDisabled.hide()
+                GetRenderPresetsBtn.hide()
+                RefreshQueueToggleBtn.setEnabled(AdvancedRenderToggleBtn.isChecked())
+            settings.set_ClientSettingsByName('AdvancedRenderBool', AdvancedRenderToggleBtn.isChecked())
+
+        @QtCore.Slot()
+        def DeleteRenderJob():
+            selected_job_name = comboBoxQueue.currentText().split('-')[0]
+            print('DeleteRenderJob :'+selected_job_name)
+            Delete_Render_Job(selected_job_name)
+
+
+        def Delete_Render_Job(job_name):
+            Json_RequestDeleteRenderJob["Parameters"]["Body"]["parameters"]["sJobName"] = job_name
+            JsonTextEdit.setText(json.dumps(Json_RequestDeleteRenderJob))
+            TabWidgetCommands.setCurrentIndex(0)
+            HostServer = HostLineEdit.text()
+            progressBar.setValue(0)
+            progressBar.setValue(50)
+            SendSocket(HostServer, json.dumps(Json_RequestDeleteRenderJob), ServerAnsweredDeleteRenderJob)
+
+        @QtCore.Slot()
+        def DeleteAllRenderJobs():
+            JsonTextEdit.setText(json.dumps(Json_RequestDeleteAllRenderJobs))
+            TabWidgetCommands.setCurrentIndex(0)
+            HostServer = HostLineEdit.text()
+            progressBar.setValue(0)
+            progressBar.setValue(50)
+            SendSocket(HostServer, json.dumps(Json_RequestDeleteAllRenderJobs), ServerAnsweredDeleteAllRenderJobs)
+
+        @QtCore.Slot()
+        def GetRemoteInfo():
+            print('GetRemoteInfo')
             JsonTextEdit.setText(json.dumps(Json_RequestRemoteInfo))
             progressBar.setValue(0)
             progressBar.setValue(50)
             print("Send Command To Server :"+JsonTextEdit.toPlainText())
             HostServer = HostLineEdit.text()
-            SendSocket(ClearAnswer, HostServer, JsonTextEdit.toPlainText(), ServerAnsweredGetRemoteInfo) #Send Json to Unreal
+            SendSocket(HostServer, JsonTextEdit.toPlainText(), ServerAnsweredGetRemoteInfo) #Send Json to Unreal
+
+        @QtCore.Slot()
+        def GetAllRenderingInfo():
+            print('GetAllRenderingInfo')
+            BeforeSendClearUI()
+            #AnswerServerLabel.setText("Answer Server : waiting...")
+            JsonTextEdit.setText(json.dumps(Json_RequestRemoteAllRenderingInfo))
+            print("Send Command To Server :"+JsonTextEdit.toPlainText())
+            HostServer = HostLineEdit.text()
+            #SendJsonSocket(HostServer, Json_RequestRemoteAllRenderingInfo)
+            SendSocket(HostServer, JsonTextEdit.toPlainText(), ServerAnsweredGetAllRenderingInfo) #Send Json to Unreal
+
+        def BeforeSendClearUI():
+            progressBar.setValue(0)
+            progressBar.setValue(50)
+
+        def GetMyRenderingInfo():
+            print('GetMyRenderingInfo')
+            JsonTextEdit.setText(json.dumps(Json_RequestRemoteAllRenderingInfo))
+            print("Send Command To Server :"+JsonTextEdit.toPlainText())
+            HostServer = HostLineEdit.text()
+            #SendJsonSocket(HostServer, Json_RequestRemoteAllRenderingInfo)
+            SendSocket(HostServer, JsonTextEdit.toPlainText(), ServerAnsweredGetMyRenderingInfo) #Send Json to Unreal
+
+        @QtCore.Slot()
+        def StartThread():
+            stopFlag_MyThread.clear()
+            thread = MyThread(stopFlag_MyThread)
+            thread.start()
+
+        def StopThread():
+            print('Thread Stop work')
+            stopFlag_MyThread.set()
 
         @QtCore.Slot()
         def MyQuit():
+            stopFlag_MyThread.set()
             app.quit()
 
         QtWidgets.QWidget.__init__(self, parent)
-        self.resize(800, 800)
-        self.setWindowTitle("Unreal Websocket Client")
+        versiondate = settings.get_ClientSettingsByName('ClientRevisionDate')
+        self.setWindowTitle("Unreal Websocket Client version:"+versiondate)
 
-        layout = QtWidgets.QVBoxLayout()
-        self.setLayout(layout)
+        layoutVerticalWindow = QtWidgets.QVBoxLayout()
+        self.setLayout(layoutVerticalWindow)
 
+
+        GroupboxLabel = QtWidgets.QGroupBox("")
+        hboxLabel = QtWidgets.QHBoxLayout()
         StatusLabel = QtWidgets.QLabel("Unreal Server Status:")
-        StatusLabel.setGeometry(10, 50, 160, 20)
         StatusLabel.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Medium))
         StatusLabel.setStyleSheet("QLabel { background-color : red; color : blue; }")
-        layout.addWidget(StatusLabel)
+        StatusLabel.setFixedHeight(40)
+        GroupboxLabel.setFixedHeight(60)
+        GroupboxLabel.setLayout(hboxLabel)
 
+        AnswerServerLabel = QtWidgets.QLabel("AnswerServer: Failed")
+        AnswerServerLabel.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Medium))
+        AnswerServerLabel.setStyleSheet("QLabel { background-color : red; color : blue; }")
 
-        Groupbox = QtWidgets.QGroupBox("Server Status")
-        Groupbox.setAlignment(100)
-        Groupbox.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Bold))
-        vbox = QtWidgets.QHBoxLayout()
-        Groupbox.setLayout(vbox)
-        layout.addWidget(Groupbox)
+        GroupboxLabel.layout().addWidget(StatusLabel)
+        GroupboxLabel.layout().addWidget(AnswerServerLabel)
+        layoutVerticalWindow.addWidget(GroupboxLabel)
 
+        GroupboxStatus = QtWidgets.QGroupBox("Server Status")
+        GroupboxStatus.setAlignment(100)
+        GroupboxStatus.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Bold))
+        hboxStatus = QtWidgets.QHBoxLayout()
+        GroupboxStatus.setFixedHeight(80)
+
+        GroupboxStatus.setLayout(hboxStatus)
+        layoutVerticalWindow.addWidget(GroupboxStatus)
+
+        AdvancedRenderToggleBtn = QtWidgets.QCheckBox("Advanced Render Control")
+        AdvancedRenderToggleBtn.setChecked(True)
+        self.connect(AdvancedRenderToggleBtn, QtCore.SIGNAL("clicked()"), onAdvancedRenderToggle)
+        GroupboxStatus.layout().addWidget(AdvancedRenderToggleBtn)
 
         Check = QtWidgets.QPushButton("Check Server")
         Check.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
         self.connect(Check, QtCore.SIGNAL("clicked()"), CheckServer)
-        Groupbox.layout().addWidget(Check)
+        GroupboxStatus.layout().addWidget(Check)
 
         HostLineEdit = QtWidgets.QLineEdit(Server)
         HostLineEdit.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Medium))
         HostServer = "ws://" + HostLineEdit.text()+":30020"
         HostLineEdit = QtWidgets.QLineEdit(Server)
-        Groupbox.layout().addWidget(HostLineEdit)
+        GroupboxStatus.layout().addWidget(HostLineEdit)
 
         ServerToggleBtn = QtWidgets.QCheckBox("Change Server")
         ServerToggleBtn.setChecked(False)
         self.connect(ServerToggleBtn, QtCore.SIGNAL("clicked()"), onClickedToggle)
         Check.setEnabled(ServerToggleBtn.isChecked())
         HostLineEdit.setEnabled(ServerToggleBtn.isChecked())
-        Groupbox.layout().addWidget(ServerToggleBtn)
+        GroupboxStatus.layout().addWidget(ServerToggleBtn)
 
-        GroupboxCommand = QtWidgets.QGroupBox("Send Custom Commands")
-        GroupboxCommand.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Bold))
+        GroupboxSendCommands = QtWidgets.QGroupBox("Send Custom Commands")
+        GroupboxSendCommands.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Bold))
         vbox2 = QtWidgets.QVBoxLayout()
-        GroupboxCommand.setLayout(vbox2)
-        layout.addWidget(GroupboxCommand)
+        GroupboxSendCommands.setLayout(vbox2)
+        layoutVerticalWindow.addWidget(GroupboxSendCommands)
 
         GetInfoBtn = QtWidgets.QPushButton("Get Info")
         GetInfoBtn.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
-        self.connect(GetInfoBtn, QtCore.SIGNAL("clicked()"), Get_Remote_Info)
-        GroupboxCommand.layout().addWidget(GetInfoBtn)
+        self.connect(GetInfoBtn, QtCore.SIGNAL("clicked()"), GetRemoteInfo)
+        GroupboxSendCommands.layout().addWidget(GetInfoBtn)
+
+        GetInfoBtn2 = QtWidgets.QPushButton("Get All Rendering Info")
+        GetInfoBtn2.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
+        self.connect(GetInfoBtn2, QtCore.SIGNAL("clicked()"), GetAllRenderingInfo)
+        GroupboxSendCommands.layout().addWidget(GetInfoBtn2)
+
 
         CommandBtn = QtWidgets.QPushButton("Send Command")
         CommandBtn.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
         self.connect(CommandBtn, QtCore.SIGNAL("clicked()"), SendCommand)
-        GroupboxCommand.layout().addWidget(CommandBtn)
+        GroupboxSendCommands.layout().addWidget(CommandBtn)
 
         JsonTextEdit = QtWidgets.QTextEdit(json.dumps(Json_RequestRemoteStaticFunction))
         JsonTextEdit.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Medium))
-        layout.addWidget(JsonTextEdit)
+        layoutVerticalWindow.addWidget(JsonTextEdit)
 
         ServerAnswerTextEdit = QtWidgets.QTextEdit('Feedback from server')
         ServerAnswerTextEdit.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Medium))
-        layout.addWidget(ServerAnswerTextEdit)
+        layoutVerticalWindow.addWidget(ServerAnswerTextEdit)
 
-        tabwidget = QtWidgets.QTabWidget()
-        tabwidget.addTab(JsonTextEdit, "Command Client")
-        tabwidget.addTab(ServerAnswerTextEdit, "Answer Server")
-        GroupboxCommand.layout().addWidget(tabwidget)
+        TabWidgetCommands = QtWidgets.QTabWidget()
+        TabWidgetCommands.addTab(JsonTextEdit, "Command Client")
+        TabWidgetCommands.addTab(ServerAnswerTextEdit, "Answer Server")
+        GroupboxSendCommands.layout().addWidget(TabWidgetCommands)
 
-        GroupboxQueue = QtWidgets.QGroupBox("Manager Movie Rendering Queue")
+        GroupboxQueue = QtWidgets.QGroupBox("Rendering Jobs Queue")
         GroupboxQueue.setChecked(True)
         vbox50 = QtWidgets.QHBoxLayout()
+        GroupboxQueue.setFixedHeight(80)
         GroupboxQueue.setLayout(vbox50)
 
-        get_queue = QtWidgets.QPushButton("Get Queue Jobs")
-        get_queue.setFont(QtGui.QFont("Times", 10, QtGui.QFont.Bold))
-        get_queue.setFixedWidth(150)
-        self.connect(get_queue, QtCore.SIGNAL("clicked()"), Get_Queue_Jobs)
-        GroupboxQueue.layout().addWidget(get_queue)
+        GetQueueBtn = QtWidgets.QPushButton("Get Queue Jobs")
+        GetQueueBtn.setFont(QtGui.QFont("Times", 10, QtGui.QFont.Bold))
+        GetQueueBtn.setFixedWidth(150)
+        self.connect(GetQueueBtn, QtCore.SIGNAL("clicked()"), GetQueueJobs)
+        GroupboxQueue.layout().addWidget(GetQueueBtn)
 
         comboBoxQueue = QtWidgets.QComboBox(self)
         comboBoxQueue.setFont(QtGui.QFont("Times", 10, QtGui.QFont.Medium))
+        comboBoxQueue.setFixedWidth(750)
         comboBoxQueue.addItem("EMPTY")
         GroupboxQueue.layout().addWidget(comboBoxQueue)
 
-        GroupboxAuto = QtWidgets.QGroupBox("Rendering Shots")
-        GroupboxAuto.setChecked(True)
+        delete_queue = QtWidgets.QPushButton("Delete Job")
+        delete_queue.setFont(QtGui.QFont("Times", 10, QtGui.QFont.Bold))
+        delete_queue.setFixedWidth(100)
+        self.connect(delete_queue, QtCore.SIGNAL("clicked()"), DeleteRenderJob)
+        GroupboxQueue.layout().addWidget(delete_queue)
+
+        delete_all_queue = QtWidgets.QPushButton("Delete All Jobs!")
+        delete_all_queue.setFont(QtGui.QFont("Times", 10, QtGui.QFont.Bold))
+        delete_all_queue.setFixedWidth(150)
+        self.connect(delete_all_queue, QtCore.SIGNAL("clicked()"), DeleteAllRenderJobs)
+        GroupboxQueue.layout().addWidget(delete_all_queue)
+
+
+        GroupboxRenderJobs = QtWidgets.QGroupBox("Rendering Shots")
+        GroupboxRenderJobs.setChecked(True)
         vbox3 = QtWidgets.QHBoxLayout()
-        GroupboxAuto.setLayout(vbox3)
+        GroupboxRenderJobs.setFixedHeight(80)
+        GroupboxRenderJobs.setLayout(vbox3)
 
-        getshot = QtWidgets.QPushButton("Get Server Sequences")
-        getshot.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
-        self.connect(getshot, QtCore.SIGNAL("clicked()"), GetAllServerShots)
-        GroupboxAuto.layout().addWidget(getshot)
+        GetServerShots = QtWidgets.QPushButton("Get Server Sequences")
+        GetServerShots.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
+        self.connect(GetServerShots, QtCore.SIGNAL("clicked()"), Get_All_Server_Shots)
+        GroupboxRenderJobs.layout().addWidget(GetServerShots)
 
-        render = QtWidgets.QPushButton("Render Movie Sequence")
-        render.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
-        render.setEnabled(False)
-        self.connect(render, QtCore.SIGNAL("clicked()"), RenderMovie)
-        GroupboxAuto.layout().addWidget(render)
+        RenderMovieDisabled = QtWidgets.QPushButton("Render Movie")
+        RenderMovieDisabled.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
+        RenderMovieDisabled.setEnabled(False)
+        self.connect(RenderMovieDisabled, QtCore.SIGNAL("clicked()"), RenderMovie)
+        GroupboxRenderJobs.layout().addWidget(RenderMovieDisabled)
 
-        render_images = QtWidgets.QPushButton("Render Images Sequence")
-        render_images.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
-        self.connect(render_images, QtCore.SIGNAL("clicked()"), RenderImages)
-        GroupboxAuto.layout().addWidget(render_images)
+        start_render_jobs_btn = QtWidgets.QPushButton("Start Render")
+        start_render_jobs_btn.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
+        self.connect(start_render_jobs_btn, QtCore.SIGNAL("clicked()"), StartRendering)
+        GroupboxRenderJobs.layout().addWidget(start_render_jobs_btn)
 
-        GroupboxAuto5 = QtWidgets.QGroupBox("Rendering Settings")
-        GroupboxAuto5.setChecked(True)
-        vbox4 = QtWidgets.QHBoxLayout()
-        GroupboxAuto5.setLayout(vbox4)
+        GroupboxRenderingSettings = QtWidgets.QGroupBox("Project Rendering Settings")
+        GroupboxRenderingSettings.setChecked(True)
+        hboxRenderingSettings = QtWidgets.QHBoxLayout()
+        hboxRenderingSettings.setAlignment(QtCore.Qt.AlignLeft)
+        GroupboxRenderingSettings.setFixedHeight(80)
+        GroupboxRenderingSettings.setLayout(hboxRenderingSettings)
+
+        ChangeProjectBtn = QtWidgets.QPushButton("Change Project")
+        ChangeProjectBtn.setFont(QtGui.QFont("Times", 10, QtGui.QFont.Bold))
+        self.connect(ChangeProjectBtn, QtCore.SIGNAL("clicked()"), OnChangeProject)
+        GroupboxRenderingSettings.layout().addWidget(ChangeProjectBtn)
 
         current_project = QtWidgets.QLabel("Current Project : "+settings.get_Current_project()+'                    ')
-        GroupboxAuto5.layout().addWidget(current_project)
+        GroupboxRenderingSettings.layout().addWidget(current_project)
 
         preset = QtWidgets.QLabel("Quality")
-        GroupboxAuto5.layout().addWidget(preset)
+        GroupboxRenderingSettings.layout().addWidget(preset)
+
+        GetRenderPresetsBtn = QtWidgets.QPushButton("GetRenderPresets")
+        GetRenderPresetsBtn.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Bold))
+        self.connect(GetRenderPresetsBtn, QtCore.SIGNAL("clicked()"), GetRenderPresets)
+        GroupboxRenderingSettings.layout().addWidget(GetRenderPresetsBtn)
+
         comboBoxQ = QtWidgets.QComboBox(self)
         comboBoxQ.setFont(QtGui.QFont("Times", 10, QtGui.QFont.Medium))
-        comboBoxQ.addItem("Preset01")
-        comboBoxQ.addItem("Preset02VeryLow")
-        comboBoxQ.addItem("Preset02LoW")
-        comboBoxQ.addItem("Preset03VeryHigh")
-        comboBoxQ.setCurrentIndex(3)
-        GroupboxAuto5.layout().addWidget(comboBoxQ)
-
+        comboBoxQ.setFixedWidth(200)
+        comboBoxQ.addItem("Epmty")
+        GroupboxRenderingSettings.layout().addWidget(comboBoxQ)
 
         CheckTransferToggleBtn = QtWidgets.QCheckBox("Transfer")
         CheckTransferToggleBtn.setChecked(False)
         self.connect(CheckTransferToggleBtn, QtCore.SIGNAL("clicked()"), onClickedToggleTransfer)
-        GroupboxAuto5.layout().addWidget(CheckTransferToggleBtn)
+        GroupboxRenderingSettings.layout().addWidget(CheckTransferToggleBtn)
 
         OpenFolderImagesBtn = QtWidgets.QPushButton("Open Images Folder..")
         OpenFolderImagesBtn.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Bold))
-        OpenFolderImagesBtn.setEnabled(False)
         self.connect(OpenFolderImagesBtn, QtCore.SIGNAL("clicked()"), onOpenFolder)
-        GroupboxAuto5.layout().addWidget(OpenFolderImagesBtn)
+        GroupboxRenderingSettings.layout().addWidget(OpenFolderImagesBtn)
 
         OpenLogImagesBtn = QtWidgets.QPushButton("Open Log..")
         OpenLogImagesBtn.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Bold))
-        OpenLogImagesBtn.setEnabled(False)
         self.connect(OpenLogImagesBtn, QtCore.SIGNAL("clicked()"), onOpenFolder)
-        GroupboxAuto5.layout().addWidget(OpenLogImagesBtn)
+        GroupboxRenderingSettings.layout().addWidget(OpenLogImagesBtn)
 
-        GroupboxAuto0 = QtWidgets.QGroupBox("Found Sequences")
-        GroupboxAuto0.setChecked(True)
-        vbox31 = QtWidgets.QHBoxLayout()
-        GroupboxAuto0.setLayout(vbox31)
+        GroupboxFilterSequences  = QtWidgets.QGroupBox("")
+        hboxFilterSequences = QtWidgets.QHBoxLayout()
+        hboxFilterSequences.setAlignment(QtCore.Qt.AlignLeft)
+        GroupboxFilterSequences.setLayout(hboxFilterSequences)
+
+        GroupboxFoundSequences = QtWidgets.QGroupBox("Server Sequences")
+        GroupboxFoundSequences.setChecked(True)
+        vboxSequences = QtWidgets.QVBoxLayout()
+        GroupboxFoundSequences.setFixedHeight(180)
+        GroupboxFoundSequences.setLayout(vboxSequences)
+
 
         FilterToggleBtn = QtWidgets.QCheckBox("Filter")
+        #FilterToggleBtn.setStyleSheet("QCheckBox{spacing: 5px;}")
         FilterLineEdit = QtWidgets.QLineEdit('Name')
         FilterLineEdit.setFont(QtGui.QFont("Times", 10, QtGui.QFont.Medium))
         FilterToggleBtn.setChecked(False)
@@ -757,45 +1296,54 @@ class MyWidget(QtWidgets.QWidget):
         self.connect(FilterToggleBtn, QtCore.SIGNAL("clicked()"), onClickedFilter)
         self.connect(FilterLineEdit, QtCore.SIGNAL("returnPressed()"), onEnterFilterLine)
 
-        GroupboxAuto0.layout().addWidget(FilterToggleBtn)
-        GroupboxAuto0.layout().addWidget(FilterLineEdit)
+        GroupboxFoundSequences.layout().addWidget(GroupboxFilterSequences)
+
+
+        GroupboxFilterSequences.layout().addWidget(FilterToggleBtn)
+        GroupboxFilterSequences.layout().addWidget(FilterLineEdit)
 
         comboBox = QtWidgets.QComboBox(self)
         comboBox.setFont(QtGui.QFont("Times", 10, QtGui.QFont.Medium))
         comboBox.addItem("EMPTY")
 
-        GroupboxAuto0.layout().addWidget(comboBox)
+        GroupboxFoundSequences.layout().addWidget(comboBox)
 
-        GroupboxAuto2 = QtWidgets.QGroupBox("Perforce")
-        vbox4 = QtWidgets.QHBoxLayout()
-        GroupboxAuto2.setLayout(vbox4)
+        make_render_job_btn = QtWidgets.QPushButton("Make Render Job")
+        make_render_job_btn.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
+        self.connect(make_render_job_btn, QtCore.SIGNAL("clicked()"), MakeRenderJob)
+        GroupboxFoundSequences.layout().addWidget(make_render_job_btn)
+
+        GroupboxPerforce = QtWidgets.QGroupBox("Perforce Control")
+        hboxRenderingSettings = QtWidgets.QHBoxLayout()
+        GroupboxPerforce.setFixedHeight(80)
+        GroupboxPerforce.setLayout(hboxRenderingSettings)
 
         PerforceLabel = QtWidgets.QLabel("Perforce Time updated :")
         PerforceLabel.setGeometry(10, 50, 160, 20)
         PerforceLabel.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Medium))
-        GroupboxAuto2.layout().addWidget(PerforceLabel)
+        GroupboxPerforce.layout().addWidget(PerforceLabel)
 
         SetPerforceBtn = QtWidgets.QPushButton("Settings")
         SetPerforceBtn.setFont(QtGui.QFont("Times", 16, QtGui.QFont.Bold))
         self.connect(SetPerforceBtn, QtCore.SIGNAL("clicked()"),SetPerforceProfile)
-        GroupboxAuto2.layout().addWidget(SetPerforceBtn)
+        GroupboxPerforce.layout().addWidget(SetPerforceBtn)
 
 
         UpdatePerforceBtn = QtWidgets.QPushButton("Update Perforce")
         UpdatePerforceBtn.setFont(QtGui.QFont("Times", 16, QtGui.QFont.Bold))
         self.connect(UpdatePerforceBtn, QtCore.SIGNAL("clicked()"), UpdatePerforce)
-        GroupboxAuto2.layout().addWidget(UpdatePerforceBtn)
+        GroupboxPerforce.layout().addWidget(UpdatePerforceBtn)
 
         OpenLogPerforceBtn = QtWidgets.QPushButton("Open Log..")
         OpenLogPerforceBtn.setFont(QtGui.QFont("Times", 16, QtGui.QFont.Bold))
         self.connect(OpenLogPerforceBtn, QtCore.SIGNAL("clicked()"), onOpenLogPerforce)
-        GroupboxAuto2.layout().addWidget(OpenLogPerforceBtn)
+        GroupboxPerforce.layout().addWidget(OpenLogPerforceBtn)
 
 
-        GroupboxAuto3 = QtWidgets.QGroupBox("Batch Mode Rendering [Warning: Will Heavy busy server!]")
-        GroupboxAuto3.setChecked(True)
-        vbox5 = QtWidgets.QVBoxLayout()
-        GroupboxAuto3.setLayout(vbox5)
+        GroupboxBatchMakeJobs = QtWidgets.QGroupBox("Make Batch Rendering Jobs")
+        GroupboxBatchMakeJobs.setChecked(True)
+        vboxMain = QtWidgets.QVBoxLayout()
+        GroupboxBatchMakeJobs.setLayout(vboxMain)
         listing = QtWidgets.QListWidget()
         listing.setFont(QtGui.QFont("Times", 13, QtGui.QFont.Medium))
         listing.setSelectionMode(
@@ -805,58 +1353,149 @@ class MyWidget(QtWidgets.QWidget):
         listing.addItem(item)
 
         listing.itemClicked.connect(printItemText)
-        GroupboxAuto3.layout().addWidget(listing)
+        GroupboxBatchMakeJobs.layout().addWidget(listing)
         BatchRenderBtn = QtWidgets.QPushButton("Start Batch Rendering")
         BatchRenderBtn.setFont(QtGui.QFont("Times", 13, QtGui.QFont.Bold))
         BatchRenderBtn.setEnabled(False)
         self.connect(BatchRenderBtn, QtCore.SIGNAL("clicked()"), BatchRenderMovie)
-        GroupboxAuto3.layout().addWidget(BatchRenderBtn)
-
-
+        GroupboxBatchMakeJobs.layout().addWidget(BatchRenderBtn)
 
         GroupboxMain = QtWidgets.QGroupBox("SERVER: Automation Pipeline")
         GroupboxMain.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Bold))
-        vbox5 = QtWidgets.QVBoxLayout()
-        GroupboxMain.setLayout(vbox5)
+        vboxMain = QtWidgets.QVBoxLayout()
+        GroupboxMain.setFixedHeight(770)
+        GroupboxMain.setLayout(vboxMain)
 
+        GroupboxAdvancedRender = QtWidgets.QGroupBox("Rendering Control")
+        GroupboxAdvancedRender.setChecked(True)
+        hboxAd = QtWidgets.QHBoxLayout()
+        GroupboxAdvancedRender.setLayout(hboxAd)
+        GroupboxAdvancedRender.setFixedHeight(80)
+
+        RefreshQueueToggleBtn = QtWidgets.QCheckBox("Auto refresh all rendering info")
+        RefreshQueueToggleBtn.setChecked(True)
+        self.connect(RefreshQueueToggleBtn, QtCore.SIGNAL("clicked()"), onRefreshQueueToggle)
+        GroupboxAdvancedRender.layout().addWidget(RefreshQueueToggleBtn)
+
+        GroupboxMain.layout().addWidget(GroupboxAdvancedRender)
+
+
+        GroupboxMain.layout().addWidget(GroupboxRenderingSettings)
+        GroupboxMain.layout().addWidget(GroupboxFoundSequences)
         GroupboxMain.layout().addWidget(GroupboxQueue)
-        GroupboxMain.layout().addWidget(GroupboxAuto)
-        GroupboxMain.layout().addWidget(GroupboxAuto5)
-        GroupboxMain.layout().addWidget(GroupboxAuto0)
+        GroupboxMain.layout().addWidget(GroupboxRenderJobs)
 
-        GroupboxMain.layout().addWidget(GroupboxAuto2)
-        GroupboxMain.layout().addWidget(GroupboxAuto3)
-        layout.addWidget(GroupboxMain)
+        GroupboxMain.layout().addWidget(GroupboxBatchMakeJobs)
+
+        GroupboxMain.layout().addWidget(GroupboxPerforce)
+
+        def renderTabUI(self):
+            renderTab = QWidget()
+            genlayout = QVBoxLayout()
+            GetInfoBtn3 = QtWidgets.QPushButton("Get All Rendering Info")
+            GetInfoBtn3.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
+            self.connect(GetInfoBtn3, QtCore.SIGNAL("clicked()"), GetAllRenderingInfo)
+            genlayout.addWidget(GetInfoBtn3)
+            genlayout.addWidget(GroupboxMain)
+            renderTab.setLayout(genlayout)
+            return renderTab
+        def importTabUI(self):
+            importTab = QWidget()
+            return importTab
+        def clientTabUI(self):
+            clientTab = QWidget()
+            return clientTab
+
+        TabsMain = QTabWidget()
+        TabsMain.setFont(QtGui.QFont("Times", 14, QtGui.QFont.Bold))
+        renderTab = TabsMain.addTab(renderTabUI(self), "Rendering pipeline")
+        importTab = TabsMain.addTab(importTabUI(self), "Importing pipeline")
+
+        #experimentTabUI
+        experimentTab = QWidget()
+        ThreadHlayout = QHBoxLayout()
+        StartThreadBtn = QtWidgets.QPushButton("Start Thread timer")
+        StartThreadBtn.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
+        self.connect(StartThreadBtn, QtCore.SIGNAL("clicked()"), StartThread)
+        IntervalTimeLabel = QtWidgets.QLabel('IntervalTime')
+        IntervalTimeLineEdit = QtWidgets.QLineEdit('15')
+        StopThreadBtn = QtWidgets.QPushButton("Stop Thread")
+        StopThreadBtn.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
+        self.connect(StopThreadBtn, QtCore.SIGNAL("clicked()"), StopThread)
+        ThreadHlayout.addWidget(StartThreadBtn)
+        ThreadHlayout.addWidget(IntervalTimeLabel)
+        ThreadHlayout.addWidget(IntervalTimeLineEdit)
+        ThreadHlayout.addWidget(StopThreadBtn)
+        experimentTab.setLayout(ThreadHlayout)
+
+        TabsMain.addTab(experimentTab, "Experimental pipeline")
+
+        clientTab = TabsMain.addTab(clientTabUI(self), "Client")
+        TabsMain.setTabEnabled(1, False)
+        #TabsMain.setTabEnabled(2, False)
+        TabsMain.setCurrentIndex(0)
+
+        layoutVerticalWindow.addWidget(TabsMain)
+
+        #layoutVerticalWindow.addWidget(GroupboxMain)
+
+        GroupboxTech = QtWidgets.QGroupBox("")
+        vboxTech = QtWidgets.QVBoxLayout()
+        GroupboxTech.setFixedHeight(80)
+        GroupboxTech.setLayout(vboxTech)
 
         progressBar = QtWidgets.QProgressBar(self)
         progressBar.minimum = 0
         progressBar.maximum = 100
-        layout.addWidget(progressBar)
+        GroupboxTech.layout().addWidget(progressBar)
 
         quit = QtWidgets.QPushButton("Quit")
         quit.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
         self.connect(quit, QtCore.SIGNAL("clicked()"), MyQuit)
-        layout.addWidget(quit)
+
+        GroupboxTech.layout().addWidget(quit)
+
+        layoutVerticalWindow.addWidget(GroupboxTech)
 
         #get last server save cfg
-        h = settings.get_HostServer()
-        if h:
-            HostLineEdit.setText(h)
-        CheckServer()
+        host_text = settings.get_ClientSettingsByName('HostServer')
+        if host_text:
+            HostLineEdit.setText(host_text)
+        print('Set IP from config: '+host_text)
 
-def SendSocket(ClearAnswer, HostServer,Json_request, ServerAnswered):
-    ws = create_connection(HostServer)
-    print("Sending Command to Server : "+HostServer)
-    ws.send(Json_request)
-    print("Sent")
-    print("Receiving...")
-    result = ws.recv()
-    print("Received from Server '%s'" % result)
-    server_str = "'%s'" % result
-    ServerAnswered(server_str)
-    ws.close()
+        bAutorefresh = settings.get_ClientSettingsByName('RefreshQueueBool')
+        RefreshQueueToggleBtn.setChecked(bAutorefresh)
+
+        bAdvancedRender = settings.get_ClientSettingsByName('AdvancedRenderBool')
+        AdvancedRenderToggleBtn.setChecked(bAdvancedRender)
+        onAdvancedRenderToggle()
+
+        AnsweredServerList = ['empty', 'empty']
+        Check_Server()
+        GetAllRenderingInfo()
+            #Get_Render_Presets()
+            #Get_All_Server_Shots()
+            #GetQueueJobs()
+
+        print('First StartUp Py App Done!')
+        print('Make Thread Timer for HeartBeat App')
+
+        class MyThread(threading.Thread):
+            global startuptime
+            startuptime = dt.now()
+            def __init__(self, event):
+                threading.Thread.__init__(self)
+                self.stopped = event
+                print("my thread work ["+IntervalTimeLineEdit.text()+"]: " + str(dt.now()))
+            def run(self):
+                while not self.stopped.wait(int(IntervalTimeLineEdit.text())):
+                    print("Unreal Py App working : " + str(dt.now()-startuptime))
+                    # call a function
+                    #GetAllRenderingInfo()
+                    GetMyRenderingInfo()
 
 def unreal_working_dirs():
+    import unreal
     print('main dir program')
     prog_dir = unreal.Paths.project_plugins_dir() + 'UnrealPyClient'
     print('Plugin UnrealPyClient Directory: ' + prog_dir)
@@ -870,9 +1509,36 @@ def unreal_working_dirs():
     print('Video Capture Directory: ' + video_capture_dir)
     print('Project Download Directory: ' + project_persistent_download_dir)
 
+def Checkgitversion():
+    import subprocess
+    Major_version = 'cl 1.0.0'
+    #process = subprocess.Popen(['git', 'rev-parse', 'HEAD'], shell=False, stdout=subprocess.PIPE)
+    try:
+        output = subprocess.check_output(["git", "log", '-n 1'])
+        outputall = subprocess.check_output(["git", "log"])
+    except Exception as e:
+        print('Failed. Reason: %s' % e)
+        return ''
+    cl_rev = len(str(outputall).split('commit'))
+    #git_head = process.communicate()
+    #print(output.strip().decode())
+    strOut = output.strip().decode()
+    version_date = ' Revision [' + Major_version +str(cl_rev)+']'+strOut.split('Date:')[-1].split('\n\n')[0]
+    return version_date
+
+def stop_MyThread():
+    stopFlag_MyThread.set()
 
 if __name__ == "__main__":
     print("Start Py App")
+    RevisionDate = Checkgitversion()
+    if len(RevisionDate) > 0:
+        print('Revision version:'+RevisionDate)
+        settings.set_ClientSettingsByName('ClientRevisionDate', RevisionDate)
+    else:
+        RevisionDate = settings.get_ClientSettingsByName('ClientRevisionDate')
+    settings.print_log("Start Py App")
+    settings.setup_all_configs_if_need()
     print('Current Project : '+settings.get_Current_project())
 if "unreal" not in dir():
     print("Warning: Unreal modules Not Loaded!")
@@ -882,15 +1548,19 @@ else:
     unreal.log("Unreal modules Loaded & Ready!")
     unreal_working_dirs()
 
-print("Connect to Unreal websocket : "+Server)
+print("Connect to Unreal websocket : "+settings.get_ClientSettingsByName('HostServer'))
 app = None
 if not QtWidgets.QApplication.instance():
     app = QtWidgets.QApplication(sys.argv)
 else:
     app = QtWidgets.QApplication.instance()
+
+app.aboutToQuit.connect(stop_MyThread) #for force quit app by user stop Thread
+
 widget = MyWidget()
 widget.show()
-print("Py App checking server...")
+print("Py App done...")
+
 if app:
     sys.exit(app.exec_())  # for Windows external launch
 if "unreal" in dir():

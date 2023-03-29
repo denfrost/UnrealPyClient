@@ -1,5 +1,5 @@
 import os
-
+import settings
 print("""@
 
 ####################
@@ -9,6 +9,55 @@ Reload Unreal Worker Script
 ####################
 
 """)
+
+def techtests():
+    print('techtests')
+
+def forselectedassets():
+    dir = 'C:/Users/denis.balikhin/LIVE/WHM/WHPTEST/COMMON/RENDER/WHM_WHPTEST_SH0070/V001'
+    dir = dir.replace('/','\\')
+    print('Check ['+dir+'] : '+str(os.path.exists(dir)))
+    print('Check [' + dir + '] : ' + str(os.path.isdir(dir)))
+    import unreal
+    #selected_assets_objects = unreal.EditorUtilityLibrary.get_selected_assets()
+    selected_assets = unreal.EditorUtilityLibrary.get_selected_asset_data()
+    for ass in selected_assets:
+        new_asset = ass.object_path
+        print(new_asset)
+        new_asset1 = str(new_asset).split('.')[0] +'_COPY'
+        new_asset2 = str(new_asset).split('.')[1] + '_COPY'
+        new_asset_path = new_asset1+'.'+new_asset2
+        print(new_asset_path)
+        #newass = unreal.EditorAssetLibrary.duplicate_asset(ass.object_path, new_asset_path)
+        #unreal.EditorAssetLibrary.save_loaded_asset(newass, only_if_is_dirty=True)
+        #unreal.EditorAssetLibrary.checkout_loaded_asset(newass)
+        #unreal.EditorAssetLibrary.delete_loaded_asset(ass.get_asset())
+        #unreal.EditorAssetLibrary.rename_asset(new_asset_path, ass.object_path)
+
+def Unreal_CleanAllMemory(bPrint=False):
+    import unreal
+    unreal.log_warning("Start Unreal_CleanAllMemory")
+    unreal.EditorLoadingAndSavingUtils().new_blank_map(save_existing_map=False)
+    GameLoadedAssets = checkAllmemory(False)
+    for Ga in GameLoadedAssets:
+        unreal.log_warning(f'Try Unloaded from memory : [{Ga.asset_name}] Class [{Ga.asset_class}] in Path: [{Ga.object_path}] Package [{Ga.package_name}]')
+        #unreal.EditorAssetLibrary.delete_loaded_asset(Ga.get_asset())
+
+
+def checkAllmemory(bPrint=True):
+    import unreal
+    asset_list = unreal.AssetRegistryHelpers.get_asset_registry().get_all_assets()
+    GameLoadedAssets = []
+    for As in asset_list:
+        if As.is_asset_loaded():
+            if '/Game' in str(As.object_path):
+                if bPrint:
+                    print(f'Loaded in memory : [{As.asset_name}] Class [{As.asset_class}] in Path: [{As.object_path}]')
+                GameLoadedAssets.append(As)
+    unreal.log_warning(f'Detected assets [{str(len(asset_list))}] count [{str(len(GameLoadedAssets))}] in memory.')
+    for GA in GameLoadedAssets:
+        unreal.log_warning(f'Loaded in memory : [{GA.asset_name}] Class [{GA.asset_class}] in Path: [{GA.object_path}]')
+    return GameLoadedAssets
 
 def spawn_actor(assetpath):
     import unreal
@@ -62,10 +111,16 @@ def start():
 def Start_UnrealPy_Client():
     script_dir = os.path.abspath(__file__).split('unreal_worker.py')[0]
     print('Plugin UnrealPyClient Directory: ' + script_dir)
-    clientbat = script_dir + "start_client.bat"
-    unreal_client_path = script_dir + 'UnrealPy_Client.py'
-    os.system(clientbat+' '+unreal_client_path)
-    print('Start UnrealPy_Client! : '+clientbat+' '+unreal_client_path)
+    if os.path.exists('M:\SCRIPTS\PACKAGES\Python39\python.exe'):
+        clientbat = script_dir + "start_m2client.bat"
+        unreal_client_path = script_dir + 'UnrealPy_Client.py'
+        os.system(clientbat+' '+unreal_client_path)
+        print('Start M2 UnrealPy_Client! : ' + script_dir + "start_UnrealPy_Client.bat")
+    else:
+        clientbat = script_dir + "start_client.bat"
+        unreal_client_path = script_dir + 'UnrealPy_Client.py'
+        os.system(clientbat+' '+unreal_client_path)
+        print('Start Standard UnrealPy_Client! : '+clientbat+' '+unreal_client_path)
 
 def ShowWorkingDirs():
     import unreal
@@ -93,7 +148,7 @@ def ShowWorkingDirs():
 def UpdatePerforce():
     import unreal
     import BlueprintLibrary.SampleBlueprintFunction as bp_lib
-    unreal.EditorLoadingAndSavingUtils().new_blank_map(save_existing_map=False)
+    Unreal_CleanAllMemory() #becarefull sure run with perforce Update only
     bp_lib.SamplePythonBlueprintLibrary.unreal_update_perforce()
 
 def Render_Images_Sequence():
@@ -158,3 +213,34 @@ def getrenderingjobs():
     for job in CurrentJobs:
         print(job.job_name)
     return CurrentJobs
+
+def M2_get_projects_dict():
+    import glob
+    # Projects MEME json directory
+    meme_shows_path = 'M:/SHOWS'
+    all_proj = glob.glob(meme_shows_path + '/*.json')
+    print(meme_shows_path + '/*.json')
+    for id, elem in enumerate(all_proj):
+        elem = elem.replace('\\', '/')
+        elem = elem.split('/')[-1].split('.')[0]
+        all_proj[id] = elem
+    return all_proj
+
+def set_PluginVersion():
+    version_date = settings.get_ClientSettingsByName('ClientRevisionDate')
+    if len(version_date) == 0:
+        return
+    import unreal
+    import json
+    python_Uplugin_file = unreal.Paths.project_plugins_dir() +'UnrealPyClient/M2UnrealEngineRemote.uplugin'
+    if os.path.isfile(python_Uplugin_file):
+        with open(python_Uplugin_file, 'r') as f:
+            json_Uplugin_file = json.load(f)
+            unreal.log_warning('Json '+str(json_Uplugin_file))
+            json_Uplugin_file["VersionName"] = version_date
+            if len(json_Uplugin_file)>0:
+                with open(python_Uplugin_file, 'w') as f:
+                    #json_Uplugin_file = json.dump(python_Uplugin_file, f)
+                    json.dump(json_Uplugin_file, f)
+                    unreal.log_warning('Json ' + str(json_Uplugin_file))
+    else:    unreal.log_warning('Json file Plugin not found')

@@ -171,18 +171,18 @@ def publish_shot(shot_name,movie_path):
     make_project_list()
 
     project = sg.find_one('Project',[['name','is','Warhammer project']], ["content"] )
-    unreal.log_warning('Job Render. Publish Meme. project : '+project)
+    unreal.log_warning('Job Render. Publish Meme. project : '+str(project))
     shot = sg.find_one("Shot", [["code", "is", shot_name]], ["content"])
-    unreal.log_warning('Job Render. Publish Meme. shot : ' + shot)
+    unreal.log_warning('Job Render. Publish Meme. shot : ' + str(shot))
     task = sg.find_one("Task", [["entity", "is", shot], ["content", "is", "lighting"]])
-    unreal.log_warning('Job Render. Publish Meme. project : ' + task)
+    unreal.log_warning('Job Render. Publish Meme. project : ' + str(task))
     versions = sg.find("Version", [["entity", "is", shot], ["sg_task", "is", task]], ["code"])
-    unreal.log_warning('Job Render. Publish Meme. project : ' + versions)
+    unreal.log_warning('Job Render. Publish Meme. project : ' + str(versions))
 
-    unreal.log_warning('Job Render. Publish Meme. project : ' + project + ' task : ' + task+' versions : '+versions)
+    unreal.log_warning('Job Render. Publish Meme. project : ' + str(project) + ' task : ' + str(task)+' versions : '+str(versions))
 
     if not versions: # the first version
-        
+        unreal.log_warning('Job Render. Publish Meme. Dont have version get  the first version')
         str_ver = '001'
 
     else: # find the latest version
@@ -191,7 +191,9 @@ def publish_shot(shot_name,movie_path):
             str_ver = v['code']
             if '.V' in str_ver:
                 str_ver = str_ver.split('.')[1]
-                ver.append(int(str_ver[1:4]))
+                unreal.log_warning('Job Render. Publish Meme. Preparing version :'+str_ver)
+                if len(str_ver):
+                    ver.append(int(str_ver[1:4]))
        
         if ver:
             last_ver = max(ver)
@@ -216,8 +218,9 @@ def publish_shot(shot_name,movie_path):
             'sg_task': {'type': 'Task', 'id' : task['id']},
             'user': {'type': 'HumanUser', 'id': user['id']} 
             }
-    
-    result = sg.create('Version', data)    
+
+    unreal.log_warning('Job Render. Publish Meme. meme data for create in shotgun : ' + str(data))
+    result = sg.create('Version', data)
     result2 = sg.upload("Version", result['id'], movie_path, "sg_uploaded_movie")
 
     return str_ver
